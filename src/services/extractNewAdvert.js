@@ -1,53 +1,10 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const AWS = require('aws-sdk');
+const { uploadImageToS3 } = require('./awsService');
 const { Advert} = require('../../models');
 
-// Configure AWS
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION
-});
-
-const s3 = new AWS.S3();
-
-// Function to upload image to S3
-async function uploadImageToS3(imageUrl, advertId) {
-  try {
-    if (!imageUrl) {
-      console.log('No image URL found');
-      return null;
-    }
-
-    // Download the image
-    const imageResponse = await axios.get(imageUrl, {
-      responseType: 'arraybuffer'
-    });
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const filename = `autoscout/${advertId}_${timestamp}.jpg`;
-    
-    // Upload to S3
-    const uploadParams = {
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: filename,
-      Body: imageResponse.data,
-      ContentType: 'image/jpeg'
-    };
-
-    const uploadResult = await s3.upload(uploadParams).promise();
-    console.log(`Image uploaded to S3: ${uploadResult.Location}`);
-    
-    return uploadResult.Location;
-  } catch (error) {
-    console.error('Error uploading image to S3:', error.message);
-    return null;
-  }
-}
-
-async function extractNewAdvert(advertUrl, advertId) {
+async function extractNewAdvert(advertUrl, advertId,user) {
+  console.log(user)
   try {
     console.log(`Fetching advert page: ${advertUrl}`);
     const response = await axios.get(advertUrl);
@@ -118,42 +75,43 @@ async function extractNewAdvert(advertUrl, advertId) {
     const fullServiceHistory = extractDetail('Full service history');
 
     console.log(`Extracted details for advert ID ${advertId}: \n`);
-    console.log({
-      make,
-      model,
-      location,
-      price,
-      sellerName,
-      bodyType,
-      type,
-      drivetrain,
-      seats,
-      doors,
-      countryVersion,
-      colour,
-      paint,
-      upholsteryColour,
-      upholstery,
-      emissionClass,
-      fuelType,
-      fuelConsumption,
-      co2Emissions,
-      power,
-      gearbox,
-      engineSize,
-      gears,
-      cylinders,
-      emptyWeight,
-      mileage,
-      firstRegistration,
-      lastService,
-      previousOwner,
-      fullServiceHistory,
-      s3ImageUrl,
-    });
+    // console.log({
+    //   make,
+    //   model,
+    //   location,
+    //   price,
+    //   sellerName,
+    //   bodyType,
+    //   type,
+    //   drivetrain,
+    //   seats,
+    //   doors,
+    //   countryVersion,
+    //   colour,
+    //   paint,
+    //   upholsteryColour,
+    //   upholstery,
+    //   emissionClass,
+    //   fuelType,
+    //   fuelConsumption,
+    //   co2Emissions,
+    //   power,
+    //   gearbox,
+    //   engineSize,
+    //   gears,
+    //   cylinders,
+    //   emptyWeight,
+    //   mileage,
+    //   firstRegistration,
+    //   lastService,
+    //   previousOwner,
+    //   fullServiceHistory,
+    //   s3ImageUrl,
+    // });
 
     // Save to database with image URL
     await Advert.create({
+      seller_id: user.id,
       autoscout_id: advertId,
       make: make.split(' ')[0] || 'Unknown Make',
       model: model.split(' ')[1] || 'Unknown Model',

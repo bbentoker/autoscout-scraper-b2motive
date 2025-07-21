@@ -36,7 +36,9 @@ async function searchAllPages(user, control) {
           console.log(
             `📝 Found ${articles.length} <article> elements on page ${page}`
           );
-  
+          if(page === 1 && articles.length === 0){
+            throw new Error('No articles found , url is not valid')
+          }
           for (const element of articles.toArray()) {
             const articleId = $$(element).attr('id');
             const advertLink = $$(element).find('a').first().attr('href');
@@ -52,7 +54,7 @@ async function searchAllPages(user, control) {
                 console.log(
                   `🆕 Fetching details for new advert ID: ${articleId}`
                 );
-                await extractNewAdvert(fullAdvertLink, articleId);
+                await extractNewAdvert(fullAdvertLink, articleId,user);
               } else {
                 if (!existingAdvert.is_active) {
                   existingAdvert.is_active = true;
