@@ -1,11 +1,16 @@
 require('dotenv').config();
 const { searchAllPages } = require('./scraper');
+const { Control } = require('./models');
 
 async function main() {
     try {
+        // Create a control record for this scraping session
+        const control = await Control.create({ date: new Date() });
+        console.log(`📌 Created control ID: ${control.id}`);
+        
         const users = await getUsersToScrape();
         for(const user of users) {
-            scrapeUsersListings(user);
+            await scrapeUsersListings(user, control);
         }
     } catch (error) {
         console.error('Error:', error.message);
@@ -31,8 +36,8 @@ async function getUsersToScrape() {
     return data?.data;
 }
 
-async function scrapeUsersListings(user) {
-    searchAllPages(user);
+async function scrapeUsersListings(user, control) {
+    await searchAllPages(user, control);
 }
 
 

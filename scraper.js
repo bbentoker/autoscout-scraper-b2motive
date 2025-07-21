@@ -5,7 +5,7 @@ const { Advert, Control, SeenInfo } = require('./models');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
-async function searchAllPages(user) {
+async function searchAllPages(user, control) {
     try {
       const response = await axios.get(user.autoscout_url);
       const $ = cheerio.load(response.data);
@@ -44,7 +44,6 @@ async function searchAllPages(user) {
             if (articleId && advertLink) {
               const fullAdvertLink = `${advertBaseUrl}${articleId}`;
              
-
               const existingAdvert = await Advert.findOne({
                 where: { autoscout_id: articleId },
               });
