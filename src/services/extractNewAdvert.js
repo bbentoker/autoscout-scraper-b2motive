@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { Advert} = require('./models');
+const { Advert} = require('../../models');
 
 
 

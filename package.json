@@ -1,14 +1,16 @@
 {
   "name": "autoscout-scraper-b2motive",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
+    "start": "node main.js",
+    "dev": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["scraper", "autoscout24", "cars", "nodejs"],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A Node.js application for scraping car listings from AutoScout24",
   "dependencies": {
     "axios": "^1.10.0",
     "cheerio": "^1.1.1",

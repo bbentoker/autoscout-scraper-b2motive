@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const {extractNewAdvert} = require('./extractNewAdvert');
-const { Advert, Control, SeenInfo } = require('./models');
+const { Advert, Control, SeenInfo } = require('../../models');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
