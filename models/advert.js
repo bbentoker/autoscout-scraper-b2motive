@@ -72,7 +72,8 @@ module.exports = (sequelize,DataTypes) => {
       upholstery: DataTypes.STRING,
       description: DataTypes.TEXT,
       link:DataTypes.STRING,
-      sell_time:DataTypes.INTEGER
+      sell_time:DataTypes.INTEGER,
+      image_url:DataTypes.STRING
     },
     {
       sequelize,

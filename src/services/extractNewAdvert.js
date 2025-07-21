@@ -1,9 +1,51 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const AWS = require('aws-sdk');
 const { Advert} = require('../../models');
 
+// Configure AWS
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+});
 
+const s3 = new AWS.S3();
 
+// Function to upload image to S3
+async function uploadImageToS3(imageUrl, advertId) {
+  try {
+    if (!imageUrl) {
+      console.log('No image URL found');
+      return null;
+    }
+
+    // Download the image
+    const imageResponse = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
+    });
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const filename = `autoscout/${advertId}_${timestamp}.jpg`;
+    
+    // Upload to S3
+    const uploadParams = {
+      Bucket: process.env.AWS_S3_BUCKET,
+      Key: filename,
+      Body: imageResponse.data,
+      ContentType: 'image/jpeg'
+    };
+
+    const uploadResult = await s3.upload(uploadParams).promise();
+    console.log(`Image uploaded to S3: ${uploadResult.Location}`);
+    
+    return uploadResult.Location;
+  } catch (error) {
+    console.error('Error uploading image to S3:', error.message);
+    return null;
+  }
+}
 
 async function extractNewAdvert(advertUrl, advertId) {
   try {
@@ -28,7 +70,14 @@ async function extractNewAdvert(advertUrl, advertId) {
     const extractDetail = (label) => {
       return $(`dt:contains("${label}")`).next('dd').text().trim();
     };
-
+    
+    // Extract image URL
+    const imageUrl = $('img').eq(9).attr('src');
+    console.log('Found image URL:', imageUrl);
+    
+    // Upload image to S3 and get the S3 URL
+    const s3ImageUrl = await uploadImageToS3(imageUrl, advertId);
+    
     const bodyType = extractDetail('Body type');
     const type = extractDetail('Type');
     const drivetrain = extractDetail('Drivetrain');
@@ -100,9 +149,10 @@ async function extractNewAdvert(advertUrl, advertId) {
       lastService,
       previousOwner,
       fullServiceHistory,
+      s3ImageUrl,
     });
 
-    // Placeholder: Save to database or use the extracted data as needed
+    // Save to database with image URL
     await Advert.create({
       autoscout_id: advertId,
       make: make.split(' ')[0] || 'Unknown Make',
@@ -135,6 +185,7 @@ async function extractNewAdvert(advertUrl, advertId) {
       last_service: lastService || 'Unknown Last Service',
       previous_owner: parseInt(previousOwner) || null,
       full_service_history: fullServiceHistory === 'Yes',
+      image_url: s3ImageUrl || null,
     });
   } catch (error) {
     console.error(`Error fetching advert page: ${advertUrl}`, error.message);
