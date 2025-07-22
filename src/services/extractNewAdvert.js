@@ -4,7 +4,6 @@ const { uploadImageToS3 } = require('./awsService');
 const { Advert} = require('../../models');
 
 async function extractNewAdvert(advertUrl, advertId,user) {
-  console.log(user)
   try {
     console.log(`Fetching advert page: ${advertUrl}`);
     const response = await axios.get(advertUrl);

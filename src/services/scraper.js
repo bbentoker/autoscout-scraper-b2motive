@@ -5,6 +5,75 @@ const { Advert, Control, SeenInfo } = require('../../models');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
+/**
+ * Process elements in parallel with a concurrency limit
+ * @param {Array} elements - Array of cheerio elements to process
+ * @param {Object} $$ - Cheerio instance
+ * @param {Object} user - User object
+ * @param {Object} control - Control object
+ * @param {number} concurrencyLimit - Maximum number of concurrent operations
+ */
+async function processElementsInParallel(elements, $$, user, control, concurrencyLimit = 5) {
+    const results = [];
+    
+    for (let i = 0; i < elements.length; i += concurrencyLimit) {
+        const batch = elements.slice(i, i + concurrencyLimit);
+        console.log(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(elements.length / concurrencyLimit)} (${batch.length} elements)`);
+        
+        const batchPromises = batch.map(async (element) => {
+            try {
+                const articleId = $$(element).attr('id');
+                const advertLink = $$(element).find('a').first().attr('href');
+
+                if (articleId && advertLink) {
+                    const fullAdvertLink = `${advertBaseUrl}${articleId}`;
+                    
+                    const existingAdvert = await Advert.findOne({
+                        where: { autoscout_id: articleId },
+                    });
+
+                    if (!existingAdvert) {
+                        console.log(`🆕 Fetching details for new advert ID: ${articleId}`);
+                        await extractNewAdvert(fullAdvertLink, articleId, user);
+                        return { articleId, status: 'new' };
+                    } else {
+                        if (!existingAdvert.is_active) {
+                            existingAdvert.is_active = true;
+                            await existingAdvert.save();
+                        }
+
+                        const seenInfo = await SeenInfo.findOne({
+                            where: { control_id: control.id, advert_id: articleId },
+                        });
+
+                        if (seenInfo) {
+                            seenInfo.seen = true;
+                            await seenInfo.save();
+                            console.log(`✅ Advert ID ${articleId} marked as seen.`);
+                        }
+                        return { articleId, status: 'existing' };
+                    }
+                }
+                return { articleId: null, status: 'skipped' };
+            } catch (error) {
+                console.error(`❌ Error processing element:`, error.message);
+                return { articleId: null, status: 'error', error: error.message };
+            }
+        });
+        
+        const batchResults = await Promise.allSettled(batchPromises);
+        results.push(...batchResults);
+        
+        // Small delay between batches to be respectful to the server
+        if (i + concurrencyLimit < elements.length) {
+            console.log('⏳ Waiting 1 second before next batch...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    return results;
+}
+
 async function searchAllPages(user, control) {
     try {
       const response = await axios.get(user.autoscout_url);
@@ -39,40 +108,15 @@ async function searchAllPages(user, control) {
           if(page === 1 && articles.length === 0){
             throw new Error('No articles found , url is not valid')
           }
-          for (const element of articles.toArray()) {
-            const articleId = $$(element).attr('id');
-            const advertLink = $$(element).find('a').first().attr('href');
-  
-            if (articleId && advertLink) {
-              const fullAdvertLink = `${advertBaseUrl}${articleId}`;
-             
-              const existingAdvert = await Advert.findOne({
-                where: { autoscout_id: articleId },
-              });
-  
-              if (!existingAdvert) {
-                console.log(
-                  `🆕 Fetching details for new advert ID: ${articleId}`
-                );
-                await extractNewAdvert(fullAdvertLink, articleId,user);
-              } else {
-                if (!existingAdvert.is_active) {
-                  existingAdvert.is_active = true;
-                  await existingAdvert.save();
-                }
-  
-                const seenInfo = await SeenInfo.findOne({
-                  where: { control_id: control.id, advert_id: articleId },
-                });
-  
-                if (seenInfo) {
-                  seenInfo.seen = true;
-                  await seenInfo.save();
-                  console.log(`✅ Advert ID ${articleId} marked as seen.`);
-                }
-              }
-            }
-          }
+          
+          // Process elements in parallel
+          const results = await processElementsInParallel(articles.toArray(), $$, user, control, 5);
+          
+          // Log summary for this page
+          const successful = results.filter(r => r.status === 'fulfilled' && r.value.status !== 'error').length;
+          const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
+          console.log(`📊 Page ${page} complete: ${successful} successful, ${failed} failed`);
+          
         } catch (error) {
           console.error(
             `❌ Error fetching content from page ${page}:`,
