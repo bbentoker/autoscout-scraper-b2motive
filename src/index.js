@@ -10,7 +10,7 @@ const { Control } = require('../models');
  * @param {Object} control - Control object for tracking
  * @param {number} concurrencyLimit - Maximum number of concurrent operations
  */
-async function processUsersInParallel(users, control, concurrencyLimit = 5) {
+async function processUsersInParallel(users, control, concurrencyLimit = process.env.USER_PROCESSING_CONCURRENCY || 5) {
     const results = [];
     
     for (let i = 0; i < users.length; i += concurrencyLimit) {
@@ -63,7 +63,7 @@ async function main() {
         console.log(`👥 Found ${users.length} users to scrape`);
         
         // Process users in parallel with concurrency limit
-        const results = await processUsersInParallel(users, control, 5);
+        const results = await processUsersInParallel(users, control);
         
         // Log summary of results
         const successful = results.filter(r => r.status === 'fulfilled' && r.value.status === 'success').length;

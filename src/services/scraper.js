@@ -13,7 +13,7 @@ const advertBaseUrl = 'https://www.autoscout24.com/offers/';
  * @param {Object} control - Control object
  * @param {number} concurrencyLimit - Maximum number of concurrent operations
  */
-async function processElementsInParallel(elements, $$, user, control, concurrencyLimit = 5) {
+async function processElementsInParallel(elements, $$, user, control, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
     const results = [];
     
     for (let i = 0; i < elements.length; i += concurrencyLimit) {
@@ -110,7 +110,7 @@ async function searchAllPages(user, control) {
           }
           
           // Process elements in parallel
-          const results = await processElementsInParallel(articles.toArray(), $$, user, control, 5);
+          const results = await processElementsInParallel(articles.toArray(), $$, user, control);
           
           // Log summary for this page
           const successful = results.filter(r => r.status === 'fulfilled' && r.value.status !== 'error').length;
