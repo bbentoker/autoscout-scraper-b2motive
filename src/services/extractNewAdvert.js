@@ -3,12 +3,12 @@ const cheerio = require('cheerio');
 const { uploadImageToS3 } = require('./awsService');
 const { Advert} = require('../../models');
 
-async function extractNewAdvert(advertUrl, advertId,user) {
+async function getListingInfos(advertUrl, advertId, user) {
   try {
     console.log(`Fetching advert page: ${advertUrl}`);
     const response = await axios.get(advertUrl);
-    const html = response.data;
 
+    const html = response.data;
     const $ = cheerio.load(html);
 
     const make = $('.StageTitle_makeModelContainer__RyjBP').text().trim();
@@ -75,42 +75,42 @@ async function extractNewAdvert(advertUrl, advertId,user) {
     const fullServiceHistory = extractDetail('Full service history');
 
     console.log(`Extracted details for advert ID ${advertId}: \n`);
-    // console.log({
-    //   make,
-    //   model,
-    //   location,
-    //   price,
-    //   sellerName,
-    //   bodyType,
-    //   type,
-    //   drivetrain,
-    //   seats,
-    //   doors,
-    //   countryVersion,
-    //   colour,
-    //   paint,
-    //   upholsteryColour,
-    //   upholstery,
-    //   emissionClass,
-    //   fuelType,
-    //   fuelConsumption,
-    //   co2Emissions,
-    //   power,
-    //   gearbox,
-    //   engineSize,
-    //   gears,
-    //   cylinders,
-    //   emptyWeight,
-    //   mileage,
-    //   firstRegistration,
-    //   lastService,
-    //   previousOwner,
-    //   fullServiceHistory,
-    //   s3ImageUrl,
-    // });
+    console.log({
+      make,
+      model,
+      location,
+      price,
+      sellerName,
+      bodyType,
+      type,
+      drivetrain,
+      seats,
+      doors,
+      countryVersion,
+      colour,
+      paint,
+      upholsteryColour,
+      upholstery,
+      emissionClass,
+      fuelType,
+      fuelConsumption,
+      co2Emissions,
+      power,
+      gearbox,
+      engineSize,
+      gears,
+      cylinders,
+      emptyWeight,
+      mileage,
+      firstRegistration,
+      lastService,
+      previousOwner,
+      fullServiceHistory,
+      s3ImageUrl,
+    });
 
-    // Save to database with image URL
-    await Advert.create({
+    // Return the extracted data instead of saving to database
+    return {
       seller_id: user.id,
       autoscout_id: advertId,
       make: make.split(' ')[0] || 'Unknown Make',
@@ -144,10 +144,24 @@ async function extractNewAdvert(advertUrl, advertId,user) {
       previous_owner: parseInt(previousOwner) || null,
       full_service_history: fullServiceHistory === 'Yes',
       image_url: s3ImageUrl || null,
-    });
+    };
   } catch (error) {
     console.error(`Error fetching advert page: ${advertUrl}`, error.message);
+    throw error;
   }
 }
 
-module.exports = { extractNewAdvert };
+// Keep the old function name for backward compatibility
+async function extractNewAdvert(advertUrl, advertId, user) {
+  try {
+    const extractedData = await getListingInfos(advertUrl, advertId, user);
+    
+    // Save to database with image URL
+    await Advert.create(extractedData);
+  } catch (error) {
+    console.error(`Error creating advert: ${advertUrl}`, error.message);
+    throw error;
+  }
+}
+
+module.exports = { extractNewAdvert, getListingInfos };

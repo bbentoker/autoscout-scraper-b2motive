@@ -49,8 +49,15 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
                         if (seenInfo) {
                             seenInfo.seen = true;
                             await seenInfo.save();
-                            console.log(`✅ Advert ID ${articleId} marked as seen.`);
-                        }
+                          }
+                          else{
+                            const seenInfo = await SeenInfo.create({
+                              control_id: control.id,
+                              advert_id: articleId,
+                              seen: true,
+                            });
+                          }
+                          console.log(`✅ Advert ID ${articleId} marked as seen.`);
                         return { articleId, status: 'existing' };
                     }
                 }

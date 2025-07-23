@@ -1,8 +1,8 @@
 require('dotenv').config();
-const { searchAllPages, searchAllPagesWithAllSorts } = require('./services/scraper');
-const { getUsersToScrape } = require('./services/userService');
-const { prepareForNotExistingAdvertCheck, markUnseenAdvertsAsInactive } = require('./services/advertService');
-const { Control } = require('../models');
+const { searchAllPages, searchAllPagesWithAllSorts } = require('../services/scraper');
+const { getUsersToScrape } = require('../services/userService');
+const { prepareForNotExistingAdvertCheck, markUnseenAdvertsAsInactive } = require('../services/advertService');
+const { Control } = require('../../models');
 
 /**
  * Process users in parallel with a concurrency limit
@@ -108,4 +108,4 @@ async function scrapeUsersListings(user, control) {
     await searchAllPagesWithAllSorts(user, control);
 }
 
-module.exports = { main };
+module.exports = { main }; 

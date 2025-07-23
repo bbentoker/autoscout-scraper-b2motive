@@ -1,15 +1,27 @@
 require('dotenv').config();
 const cron = require('node-cron');
-const { main } = require('./src/index');
+const { main: scraperMain } = require('./src/scraper/main');
+const { main: checkerMain } = require('./src/checker/main');
 
 // Function to run the scraper with error handling
 async function runScraper() {
     console.log('🕐 Starting scheduled scraping job...');
     try {
-        await main();
+        await scraperMain();
         console.log('✅ Scheduled scraping job completed successfully');
     } catch (error) {
         console.error('❌ Scheduled scraping job failed:', error.message);
+    }
+}
+
+// Function to run the checker with error handling
+async function runChecker() {
+    console.log('📋 Starting scheduled check listings job...');
+    try {
+        await checkerMain();
+        console.log('✅ Scheduled check listings job completed successfully');
+    } catch (error) {
+        console.error('❌ Scheduled check listings job failed:', error.message);
     }
 }
 
@@ -22,8 +34,19 @@ cron.schedule('0 * * * *', () => {
     timezone: "UTC" // You can change this to your preferred timezone
 });
 
+// Schedule check listings to run at the 15th minute of every hour
+// Cron format: '15 * * * *' means run at minute 15 of every hour
+cron.schedule('15 * * * *', () => {
+    runChecker();
+}, {
+    scheduled: true,
+    timezone: "UTC" // You can change this to your preferred timezone
+});
+
 console.log('⏰ AutoScout24 scraper scheduled to run every hour');
+console.log('📋 Check listings job scheduled to run at the 15th minute of every hour');
 console.log('🚀 Starting initial run...');
 
 // Run the scraper immediately on startup
 runScraper(); 
+runChecker();

@@ -3,6 +3,10 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize,DataTypes) => {
   class SeenInfo extends Model {
     static associate(models) {
+      SeenInfo.belongsTo(models.Control, {
+        foreignKey: 'control_id',
+        as: 'control'
+      });
     }
   }
 
