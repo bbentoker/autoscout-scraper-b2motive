@@ -40,7 +40,8 @@ async function extractNewAdvert(advertUrl, advertId,user) {
     const seats = extractDetail('Seats');
     const doors = extractDetail('Doors');
     const countryVersion = extractDetail('Country version');
-    const colour = extractDetail('Colour');
+
+    const colour = $('.DataGrid_defaultDdStyle__3IYpG.DataGrid_fontBold__RqU01').text().trim();
     const paint = extractDetail('Paint');
     const upholsteryColour = extractDetail('Upholstery colour');
     const upholstery = extractDetail('Upholstery');

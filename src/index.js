@@ -56,7 +56,7 @@ async function main() {
         console.log(`📌 Created control ID: ${control.id}`);
         
         // Prepare SeenInfo records for existing active adverts
-        await prepareForNotExistingAdvertCheck(control.id);
+        // await prepareForNotExistingAdvertCheck(control.id);
         
         // Fetch and process users
         const users = await getUsersToScrape();
@@ -71,7 +71,7 @@ async function main() {
         console.log(`📊 Processing complete: ${successful} successful, ${failed} failed`);
         
         // Mark adverts as inactive if they weren't seen in this session
-        await markUnseenAdvertsAsInactive(control);
+        // await markUnseenAdvertsAsInactive(control);
         
         const endTime = new Date();
         const duration = endTime - startTime;
