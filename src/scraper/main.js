@@ -3,6 +3,7 @@ const { searchAllPages, searchAllPagesWithAllSorts } = require('../services/scra
 const { getUsersToScrape } = require('../services/userService');
 const { prepareForNotExistingAdvertCheck, markUnseenAdvertsAsInactive } = require('../services/advertService');
 const { Control } = require('../../models');
+const logger = require('../utils/logger');
 
 /**
  * Process users in parallel with a concurrency limit
@@ -15,15 +16,15 @@ async function processUsersInParallel(users, control, concurrencyLimit = process
     
     for (let i = 0; i < users.length; i += concurrencyLimit) {
         const batch = users.slice(i, i + concurrencyLimit);
-        console.log(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(users.length / concurrencyLimit)} (${batch.length} users)`);
+        logger.info(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(users.length / concurrencyLimit)} (${batch.length} users)`);
         
         const batchPromises = batch.map(async (user) => {
             try {
-                console.log(`📝 Scraping user: ${user.id}`);
+                logger.info(`📝 Scraping user: ${user.id}`);
                 await scrapeUsersListings(user, control);
                 return { user: user.id, status: 'success' };
             } catch (error) {
-                console.error(`❌ Error scraping user ${user.id}:`, error.message);
+                logger.error(`❌ Error scraping user ${user.id}:`, error.message);
                 return { user: user.id, status: 'error', error: error.message };
             }
         });
@@ -33,7 +34,7 @@ async function processUsersInParallel(users, control, concurrencyLimit = process
         
         // Small delay between batches to be respectful to the server
         if (i + concurrencyLimit < users.length) {
-            console.log('⏳ Waiting 2 seconds before next batch...');
+            logger.info('⏳ Waiting 2 seconds before next batch...');
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
     }
@@ -47,22 +48,22 @@ async function processUsersInParallel(users, control, concurrencyLimit = process
  */
 async function main() {
     const startTime = new Date();
-    console.log('🚀 Starting AutoScout24 scraper...');
-    console.log(`⏰ Start time: ${startTime.toLocaleString()}`);
+    logger.info('🚀 Starting AutoScout24 scraper...');
+    logger.info(`⏰ Start time: ${startTime.toLocaleString()}`);
     
     try {
         // Create a control record for this scraping session
         const control = await Control.create({ date: new Date() });
-        console.log(`📌 Created control ID: ${control.id}`);
+        logger.info(`📌 Created control ID: ${control.id}`);
         
         // Prepare SeenInfo records for existing active adverts
         // await prepareForNotExistingAdvertCheck(control.id);
         
         // Fetch and process users
         const users = await getUsersToScrape();
-        console.log('--------------------------------------------------------');
-        console.log(`👥 Found ${users.length} users to scrape`);
-        console.log('--------------------------------------------------------');
+        logger.info('--------------------------------------------------------');
+        logger.info(`👥 Found ${users.length} users to scrape`);
+        logger.info('--------------------------------------------------------');
         
         // Process users in parallel with concurrency limit
         const results = await processUsersInParallel(users, control);
@@ -70,7 +71,7 @@ async function main() {
         // Log summary of results
         const successful = results.filter(r => r.status === 'fulfilled' && r.value.status === 'success').length;
         const failed = results.length - successful;
-        console.log(`📊 Processing complete: ${successful} successful, ${failed} failed`);
+        logger.info(`📊 Processing complete: ${successful} successful, ${failed} failed`);
         
         // Mark adverts as inactive if they weren't seen in this session
         // await markUnseenAdvertsAsInactive(control);
@@ -81,9 +82,9 @@ async function main() {
         const durationSeconds = Math.floor((duration % 60000) / 1000);
         const durationMs = duration % 1000;
         
-        console.log(`⏰ End time: ${endTime.toLocaleString()}`);
-        console.log(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
-        console.log('✅ Scraping session completed successfully');
+        logger.info(`⏰ End time: ${endTime.toLocaleString()}`);
+        logger.info(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
+        logger.info('✅ Scraping session completed successfully');
         
     } catch (error) {
         const endTime = new Date();
@@ -92,9 +93,9 @@ async function main() {
         const durationSeconds = Math.floor((duration % 60000) / 1000);
         const durationMs = duration % 1000;
         
-        console.log(`⏰ End time: ${endTime.toLocaleString()}`);
-        console.log(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
-        console.error('❌ Error during scraping session:', error.message);
+        logger.info(`⏰ End time: ${endTime.toLocaleString()}`);
+        logger.info(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
+        logger.error('❌ Error during scraping session:', error.message);
         throw error;
     }
 }
