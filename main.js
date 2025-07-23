@@ -49,5 +49,5 @@ logger.info('📋 Check listings job scheduled to run at the 15th minute of ever
 logger.info('🚀 Starting initial run...');
 
 // Run the scraper immediately on startup
-// runScraper(); 
+runScraper(); 
 runChecker();
