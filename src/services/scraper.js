@@ -132,6 +132,59 @@ async function searchAllPages(user, control) {
     }
   }
 
+/**
+ * Extracts sorting options from the user's search page.
+ * @param {string} userUrl - The user's search URL.
+ * @returns {Promise<Array<{value: string, text: string}>>}
+ */
+async function getSortingOptions(userUrl) {
+  try {
+    const response = await axios.get(userUrl);
+    const $ = cheerio.load(response.data);
+    const options = [];
+    $('select.scr-select.sc-pull-right.sc-input.dp-list__sorting__select option').each((i, el) => {
+      options.push({
+        value: $(el).attr('value'),
+        text: $(el).text().trim(),
+      });
+    });
+    // Fallback: if no options found, use 'standard'
+    if (options.length === 0) {
+      options.push({ value: 'standard', text: 'Standard results' });
+    }
+    return options;
+  } catch (error) {
+    console.error('❌ Error extracting sorting options:', error.message);
+    return [{ value: 'standard', text: 'Standard results' }];
+  }
+}
+
+/**
+ * Scrapes all pages for all sorting options for a user.
+ * @param {Object} user - The user object (must have autoscout_url).
+ * @param {Object} control - The control object.
+ */
+async function searchAllPagesWithAllSorts(user, control) {
+  try {
+    // 1. Get all sorting options dynamically
+    const sortingOptions = await getSortingOptions(user.autoscout_url);
+    for (const sortOption of sortingOptions) {
+      // 2. Construct URL with sort parameter
+      let url = user.autoscout_url;
+      // Remove any existing sort param
+      url = url.replace(/([&?])sort=[^&]*/g, '$1').replace(/[?&]$/, '');
+      // Add sort param
+      url += (url.includes('?') ? '&' : '?') + `sort=${encodeURIComponent(sortOption.value)}`;
+      console.log(`\n🔗 Scraping with sort: ${sortOption.text} (${sortOption.value})`);
+      // 3. Call your existing searchAllPages logic for this sort
+      await searchAllPages({ ...user, autoscout_url: url }, control);
+    }
+  } catch (error) {
+    console.error('❌ Error in searchAllPagesWithAllSorts:', error.message);
+  }
+}
+
   module.exports = {
-    searchAllPages
+    searchAllPages,
+    searchAllPagesWithAllSorts
   }
