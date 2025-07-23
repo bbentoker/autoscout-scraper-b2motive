@@ -133,30 +133,22 @@ async function searchAllPages(user, control) {
   }
 
 /**
- * Extracts sorting options from the user's search page.
- * @param {string} userUrl - The user's search URL.
- * @returns {Promise<Array<{value: string, text: string}>>}
+ * Returns the predefined sorting options with desc parameter.
+ * @returns {Array<{value: string, text: string, desc: number}>}
  */
-async function getSortingOptions(userUrl) {
-  try {
-    const response = await axios.get(userUrl);
-    const $ = cheerio.load(response.data);
-    const options = [];
-    $('select.scr-select.sc-pull-right.sc-input.dp-list__sorting__select option').each((i, el) => {
-      options.push({
-        value: $(el).attr('value'),
-        text: $(el).text().trim(),
-      });
-    });
-    // Fallback: if no options found, use 'standard'
-    if (options.length === 0) {
-      options.push({ value: 'standard', text: 'Standard results' });
-    }
-    return options;
-  } catch (error) {
-    console.error('❌ Error extracting sorting options:', error.message);
-    return [{ value: 'standard', text: 'Standard results' }];
-  }
+function getSortingOptions() {
+  return [
+    { value: 'standard', text: 'Standard results', desc: 0 },
+    { value: 'price', text: 'Price Ascending', desc: 0 },
+    { value: 'price', text: 'Price Descending', desc: 1 },
+    { value: 'age', text: 'Latest Offer First', desc: 1 },
+    { value: 'mileage', text: 'Mileage Ascending', desc: 0 },
+    { value: 'mileage', text: 'Mileage Descending', desc: 1 },
+    { value: 'power', text: 'Power Ascending', desc: 0 },
+    { value: 'power', text: 'Power Descending', desc: 1 },
+    { value: 'year', text: 'First Registration Ascending', desc: 0 },
+    { value: 'year', text: 'First Registration Descending', desc: 1 }
+  ];
 }
 
 /**
@@ -166,16 +158,17 @@ async function getSortingOptions(userUrl) {
  */
 async function searchAllPagesWithAllSorts(user, control) {
   try {
-    // 1. Get all sorting options dynamically
-    const sortingOptions = await getSortingOptions(user.autoscout_url);
+    // 1. Get all sorting options
+    const sortingOptions = getSortingOptions();
     for (const sortOption of sortingOptions) {
-      // 2. Construct URL with sort parameter
+      // 2. Construct URL with sort and desc parameters
       let url = user.autoscout_url;
-      // Remove any existing sort param
+      // Remove any existing sort and desc params
       url = url.replace(/([&?])sort=[^&]*/g, '$1').replace(/[?&]$/, '');
-      // Add sort param
-      url += (url.includes('?') ? '&' : '?') + `sort=${encodeURIComponent(sortOption.value)}`;
-      console.log(`\n🔗 Scraping with sort: ${sortOption.text} (${sortOption.value})`);
+      url = url.replace(/([&?])desc=[^&]*/g, '$1').replace(/[?&]$/, '');
+      // Add sort and desc params
+      url += (url.includes('?') ? '&' : '?') + `sort=${encodeURIComponent(sortOption.value)}&desc=${sortOption.desc}`;
+      console.log(`\n🔗 Scraping with sort: ${sortOption.text} (${sortOption.value}, desc: ${sortOption.desc})`);
       // 3. Call your existing searchAllPages logic for this sort
       await searchAllPages({ ...user, autoscout_url: url }, control);
     }
