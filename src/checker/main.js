@@ -89,44 +89,64 @@ async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.
         logger.info(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(adverts.length / concurrencyLimit)} (${batch.length} adverts)`);
         
         const batchPromises = batch.map(async (advert) => {
-            try {
-                logger.info(`📋 Extracting listing info for advert: ${advert.autoscout_id}`);
-                
-                // Create a mock user object for the getListingInfos function
-                const mockUser = { id: advert.seller_id || 1 };
-                const advertUrl = `${process.env.AUTOSCOUT_URL}/offers/${advert.autoscout_id}`;
-                
-                // Extract listing information using the same method as scraper
-                const listingInfo = await getListingInfos(advertUrl, advert.autoscout_id, mockUser);
-                
-                return { 
-                    autoscout_id: advert.autoscout_id, 
-                    status: 'success',
-                    listingInfo: listingInfo
-                };
-            } catch (error) {
-                logger.error(`❌ Error processing advert ${advert.autoscout_id}:`, error.message);
-                
-                // Check if this is a 404 error from getListingInfos
-                if (error.message.includes('Request failed with status code 404') || 
-                    error.message.includes('404') ||
-                    (error.response && error.response.status === 404)) {
+            let lastError = null;
+            
+            // Try up to 3 times
+            for (let attempt = 1; attempt <= 3; attempt++) {
+                try {
+                    logger.info(`📋 Extracting listing info for advert: ${advert.autoscout_id} (attempt ${attempt}/3)`);
                     
-                    // Handle 404 error by marking advert as inactive
-                    await handleAdvertNotFound(advert.autoscout_id);
+                    // Create a mock user object for the getListingInfos function
+                    const mockUser = { id: advert.seller_id || 1 };
+                    const advertUrl = `${process.env.AUTOSCOUT_URL}/offers/${advert.autoscout_id}`;
+                    
+                    // Extract listing information using the same method as scraper
+                    const listingInfo = await getListingInfos(advertUrl, advert.autoscout_id, mockUser);
+                    
+                    logger.info(`✅ Successfully extracted listing info for advert: ${advert.autoscout_id} on attempt ${attempt}`);
                     
                     return { 
                         autoscout_id: advert.autoscout_id, 
-                        status: 'inactive',
-                        message: 'Advert marked as inactive due to 404'
+                        status: 'success',
+                        listingInfo: listingInfo,
+                        attempts: attempt
                     };
+                } catch (error) {
+                    lastError = error;
+                    logger.warn(`⚠️ Attempt ${attempt}/3 failed for advert ${advert.autoscout_id}:`, error.message);
+                    
+                    // If this is the last attempt, handle the failure
+                    if (attempt === 3) {
+                        logger.error(`❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
+                        
+                        // Check if this is a 404 error from getListingInfos
+                        if (error.message.includes('Request failed with status code 404') || 
+                            error.message.includes('404') ||
+                            (error.response && error.response.status === 404)) {
+                            
+                            // Handle 404 error by marking advert as inactive
+                            await handleAdvertNotFound(advert.autoscout_id);
+                            
+                            return { 
+                                autoscout_id: advert.autoscout_id, 
+                                status: 'inactive',
+                                message: 'Advert marked as inactive due to 404 after 3 attempts',
+                                attempts: 3
+                            };
+                        }
+                        
+                        return { 
+                            autoscout_id: advert.autoscout_id, 
+                            status: 'error', 
+                            error: error.message,
+                            attempts: 3
+                        };
+                    }
+                    
+                    // Wait 1 second before next attempt
+                    logger.info(`⏳ Waiting 1 second before retry for advert ${advert.autoscout_id}...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
-                
-                return { 
-                    autoscout_id: advert.autoscout_id, 
-                    status: 'error', 
-                    error: error.message 
-                };
             }
         });
         
