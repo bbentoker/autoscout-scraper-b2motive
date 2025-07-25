@@ -84,9 +84,12 @@ async function handleAdvertNotFound(autoscoutId) {
 async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
     const results = [];
     
-    for (let i = 0; i < adverts.length; i += concurrencyLimit) {
-        const batch = adverts.slice(i, i + concurrencyLimit);
-        logger.info(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(adverts.length / concurrencyLimit)} (${batch.length} adverts)`);
+    // Process in smaller chunks to prevent memory issues
+    const chunkSize = Math.min(concurrencyLimit, 10); // Max 10 at a time
+    
+    for (let i = 0; i < adverts.length; i += chunkSize) {
+        const batch = adverts.slice(i, i + chunkSize);
+        logger.info(`🔄 Processing batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(adverts.length / chunkSize)} (${batch.length} adverts)`);
         
         const batchPromises = batch.map(async (advert) => {
             let lastError = null;
@@ -105,10 +108,10 @@ async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.
                     
                     logger.info(`✅ Successfully extracted listing info for advert: ${advert.autoscout_id} on attempt ${attempt}`);
                     
+                    // Don't store large listingInfo in memory, just log success
                     return { 
                         autoscout_id: advert.autoscout_id, 
                         status: 'success',
-                        listingInfo: listingInfo,
                         attempts: attempt
                     };
                 } catch (error) {
@@ -118,27 +121,14 @@ async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.
                     // If this is the last attempt, handle the failure
                     if (attempt === 3) {
                         logger.error(`❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
-                        
-                        // Check if this is a 404 error from getListingInfos
-                        if (error.message.includes('Request failed with status code 404') || 
-                            error.message.includes('404') ||
-                            (error.response && error.response.status === 404)) {
-                            
-                            // Handle 404 error by marking advert as inactive
-                            await handleAdvertNotFound(advert.autoscout_id);
-                            
-                            return { 
-                                autoscout_id: advert.autoscout_id, 
-                                status: 'inactive',
-                                message: 'Advert marked as inactive due to 404 after 3 attempts',
-                                attempts: 3
-                            };
-                        }
-                        
+
+                        // Always handle as not found after 3 failed attempts
+                        await handleAdvertNotFound(advert.autoscout_id);
+
                         return { 
                             autoscout_id: advert.autoscout_id, 
-                            status: 'error', 
-                            error: error.message,
+                            status: 'inactive',
+                            message: 'Advert marked as inactive after 3 failed attempts',
                             attempts: 3
                         };
                     }
@@ -151,10 +141,25 @@ async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.
         });
         
         const batchResults = await Promise.allSettled(batchPromises);
-        results.push(...batchResults);
+        
+        // Process results immediately to free memory
+        for (const result of batchResults) {
+            if (result.status === 'fulfilled') {
+                results.push(result.value);
+            } else {
+                results.push({ 
+                    autoscout_id: 'unknown', 
+                    status: 'rejected', 
+                    error: result.reason?.message || 'Unknown error'
+                });
+            }
+        }
+        
+        // Clear batch results to free memory
+        batchResults.length = 0;
         
         // Small delay between batches to be respectful to the server
-        if (i + concurrencyLimit < adverts.length) {
+        if (i + chunkSize < adverts.length) {
             logger.info('⏳ Waiting 2 seconds before next batch...');
             await new Promise(resolve => setTimeout(resolve, 2000));
         }
@@ -172,7 +177,10 @@ async function checkListings() {
     try {
         // Fetch all active adverts
         const activeAdverts = await Advert.findAll({
-            where: { is_active: true },
+            where: {
+                is_active: true
+            },
+
             attributes: ['autoscout_id', 'seller_id']
         });
         

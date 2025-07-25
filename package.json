@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "node main.js",
+    "start": "node --expose-gc main.js",
+    "dev": "node --expose-gc main.js",
+    "start:memory-optimized": "node --expose-gc --max-old-space-size=512 main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

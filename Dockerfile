@@ -31,5 +31,5 @@ ENV NODE_ENV=production
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "console.log('Health check passed')" || exit 1
 
-# Start the application
-CMD ["node", "main.js"] 
+# Start the application with memory optimization flags
+CMD ["node", "--expose-gc", "--max-old-space-size=512", "main.js"] 

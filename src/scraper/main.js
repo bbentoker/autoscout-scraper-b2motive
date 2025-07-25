@@ -14,9 +14,12 @@ const logger = require('../utils/logger');
 async function processUsersInParallel(users, control, concurrencyLimit = process.env.USER_PROCESSING_CONCURRENCY || 5) {
     const results = [];
     
-    for (let i = 0; i < users.length; i += concurrencyLimit) {
-        const batch = users.slice(i, i + concurrencyLimit);
-        logger.info(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(users.length / concurrencyLimit)} (${batch.length} users)`);
+    // Process in smaller chunks to prevent memory issues
+    const chunkSize = Math.min(concurrencyLimit, 5); // Max 5 users at a time
+    
+    for (let i = 0; i < users.length; i += chunkSize) {
+        const batch = users.slice(i, i + chunkSize);
+        logger.info(`🔄 Processing batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(users.length / chunkSize)} (${batch.length} users)`);
         
         const batchPromises = batch.map(async (user) => {
             try {
@@ -30,10 +33,25 @@ async function processUsersInParallel(users, control, concurrencyLimit = process
         });
         
         const batchResults = await Promise.allSettled(batchPromises);
-        results.push(...batchResults);
+        
+        // Process results immediately to free memory
+        for (const result of batchResults) {
+            if (result.status === 'fulfilled') {
+                results.push(result.value);
+            } else {
+                results.push({ 
+                    user: 'unknown', 
+                    status: 'rejected', 
+                    error: result.reason?.message || 'Unknown error'
+                });
+            }
+        }
+        
+        // Clear batch results to free memory
+        batchResults.length = 0;
         
         // Small delay between batches to be respectful to the server
-        if (i + concurrencyLimit < users.length) {
+        if (i + chunkSize < users.length) {
             logger.info('⏳ Waiting 2 seconds before next batch...');
             await new Promise(resolve => setTimeout(resolve, 2000));
         }

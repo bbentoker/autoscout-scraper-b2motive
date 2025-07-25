@@ -3,26 +3,36 @@ const cron = require('node-cron');
 const { main: scraperMain } = require('./src/scraper/main');
 const { main: checkerMain } = require('./src/checker/main');
 const logger = require('./src/utils/logger');
+const memoryMonitor = require('./src/utils/memoryMonitor');
+
+// Start memory monitoring
+memoryMonitor.startMonitoring();
 
 // Function to run the scraper with error handling
 async function runScraper() {
     logger.info('🕐 Starting scheduled scraping job...');
+    memoryMonitor.logMemoryUsage(true);
     try {
         await scraperMain();
         logger.info('✅ Scheduled scraping job completed successfully');
+        memoryMonitor.logMemoryUsage(true);
     } catch (error) {
         logger.error('❌ Scheduled scraping job failed:', error.message);
+        memoryMonitor.forceGC();
     }
 }
 
 // Function to run the checker with error handling
 async function runChecker() {
     logger.info('📋 Starting scheduled check listings job...');
+    memoryMonitor.logMemoryUsage(true);
     try {
         await checkerMain();
         logger.info('✅ Scheduled check listings job completed successfully');
+        memoryMonitor.logMemoryUsage(true);
     } catch (error) {
         logger.error('❌ Scheduled check listings job failed:', error.message);
+        memoryMonitor.forceGC();
     }
 }
 

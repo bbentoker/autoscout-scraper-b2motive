@@ -1,10 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 class Logger {
     constructor() {
         this.logFile = path.join(process.cwd(), 'systemlog.txt');
         this.maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        this.maxLines = 5000; // Keep only last 5000 lines
         this.ensureLogFile();
     }
 
@@ -30,26 +32,40 @@ class Logger {
     }
 
     /**
-     * Truncate file to keep it under max size
+     * Truncate file using streams to avoid memory issues
      */
-    truncateFile() {
+    async truncateFile() {
         try {
             const currentSize = this.getFileSize();
             if (currentSize > this.maxSize) {
                 console.log(`📏 Log file size (${(currentSize / 1024 / 1024).toFixed(2)}MB) exceeds limit, truncating...`);
                 
-                // Read all lines
-                const content = fs.readFileSync(this.logFile, 'utf8');
-                const lines = content.split('\n');
+                // Use streams to read file line by line
+                const fileStream = fs.createReadStream(this.logFile);
+                const rl = readline.createInterface({
+                    input: fileStream,
+                    crlfDelay: Infinity
+                });
+
+                const lines = [];
+                let lineCount = 0;
                 
-                // Keep only the last 1000 lines (or adjust as needed)
-                const linesToKeep = 1000;
-                const newLines = lines.slice(-linesToKeep);
+                for await (const line of rl) {
+                    if (line.trim()) {
+                        lines.push(line);
+                        lineCount++;
+                        
+                        // Keep only the last maxLines
+                        if (lines.length > this.maxLines) {
+                            lines.shift(); // Remove oldest line
+                        }
+                    }
+                }
                 
                 // Write back to file
-                fs.writeFileSync(this.logFile, newLines.join('\n'));
+                fs.writeFileSync(this.logFile, lines.join('\n') + '\n');
                 
-                console.log(`✅ Log file truncated to ${newLines.length} lines`);
+                console.log(`✅ Log file truncated to ${lines.length} lines`);
             }
         } catch (error) {
             console.error('❌ Error truncating log file:', error.message);
@@ -57,30 +73,42 @@ class Logger {
     }
 
     /**
-     * Write log entry with timestamp
+     * Write log entry with timestamp - optimized for memory
      */
     writeLog(level, message, data = null) {
         const timestamp = new Date().toISOString();
+        
+        // Limit data size to prevent memory issues
+        let limitedData = null;
+        if (data) {
+            if (typeof data === 'object') {
+                // Stringify with limited depth and size
+                limitedData = JSON.stringify(data, null, 0).substring(0, 1000);
+            } else {
+                limitedData = String(data).substring(0, 500);
+            }
+        }
+
         const logEntry = {
             timestamp,
             level,
-            message,
-            data
+            message: message.substring(0, 1000), // Limit message size
+            data: limitedData
         };
 
         const logLine = JSON.stringify(logEntry) + '\n';
         
         try {
-            // Check file size before writing
-            this.truncateFile();
+            // Check file size before writing (async but don't await to avoid blocking)
+            this.truncateFile().catch(err => console.error('Truncate error:', err));
             
             // Append to file
             fs.appendFileSync(this.logFile, logLine);
             
-            // Also log to console for immediate visibility
-            const consoleMessage = `[${timestamp}] ${level.toUpperCase()}: ${message}`;
-            if (data) {
-                console.log(consoleMessage, data);
+            // Also log to console for immediate visibility (limited output)
+            const consoleMessage = `[${timestamp}] ${level.toUpperCase()}: ${message.substring(0, 200)}`;
+            if (limitedData) {
+                console.log(consoleMessage, limitedData);
             } else {
                 console.log(consoleMessage);
             }
@@ -116,13 +144,32 @@ class Logger {
     }
 
     /**
-     * Get recent log entries
+     * Get recent log entries - optimized for memory
      */
-    getRecentLogs(lines = 100) {
+    async getRecentLogs(lines = 100) {
         try {
-            const content = fs.readFileSync(this.logFile, 'utf8');
-            const allLines = content.split('\n').filter(line => line.trim());
-            return allLines.slice(-lines);
+            const fileStream = fs.createReadStream(this.logFile);
+            const rl = readline.createInterface({
+                input: fileStream,
+                crlfDelay: Infinity
+            });
+
+            const recentLines = [];
+            let lineCount = 0;
+            
+            for await (const line of rl) {
+                if (line.trim()) {
+                    recentLines.push(line);
+                    lineCount++;
+                    
+                    // Keep only the last requested lines
+                    if (recentLines.length > lines) {
+                        recentLines.shift();
+                    }
+                }
+            }
+            
+            return recentLines;
         } catch (error) {
             console.error('❌ Error reading log file:', error.message);
             return [];
