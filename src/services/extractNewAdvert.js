@@ -112,7 +112,6 @@ async function getListingInfos(advertUrl, advertId, user) {
       fullServiceHistory,
       s3ImageUrl,
     });
-    return
     // Return the extracted data instead of saving to database
     return {
       seller_id: user.id,

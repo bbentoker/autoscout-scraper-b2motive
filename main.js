@@ -60,4 +60,4 @@ logger.info('🚀 Starting initial run...');
 
 // Run the scraper immediately on startup
 runScraper(); 
-// runChecker();
+runChecker();
