@@ -15,7 +15,10 @@ async function getListingInfos(advertUrl, advertId, user) {
     const model = $('.StageTitle_modelVersion__Yof2Z').text().trim();
     const location = $('.scr-link.LocationWithPin_locationItem__tK1m5').text().trim();
 
-    const price = $('.PriceInfo_price__XU0aF').text().trim();
+    const priceElement = $('.PriceInfo_price__XU0aF');
+    const price = priceElement.contents().filter(function() {
+      return this.type === 'text';
+    }).text().trim();
 
     let sellerName = $('.CommonComponents_nameContainer__TtFCL').text().trim();
 
@@ -40,8 +43,7 @@ async function getListingInfos(advertUrl, advertId, user) {
     const seats = extractDetail('Seats');
     const doors = extractDetail('Doors');
     const countryVersion = extractDetail('Country version');
-
-    const colour = $('.DataGrid_defaultDdStyle__3IYpG.DataGrid_fontBold__RqU01').text().trim();
+    const colour = extractDetail('Colour');
     const paint = extractDetail('Paint');
     const upholsteryColour = extractDetail('Upholstery colour');
     const upholstery = extractDetail('Upholstery');
@@ -75,46 +77,46 @@ async function getListingInfos(advertUrl, advertId, user) {
     const fullServiceHistory = extractDetail('Full service history');
 
     console.log(`Extracted details for advert ID ${advertId}: \n`);
-    // console.log({
-    //   make,
-    //   model,
-    //   location,
-    //   price,
-    //   sellerName,
-    //   bodyType,
-    //   type,
-    //   drivetrain,
-    //   seats,
-    //   doors,
-    //   countryVersion,
-    //   colour,
-    //   paint,
-    //   upholsteryColour,
-    //   upholstery,
-    //   emissionClass,
-    //   fuelType,
-    //   fuelConsumption,
-    //   co2Emissions,
-    //   power,
-    //   gearbox,
-    //   engineSize,
-    //   gears,
-    //   cylinders,
-    //   emptyWeight,
-    //   mileage,
-    //   firstRegistration,
-    //   lastService,
-    //   previousOwner,
-    //   fullServiceHistory,
-    //   s3ImageUrl,
-    // });
-
+    console.log({
+      make,
+      model,
+      location,
+      price,
+      sellerName,
+      bodyType,
+      type,
+      drivetrain,
+      seats,
+      doors,
+      countryVersion,
+      colour,
+      paint,
+      upholsteryColour,
+      upholstery,
+      emissionClass,
+      fuelType,
+      fuelConsumption,
+      co2Emissions,
+      power,
+      gearbox,
+      engineSize,
+      gears,
+      cylinders,
+      emptyWeight,
+      mileage,
+      firstRegistration,
+      lastService,
+      previousOwner,
+      fullServiceHistory,
+      s3ImageUrl,
+    });
+    return
     // Return the extracted data instead of saving to database
     return {
       seller_id: user.id,
       autoscout_id: advertId,
-      make: make.split(' ')[0] || 'Unknown Make',
-      model: model.split(' ')[1] || 'Unknown Model',
+      make: make || 'Unknown Make',
+      model: model || 'Unknown Model',
       location: location || 'Unknown Location',
       price: parseFloat(price.replace(/[^0-9.]/g, '')) || 0,
       seller_name: sellerName || 'Unknown Seller',

@@ -22,16 +22,20 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
         
         const batchPromises = batch.map(async (element) => {
             try {
-                const articleId = $$(element).attr('id');
+                // for debugging
+                // const articleId = $$(element).attr('id');
+                const articleId = 'e423f619-a37a-424b-b0e8-7fb35b88e6e6';
                 const advertLink = $$(element).find('a').first().attr('href');
 
                 if (articleId && advertLink) {
                     const fullAdvertLink = `${advertBaseUrl}${articleId}`;
                     
-                    const existingAdvert = await Advert.findOne({
-                        where: { autoscout_id: articleId },
-                    });
-
+                    // for debugging
+                    // const existingAdvert = await Advert.findOne({
+                    //     where: { autoscout_id: articleId },
+                    // });
+                    const existingAdvert = null;
+                    
                     if (!existingAdvert) {
                         console.log(`🆕 Fetching details for new advert ID: ${articleId}`);
                         await extractNewAdvert(fullAdvertLink, articleId, user);
