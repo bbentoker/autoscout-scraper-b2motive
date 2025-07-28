@@ -32,6 +32,7 @@ async function determineFuelType(fuelTypeText) {
           - Hybrid: Any hybrid, electric-hybrid, or plug-in hybrid terms
           
           Return ONLY one of these three words: Diesel, Gasoline, or Hybrid.
+          if its Electric/Gasoline it is hybrid , more than one fuel type is hybrid
           If the text is unclear or doesn't match any category, return "Unknown".`
         },
         {
@@ -54,6 +55,66 @@ async function determineFuelType(fuelTypeText) {
   }
 }
 
+/**
+ * Determines power in HP format from extracted text using GPT
+ * @param {string} powerText - The extracted power text from the webpage
+ * @returns {Promise<string>} - Returns power in format "xxx hp" or null if not found
+ */
+async function determinePowerHP(powerText) {
+  try {
+    if (!powerText || powerText.trim() === '') {
+      console.log('No power text provided, returning null');
+      return null;
+    }
+
+    console.log(`Analyzing power text: "${powerText}"`);
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `You are a power converter. Given a power description from a car listing, extract the horsepower (HP) value.
+
+          Rules:
+          - If the hp value is in the text, return the value directly
+          - Convert any power unit to HP (horsepower)
+          - Common conversions: 1 kW = 1.34 HP, 1 PS = 0.986 HP
+          - Extract only the numeric value and add "hp" suffix
+          - Format: "xxx hp" (e.g., "150 hp", "200 hp")
+          - If no power information is found, return "Unknown"
+          - Round to nearest whole number
+          
+          Examples:
+          - "150 kW" → "201 hp"
+          - "200 PS" → "197 hp" 
+          - "180 HP" → "180 hp"
+          - "120 kW (163 PS)" → "163 hp"
+          - "No power info" → "Unknown"
+          
+          Return ONLY the formatted power in "xxx hp" format or "Unknown".`
+        },
+        {
+          role: "user",
+          content: `Extract power in HP from: "${powerText}"`
+        }
+      ],
+      max_tokens: 15,
+      temperature: 0.1
+    });
+
+    const result = response.choices[0].message.content.trim();
+    console.log(`GPT extracted power as: ${result}`);
+    
+    return result;
+  } catch (error) {
+    console.error('Error calling GPT API for power extraction:', error.message);
+    // Fallback to original text if GPT fails
+    return powerText || 'Unknown';
+  }
+}
+
 module.exports = {
-  determineFuelType
+  determineFuelType,
+  determinePowerHP
 }; 

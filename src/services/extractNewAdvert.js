@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { uploadImageToS3 } = require('./awsService');
-const { determineFuelType } = require('./gptService');
+const { determineFuelType, determinePowerHP } = require('./gptService');
 const { Advert} = require('../../models');
 
 async function getListingInfos(advertUrl, advertId, user) {
@@ -53,7 +53,8 @@ async function getListingInfos(advertUrl, advertId, user) {
     const fuelType = await determineFuelType(fuelTypeRaw);
     const fuelConsumption = extractDetail('Fuel consumption');
     const co2Emissions = extractDetail('CO₂-emissions');
-    const power = extractDetail('Power');
+    const powerRaw = extractDetail('Power');
+    const power = await determinePowerHP(powerRaw);
     const gearbox = extractDetail('Gearbox');
     const engineSize = extractDetail('Engine size');
     const gears = extractDetail('Gears');
