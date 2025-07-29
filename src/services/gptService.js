@@ -33,7 +33,7 @@ async function determineFuelType(fuelTypeText) {
           
           Return ONLY one of these three words: Diesel, Gasoline, or Hybrid.
           if its Electric/Gasoline it is hybrid , more than one fuel type is hybrid
-          If the text is unclear or doesn't match any category, return "Unknown".`
+          If the text is unclear or doesn't match any category, return one word version of the fuel type or the closest match.`
         },
         {
           role: "user",

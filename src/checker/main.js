@@ -46,8 +46,13 @@ async function handleAdvertNotFound(autoscoutId) {
         advert.is_active = false;
 
         // also calculate the days between created and last_seen
-        const daysBetween = Math.ceil((advert.last_seen - advert.created_at) / (1000 * 60 * 60 * 24));
-        console.log("daysBetween",daysBetween);
+        const timeDiffMs = advert.last_seen - advert.created_at;
+        const timeDiffDays = timeDiffMs / (1000 * 60 * 60 * 24);
+        
+        // If it's less than 1 day, set to 0 (same day)
+        // If it's 1 day or more, use Math.floor to get the actual days
+        const daysBetween = timeDiffDays < 1 ? 0 : Math.floor(timeDiffDays);
+        console.log("daysBetween", daysBetween, "timeDiffDays", timeDiffDays);
         advert.sell_time = daysBetween;
         
         await advert.save();
