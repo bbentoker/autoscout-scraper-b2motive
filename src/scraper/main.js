@@ -6,6 +6,86 @@ const { Control } = require('../../models');
 const logger = require('../utils/logger');
 
 /**
+ * Check if a date is within the current week (from Monday to Sunday)
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {boolean} - True if the date is within the current week
+ */
+function isWithinCurrentWeek(dateString) {
+    const targetDate = new Date(dateString);
+    const today = new Date();
+    
+    // Get the start of the current week (Monday)
+    const startOfWeek = new Date(today);
+    const dayOfWeek = today.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Sunday = 0, so we need 6 days back
+    startOfWeek.setDate(today.getDate() - daysToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    // Get the end of the current week (Sunday)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
+    // Check if target date is within the current week
+    return targetDate >= startOfWeek && targetDate <= endOfWeek;
+}
+
+/**
+ * Filter users based on their autoscout_url_add_date
+ * Skip users whose date is within the current week and not older than 7 days
+ * @param {Array} users - Array of users to filter
+ * @returns {Array} - Filtered array of users
+ */
+function filterUsersByAddDate(users) {
+    const today = new Date();
+    const filteredUsers = [];
+    const skippedUsers = [];
+    
+    for (const user of users) {
+        if (!user.autoscout_url_add_date) {
+            // If no date is provided, include the user
+            logger.info(`✅ User ${user.id}: No autoscout_url_add_date provided - will be processed`);
+            filteredUsers.push(user);
+            continue;
+        }
+        
+        const addDate = new Date(user.autoscout_url_add_date);
+        const daysDifference = Math.floor((today - addDate) / (1000 * 60 * 60 * 24));
+        const isWithinWeek = isWithinCurrentWeek(user.autoscout_url_add_date);
+        
+        // Skip if the date is within the current week and not older than 7 days
+        if (isWithinWeek && daysDifference < 7) {
+            const skipInfo = {
+                id: user.id,
+                autoscout_url_add_date: user.autoscout_url_add_date,
+                daysDifference: daysDifference,
+                isWithinWeek: isWithinWeek,
+                reason: `Within current week (${daysDifference} days old) - skipping until next Monday`
+            };
+            skippedUsers.push(skipInfo);
+            
+            // Log each skipped user immediately
+            logger.info(`⏭️ SKIPPED User ${user.id}:`);
+            logger.info(`   📊 User: ${user.company_name}`);
+            logger.info(`   📅 Add Date: ${user.autoscout_url_add_date}`);
+            logger.info(`   📊 Days Old: ${daysDifference}`);
+            logger.info(`   📈 Within Current Week: ${isWithinWeek}`);
+            logger.info(`   🚫 Reason: ${skipInfo.reason}`);
+            logger.info(`   ──────────────────────────────────────────`);
+        } else {
+            logger.info(`✅ User ${user.id}: Will be processed (${daysDifference} days old, within week: ${isWithinWeek})`);
+            filteredUsers.push(user);
+        }
+    }
+    
+    if (skippedUsers.length > 0) {
+        logger.info(`📊 SUMMARY: Skipped ${skippedUsers.length} users due to autoscout_url_add_date within current week`);
+    }
+    
+    return filteredUsers;
+}
+
+/**
  * Process users in parallel with a concurrency limit
  * @param {Array} users - Array of users to process
  * @param {Object} control - Control object for tracking
@@ -80,15 +160,25 @@ async function main() {
         // Fetch and process users
         const users = await getUsersToScrape();
         logger.info('--------------------------------------------------------');
-        logger.info(`👥 Found ${users.length} users to scrape`);
+        logger.info(`👥 Found ${users.length} total users`);
+        
+        // Filter users based on their autoscout_url_add_date
+        const filteredUsers = filterUsersByAddDate(users);
+        logger.info(`✅ ${filteredUsers.length} users will be processed after filtering`);
         logger.info('--------------------------------------------------------');
         
+        // Check if there are any users to process
+        if (filteredUsers.length === 0) {
+            logger.info('⏭️ No users to process after filtering. All users are within the current week or less than 7 days old.');
+            return;
+        }
+        
         // Process users in parallel with concurrency limit
-        const results = await processUsersInParallel(users, control);
+        const results = await processUsersInParallel(filteredUsers, control);
         
         // Log summary of results
-        const successful = results.filter(r => r.status === 'fulfilled' && r.value.status === 'success').length;
-        const failed = results.length - successful;
+        const successful = results.filter(r => r.status === 'success').length;
+        const failed = results.filter(r => r.status === 'error').length;
         logger.info(`📊 Processing complete: ${successful} successful, ${failed} failed`);
         
         // Mark adverts as inactive if they weren't seen in this session
