@@ -145,10 +145,10 @@ async function searchAllPages(user, control) {
  */
 function getSortingOptions() {
   return [
+    { value: 'age', text: 'Latest Offer First', desc: 1 },
     { value: 'standard', text: 'Standard results', desc: 0 },
     { value: 'price', text: 'Price Ascending', desc: 0 },
     { value: 'price', text: 'Price Descending', desc: 1 },
-    { value: 'age', text: 'Latest Offer First', desc: 1 },
     { value: 'mileage', text: 'Mileage Ascending', desc: 0 },
     { value: 'mileage', text: 'Mileage Descending', desc: 1 },
     { value: 'power', text: 'Power Ascending', desc: 0 },
@@ -165,6 +165,8 @@ function getSortingOptions() {
  */
 async function searchAllPagesWithAllSorts(user, control) {
   try {
+
+ 
     // 1. Get all sorting options
     const sortingOptions = getSortingOptions();
     for (const sortOption of sortingOptions) {
