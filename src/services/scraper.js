@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const {extractNewAdvert} = require('./extractNewAdvert');
-const { Advert, Control, SeenInfo } = require('../../models');
+const { Advert, Control, SeenInfo, AutoScoutInventory } = require('../../models');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
@@ -95,11 +95,11 @@ async function searchAllPages(user, control) {
   
       console.log(`📄 Total pages found: ${totalPages}`);
   
-      for (let page = 1; page <= totalPages; page++) {
+            for (let page = 1; page <= totalPages; page++) {
         console.log(
           `📥 Fetching content from page ${page}`
         );
-  
+
         try {
           // Construct URL with page parameter
           const pageUrl = user.autoscout_url.includes('?') 
@@ -107,7 +107,38 @@ async function searchAllPages(user, control) {
             : `${user.autoscout_url}?page=${page}`;
           const pageResponse = await axios.get(pageUrl);
           const $$ = cheerio.load(pageResponse.data);
-  
+
+                     // On first run (page 1), get and log the elements with specified class
+           if (page === 1) {
+             const titleCountElements = $$('.dp-list__title__count.sc-ellipsis.sc-font-xl');
+             console.log(`🔍 Found ${titleCountElements.length} elements with class 'dp-list__title__count sc-ellipsis sc-font-xl' on page ${page}`);
+             
+             titleCountElements.each((index, element) => {
+               const elementText = $$(element).text().trim();
+               console.log(`📋 Element ${index + 1} content: "${elementText}"`);
+             });
+             
+             // Extract count from the first element and save to database
+             if (titleCountElements.length > 0) {
+               const firstElementText = $$(titleCountElements[0]).text().trim();
+               const countMatch = firstElementText.match(/(\d+)/);
+               if (countMatch) {
+                 const count = parseInt(countMatch[1]);
+                 console.log(`📊 Extracted count: ${count}`);
+                 
+                 // Save to AutoScoutInventory table
+                 try {
+                   await AutoScoutInventory.create({
+                     seller_id: user.id,
+                     count: count
+                   });
+                   console.log(`💾 Saved inventory count ${count} for seller ${user.id}`);
+                 } catch (error) {
+                   console.error(`❌ Error saving inventory count:`, error.message);
+                 }
+               }
+             }
+           }
           const articles = $$('article');
           console.log(
             `📝 Found ${articles.length} <article> elements on page ${page}`
