@@ -108,7 +108,7 @@ async function searchAllPages(user, control) {
           const pageResponse = await axios.get(pageUrl);
           const $$ = cheerio.load(pageResponse.data);
 
-                     // On first run (page 1), get and log the elements with specified class
+                                // On first run (page 1), get and log the elements with specified class
            if (page === 1) {
              const titleCountElements = $$('.dp-list__title__count.sc-ellipsis.sc-font-xl');
              console.log(`🔍 Found ${titleCountElements.length} elements with class 'dp-list__title__count sc-ellipsis sc-font-xl' on page ${page}`);
@@ -117,47 +117,6 @@ async function searchAllPages(user, control) {
                const elementText = $$(element).text().trim();
                console.log(`📋 Element ${index + 1} content: "${elementText}"`);
              });
-             
-                           // Extract count from the first element and save to database
-              if (titleCountElements.length > 0) {
-                const firstElementText = $$(titleCountElements[0]).text().trim();
-                const countMatch = firstElementText.match(/(\d+)/);
-                if (countMatch) {
-                  const count = parseInt(countMatch[1]);
-                  console.log(`📊 Extracted count: ${count}`);
-                  
-                  // Check if there's already a record for today
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  const tomorrow = new Date(today);
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-                  
-                  const existingRecord = await AutoScoutInventory.findOne({
-                    where: {
-                      seller_id: user.id,
-                      created_at: {
-                        [require('sequelize').Op.gte]: today,
-                        [require('sequelize').Op.lt]: tomorrow
-                      }
-                    }
-                  });
-                  
-                  if (existingRecord) {
-                    console.log(`📅 Inventory count for today already exists for seller ${user.id} (count: ${existingRecord.count})`);
-                  } else {
-                    // Save to AutoScoutInventory table
-                    try {
-                      await AutoScoutInventory.create({
-                        seller_id: user.id,
-                        count: count
-                      });
-                      console.log(`💾 Saved inventory count ${count} for seller ${user.id}`);
-                    } catch (error) {
-                      console.error(`❌ Error saving inventory count:`, error.message);
-                    }
-                  }
-                }
-              }
            }
           const articles = $$('article');
           console.log(
