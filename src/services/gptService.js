@@ -114,7 +114,64 @@ async function determinePowerHP(powerText) {
   }
 }
 
+/**
+ * Determines mileage from extracted text using GPT
+ * @param {string} mileageText - The extracted mileage text from the webpage
+ * @returns {Promise<string>} - Returns mileage in format "xxx km" or null if not found
+ */
+async function determineMileage(mileageText) {
+  try {
+    if (!mileageText || mileageText.trim() === '') {
+      console.log('No mileage text provided, returning null');
+      return null;
+    }
+
+    console.log(`Analyzing mileage text: "${mileageText}"`);
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `You are a mileage extractor. Given a mileage description from a car listing, extract the first valid mileage value.
+
+          Rules:
+          - If multiple mileage values are present, take only the first one
+          - Keep the original unit (km or mi)
+          - Format should be "xxx km" or "xxx mi"
+          - Remove any commas and spaces between numbers
+          - If no valid mileage is found, return "Unknown"
+          
+          Examples:
+          - "55,000km10,000km" → "55000 km"
+          - "10000 km" → "10000 km"
+          - "5,500 mi" → "5500 mi"
+          - "No mileage info" → "Unknown"
+          
+          Return ONLY the formatted mileage or "Unknown".`
+        },
+        {
+          role: "user",
+          content: `Extract mileage from: "${mileageText}"`
+        }
+      ],
+      max_tokens: 15,
+      temperature: 0.1
+    });
+
+    const result = response.choices[0].message.content.trim();
+    console.log(`GPT extracted mileage as: ${result}`);
+    
+    return result;
+  } catch (error) {
+    console.error('Error calling GPT API for mileage extraction:', error.message);
+    // Fallback to original text if GPT fails
+    return mileageText || 'Unknown';
+  }
+}
+
 module.exports = {
   determineFuelType,
-  determinePowerHP
+  determinePowerHP,
+  determineMileage
 }; 
