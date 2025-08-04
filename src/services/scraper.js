@@ -29,7 +29,10 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
                     const fullAdvertLink = `${advertBaseUrl}${articleId}`;
                     
                     const existingAdvert = await Advert.findOne({
-                        where: { autoscout_id: articleId },
+                        where: { 
+                          autoscout_id: articleId,
+                          seller_id : user.id
+                         },
                     });
 
                     if (!existingAdvert) {
