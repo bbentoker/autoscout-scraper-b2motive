@@ -169,6 +169,7 @@ async function getListingInfos(advertUrl, advertId, user) {
       previous_owner: parseInt(previousOwner) || null,
       full_service_history: fullServiceHistory === 'Yes',
       image_url: s3ImageUrl || null,
+      original_image_url: imageUrl || null,
     };
   } catch (error) {
     console.error(`Error fetching advert page: ${advertUrl}`, error.message);

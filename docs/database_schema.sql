@@ -47,7 +47,8 @@ CREATE TABLE autoscout_adverts (
     description TEXT,
     link VARCHAR(500),
     sell_time INTEGER,
-    image_url VARCHAR(500)
+    image_url VARCHAR(500),
+    original_image_url VARCHAR(500)
 );
 
 -- Create autoscout_controls table

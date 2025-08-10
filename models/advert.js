@@ -73,7 +73,8 @@ module.exports = (sequelize,DataTypes) => {
       description: DataTypes.TEXT,
       link:DataTypes.STRING,
       sell_time:DataTypes.INTEGER,
-      image_url:DataTypes.STRING
+      image_url:DataTypes.STRING,
+      original_image_url:DataTypes.STRING
     },
     {
       sequelize,
