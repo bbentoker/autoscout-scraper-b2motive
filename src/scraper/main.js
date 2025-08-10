@@ -237,36 +237,12 @@ async function scrapeUserInventoryCount(user) {
                 const count = parseInt(countMatch[1]);
                 console.log(`📊 Extracted count: ${count} for user ${user.id}`);
                 
-                // Check if there's already a record for today
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                
-                const existingRecord = await AutoScoutInventory.findOne({
-                    where: {
-                        seller_id: user.id,
-                        created_at: {
-                            [require('sequelize').Op.gte]: today,
-                            [require('sequelize').Op.lt]: tomorrow
-                        }
-                    }
+                await AutoScoutInventory.create({
+                    seller_id: user.id,
+                    count: count
                 });
+                console.log(`💾 Saved inventory count ${count} for seller ${user.id}`);
                 
-                if (existingRecord) {
-                    console.log(`📅 Inventory count for today already exists for seller ${user.id} (count: ${existingRecord.count})`);
-                } else {
-                    // Save to AutoScoutInventory table
-                    try {
-                        await AutoScoutInventory.create({
-                            seller_id: user.id,
-                            count: count
-                        });
-                        console.log(`💾 Saved inventory count ${count} for seller ${user.id}`);
-                    } catch (error) {
-                        console.error(`❌ Error saving inventory count:`, error.message);
-                    }
-                }
             }
         }
     } catch (error) {
