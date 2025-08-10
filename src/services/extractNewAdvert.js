@@ -1,8 +1,28 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { uploadImageToS3 } = require('./awsService');
-const { determineFuelType, determinePowerHP, determineMileage } = require('./gptService');
+const { determineFuelType, determinePowerHP } = require('./gptService');
 const { Advert} = require('../../models');
+
+function extractFirstMileageValue(mileageRaw) {
+  if (!mileageRaw || typeof mileageRaw !== 'string') {
+    return null;
+  }
+
+  const kmPattern = /(\d{1,3}(?:[.,\s]\d{3})*|\d+)\s*km/gi;
+  const matches = Array.from(mileageRaw.matchAll(kmPattern));
+
+  if (matches.length === 0) {
+    return null;
+  }
+
+  if (matches.length > 1) {
+    console.log('Multiple mileage values detected, using the first one:', mileageRaw);
+  }
+
+  const firstMatch = matches[0][0];
+  return firstMatch.replace(/\s+/g, ' ').trim();
+}
 
 async function getListingInfos(advertUrl, advertId, user) {
   try {
@@ -61,11 +81,11 @@ async function getListingInfos(advertUrl, advertId, user) {
     const cylinders = extractDetail('Cylinders');
     const emptyWeight = extractDetail('Empty weight');
     const mileageRaw = extractDetail('Mileage');
-    const mileage = await determineMileage(mileageRaw);
-
+    
+    const mileage = extractFirstMileageValue(mileageRaw);
     const firstRegistrationRaw = extractDetail('First registration');
    
-     
+    console.log("First registration raw value:", firstRegistrationRaw);
     let firstRegistration = null;
 
     if (firstRegistrationRaw != null && firstRegistrationRaw != '-' && firstRegistrationRaw != '') {
