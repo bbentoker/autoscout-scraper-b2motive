@@ -100,12 +100,35 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
 async function searchAllPagesViaApi(user, control) {
   try {
     // Load dealer page to get customerId and set a realistic referer
-    const dealerRes = await axios.get(user.autoscout_url, {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const fetchWith429Retry = async (label, fn) => {
+      // Keep trying until not rate limited
+      while (true) {
+        try {
+          return await fn();
+        } catch (err) {
+          const status = err?.response?.status;
+          if (status === 429) {
+            const retryAfterHeader = err.response.headers?.['retry-after'];
+            const retryAfterSec = retryAfterHeader ? parseInt(retryAfterHeader, 10) : null;
+            const waitMs = (retryAfterSec && !Number.isNaN(retryAfterSec))
+              ? retryAfterSec * 1000
+              : parseInt(process.env.RATE_LIMIT_WAIT_MS || '60000', 10);
+            console.warn(`⚠️ 429 on ${label}. Waiting ${Math.round(waitMs / 1000)}s before retry...`);
+            await sleep(waitMs);
+            continue;
+          }
+          throw err;
+        }
+      }
+    };
+
+    const dealerRes = await fetchWith429Retry('dealer page', () => axios.get(user.autoscout_url, {
       headers: {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'accept-language': 'fr-BE,fr;q=0.9,en;q=0.8'
       }
-    });
+    }));
     const html = dealerRes.data;
     const customerId = extractCustomerIdFromHtml(html);
     console.log("scraping user", user.id);
@@ -115,7 +138,7 @@ async function searchAllPagesViaApi(user, control) {
       return;
     }
     const cultureIso = resolveCultureIsoFromUrl(user.autoscout_url);
-    const visitorCookie = await getVisitorCookie();
+    const visitorCookie = await fetchWith429Retry('visitor cookie', () => getVisitorCookie());
     console.log(`🏷️ Using customerId=${customerId}, cultureIso=${cultureIso}`);
 
     // Extract brand options from page
@@ -192,35 +215,6 @@ async function searchAllPagesViaApi(user, control) {
     // Per-make fetch function (single-call then pagination fallback)
     async function fetchMake(make) {
       console.log(`🔎 Fetching listings for makeId=${make.id} (${make.label})`);
-      // Single-call attempt
-      try {
-        const firstData = await fetchDealerListings({
-          customerId,
-          cultureIso,
-          referer: user.autoscout_url,
-          visitorCookie,
-          makeId: make.id
-        });
-        const firstItems = firstData?.listings || firstData?.result?.listings || firstData?.data || [];
-        const firstCount = Array.isArray(firstItems) ? firstItems.length : 0;
-        console.log(`📥 Single-call (make ${make.label}) returned ${firstCount} listings`);
-        if (firstCount > 0) {
-          const results = await processApiListings(firstItems);
-          const created = results.filter(r => r.status === 'fulfilled' && r.value.status === 'new').length;
-          const exist = results.filter(r => r.status === 'fulfilled' && r.value.status === 'existing').length;
-          const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
-          console.log(`📊 Single-call (${make.label}): ${created} new, ${exist} existing, ${failed} failed`);
-          totalListings += firstCount;
-          if (firstCount > 20) {
-            console.log(`✅ Full data likely received for make ${make.label}. Skipping pagination.`);
-            return;
-          }
-        }
-      } catch (e) {
-        console.warn(`⚠️ Single-call failed for make ${make.label}, falling back to pagination:`, e.message);
-      }
-
-      // Fallback to pagination per make
       let page = 1;
       let safetyStop = 0;
       while (true) {
@@ -231,14 +225,14 @@ async function searchAllPagesViaApi(user, control) {
         }
 
         console.log(`📤 Posting to dealer API page=${page} for customerId=${customerId} makeId=${make.id}`);
-        const data = await fetchDealerListings({
+        const data = await fetchWith429Retry('dealer listings', () => fetchDealerListings({
           customerId,
           page,
           cultureIso,
           referer: user.autoscout_url,
           visitorCookie,
           makeId: make.id
-        });
+        }));
         try {
           const items = data?.listings || data?.result?.listings || data?.data || [];
           const count = Array.isArray(items) ? items.length : 0;
