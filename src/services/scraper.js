@@ -8,6 +8,7 @@ const {
   extractCustomerIdFromHtml,
   extractMakeOptionsFromHtml,
   fetchDealerListings,
+  getHttpsAgent,
 } = require('./autoscoutApi');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
@@ -124,6 +125,7 @@ async function searchAllPagesViaApi(user, control) {
     };
 
     const dealerRes = await fetchWith429Retry('dealer page', () => axios.get(user.autoscout_url, {
+      httpsAgent: getHttpsAgent(),
       headers: {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'accept-language': 'fr-BE,fr;q=0.9,en;q=0.8'
