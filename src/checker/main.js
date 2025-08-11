@@ -86,7 +86,7 @@ async function handleAdvertNotFound(autoscoutId) {
  * @param {Array} adverts - Array of advert objects to process
  * @param {number} concurrencyLimit - Maximum number of concurrent operations
  */
-async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
+async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY_CHECKER || 1) {
     const results = [];
     
     // Process in smaller chunks to prevent memory issues

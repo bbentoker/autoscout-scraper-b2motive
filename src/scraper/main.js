@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { searchAllPages, searchAllPagesWithAllSorts } = require('../services/scraper');
+const { searchAllPages, searchAllPagesWithAllSorts, searchAllPagesViaApi } = require('../services/scraper');
 const { getUsersToScrape } = require('../services/userService');
 const { prepareForNotExistingAdvertCheck, markUnseenAdvertsAsInactive } = require('../services/advertService');
 const { Control } = require('../../models');
@@ -165,12 +165,6 @@ async function main() {
         logger.info('--------------------------------------------------------');
         logger.info(`👥 Found ${users.length} total users`);
         
-        // STEP 1: Scrape inventory counts for ALL users (regardless of filtering)
-        // logger.info('📊 STEP 1: Starting inventory count scraping for all users...');
-        // await scrapeAllUsersInventoryCounts(users);
-        // logger.info('✅ Inventory count scraping completed');
-        // logger.info('--------------------------------------------------------');
-        
         // STEP 2: Filter users for regular listing scraping
         const filteredUsers = filterUsersByAddDate(users);
         logger.info(`✅ ${filteredUsers.length} users will be processed for regular listing scraping after filtering`);
@@ -218,59 +212,7 @@ async function main() {
     }
 }
 
-/**
- * Scrape inventory count for a specific user (only first page)
- * @param {Object} user - User object with autoscout_url
- */
-async function scrapeUserInventoryCount(user) {
-    try {
-        const response = await axios.get(user.autoscout_url);
-        const $ = cheerio.load(response.data);
-        
-        const titleCountElements = $('.dp-list__title__count.sc-ellipsis.sc-font-xl');
-        console.log(`🔍 Found ${titleCountElements.length} elements with class 'dp-list__title__count sc-ellipsis sc-font-xl' for user ${user.id}`);
-        
-        if (titleCountElements.length > 0) {
-            const firstElementText = $(titleCountElements[0]).text().trim();
-            const countMatch = firstElementText.match(/(\d+)/);
-            if (countMatch) {
-                const count = parseInt(countMatch[1]);
-                console.log(`📊 Extracted count: ${count} for user ${user.id}`);
-                
-                await AutoScoutInventory.create({
-                    seller_id: user.id,
-                    count: count
-                });
-                console.log(`💾 Saved inventory count ${count} for seller ${user.id}`);
-                
-            }
-        }
-    } catch (error) {
-        console.error(`❌ Error scraping inventory count for user ${user.id}:`, error.message);
-    }
-}
 
-/**
- * Scrape inventory counts for all users (regardless of filtering)
- * @param {Array} users - Array of all users
- */
-async function scrapeAllUsersInventoryCounts(users) {
-    logger.info('📊 Starting inventory count scraping for all users...');
-    
-    for (const user of users) {
-        try {
-            logger.info(`📝 Scraping inventory count for user: ${user.id} (${user.company_name})`);
-            await scrapeUserInventoryCount(user);
-            
-            // Small delay between users to be respectful to the server
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        } catch (error) {
-            logger.error(`❌ Error scraping inventory count for user ${user.id}:`, error.message);
-        }
-    }
-    
-    logger.info('✅ Inventory count scraping completed');
-}
 
 /**
  * Scrape listings for a specific user
@@ -278,7 +220,8 @@ async function scrapeAllUsersInventoryCounts(users) {
  * @param {Object} control - Control object for tracking
  */
 async function scrapeUsersListings(user, control) {
-    await searchAllPagesWithAllSorts(user, control);
+    // Prefer the new API-based flow
+    await searchAllPagesViaApi(user, control);
 }
 
 module.exports = { main }; 
