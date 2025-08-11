@@ -166,10 +166,10 @@ async function main() {
         logger.info(`👥 Found ${users.length} total users`);
         
         // STEP 1: Scrape inventory counts for ALL users (regardless of filtering)
-        logger.info('📊 STEP 1: Starting inventory count scraping for all users...');
-        await scrapeAllUsersInventoryCounts(users);
-        logger.info('✅ Inventory count scraping completed');
-        logger.info('--------------------------------------------------------');
+        // logger.info('📊 STEP 1: Starting inventory count scraping for all users...');
+        // await scrapeAllUsersInventoryCounts(users);
+        // logger.info('✅ Inventory count scraping completed');
+        // logger.info('--------------------------------------------------------');
         
         // STEP 2: Filter users for regular listing scraping
         const filteredUsers = filterUsersByAddDate(users);

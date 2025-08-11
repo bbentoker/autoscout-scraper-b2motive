@@ -22,7 +22,8 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
         
         const batchPromises = batch.map(async (element) => {
             try {
-                const articleId = $$(element).attr('id');
+                // const articleId = $$(element).attr('id');
+                const articleId = 'd1148603-b151-434f-bf96-2d98d0fa7e2a'
                 const advertLink = $$(element).find('a').first().attr('href');
 
                 if (articleId && advertLink) {

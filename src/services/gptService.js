@@ -20,7 +20,7 @@ async function determineFuelType(fuelTypeText) {
     console.log(`Analyzing fuel type text: "${fuelTypeText}"`);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: "system",
@@ -70,7 +70,7 @@ async function determinePowerHP(powerText) {
     console.log(`Analyzing power text: "${powerText}"`);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: "system",
@@ -129,7 +129,7 @@ async function determineMileage(mileageText) {
     console.log(`Analyzing mileage text: "${mileageText}"`);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: "system",
