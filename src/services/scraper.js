@@ -1,7 +1,14 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const {extractNewAdvert} = require('./extractNewAdvert');
+const { extractNewAdvert } = require('./extractNewAdvert');
 const { Advert, Control, SeenInfo, AutoScoutInventory } = require('../../models');
+const {
+  resolveCultureIsoFromUrl,
+  getVisitorCookie,
+  extractCustomerIdFromHtml,
+  extractMakeOptionsFromHtml,
+  fetchDealerListings,
+} = require('./autoscoutApi');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
@@ -84,149 +91,7 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
     return results;
 }
 
-/**
- * Try to extract customerId from dealer page HTML by looking at the logo image src
- * Example src:
- * https://prod.pictures.autoscout24.net/dealer-info/4348210-original-....jpg
- */
-function extractCustomerIdFromHtml(html) {
-  try {
-    const $ = cheerio.load(html);
-    // Prefer the logo inside header bar
-    const candidateImgs = [
-      'div.dp-header__bar a.dp-header__logo img',
-      'div.dp-header__bar img',
-      'header img',
-      'img'
-    ];
-
-    let src = null;
-    for (const sel of candidateImgs) {
-      const img = $(sel).first();
-      if (img && img.attr('src')) {
-        src = img.attr('src');
-        if (src.includes('/dealer-info/')) break;
-      }
-    }
-
-    // Fallback: regex search on entire HTML if selector failed
-    if (!src) {
-      const regex = /https?:\/\/[^\s"']*dealer-info\/\d+[^\s"']*/i;
-      const m = html.match(regex);
-      if (m) src = m[0];
-    }
-
-    if (!src) return null;
-
-    // Extract the numeric id after dealer-info/
-    const idMatch = src.match(/dealer-info\/(\d+)/i);
-    if (idMatch) {
-      return parseInt(idMatch[1], 10);
-    }
-    // Alternative form might include -original
-    const idMatch2 = src.match(/dealer-info\/(\d+)-original/i);
-    if (idMatch2) {
-      return parseInt(idMatch2[1], 10);
-    }
-    return null;
-  } catch (e) {
-    console.error('❌ Failed to extract customerId:', e.message);
-    return null;
-  }
-}
-
-/**
- * Resolve cultureIso from autoscout URL
- */
-function resolveCultureIsoFromUrl(url) {
-  if (!url) return 'fr-BE';
-  try {
-    if (url.includes('/fr/')) return 'fr-BE';
-    if (url.includes('/nl/')) return 'nl-BE';
-    if (url.includes('/de/')) return 'de-BE';
-    return 'fr-BE';
-  } catch {
-    return 'fr-BE';
-  }
-}
-
-/**
- * Fetch a fresh as24Visitor cookie by hitting the BE homepage
- */
-async function getVisitorCookie() {
-  try {
-    const res = await axios.get('https://www.autoscout24.be/', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'fr-BE,fr;q=0.9,en;q=0.8'
-      }
-    });
-    const setCookie = res.headers['set-cookie'] || [];
-    const cookie = setCookie.find((c) => c.startsWith('as24Visitor='));
-    if (!cookie) return null;
-    const value = cookie.split(';')[0]; // as24Visitor=...
-    return value; // return full pair, e.g. "as24Visitor=uuid"
-  } catch (e) {
-    console.warn('⚠️ Could not fetch as24Visitor cookie:', e.message);
-    return null;
-  }
-}
-
-/**
- * Call AutoScout dealer listings API for a page
- */
-async function fetchDealerListings({ customerId, page, cultureIso, referer, visitorCookie, sortBy = 'age', desc = true, makeId = -1 }) {
-  const url = 'https://www.autoscout24.be/api/dealer-detail/fetch-listings';
-  const payload = {
-    cultureIso: cultureIso || 'fr-BE',
-    customerId: customerId,
-    userType: null,
-    filters: {
-      makeId: makeId != null ? makeId : -1,
-      modelId: -1,
-      vehicleType: 'C',
-      mileageFrom: '-1',
-      mileageTo: '-1',
-      priceFrom: '-1',
-      priceTo: '-1',
-      yearOfRegistrationFrom: '-1',
-      yearOfRegistrationTo: '-1',
-      numberOfAxles: '-1',
-      variant: '',
-      bodyTypes: []
-    },
-    sorting: {
-      sortBy: sortBy,
-      desc: !!desc,
-      recommendedSortingBasedId: '-1'
-    },
-    // Conditionally include page only if provided to allow single-call full fetch
-    ...(page != null ? { page } : {}),
-    togglesString: ''
-  };
-
-  const headers = {
-    'accept': '*/*',
-    'content-type': 'application/json',
-    'origin': 'https://www.autoscout24.be',
-    'referer': referer || 'https://www.autoscout24.be/',
-    'sec-fetch-mode': 'cors',
-    'sec-fetch-site': 'same-origin',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'accept-language': cultureIso?.toLowerCase().startsWith('nl') ? 'nl-BE' : 'fr-BE',
-    // Present but empty in your curl; include for parity
-    'x-toguru': ''
-  };
-  if (visitorCookie) {
-    headers['cookie'] = visitorCookie;
-  }
-
-  const res = await axios.post(url, payload, { headers });
-  console.log("res numberOfResults", res.data.numberOfResults);
-  console.log('res', res.data.listings.length);
-  return res.data;
-}
+// Utils moved to autoscoutApi.js for readability
 
 /**
  * New flow: Search all pages via dealer API rather than HTML pagination.
@@ -489,18 +354,21 @@ async function searchAllPages(user, control) {
  * @returns {Array<{value: string, text: string, desc: number}>}
  */
 function getSortingOptions() {
-  return [
+   return [
     { value: 'age', text: 'Latest Offer First', desc: 1 },
-    { value: 'standard', text: 'Standard results', desc: 0 },
-    { value: 'price', text: 'Price Ascending', desc: 0 },
-    { value: 'price', text: 'Price Descending', desc: 1 },
-    { value: 'mileage', text: 'Mileage Ascending', desc: 0 },
-    { value: 'mileage', text: 'Mileage Descending', desc: 1 },
-    { value: 'power', text: 'Power Ascending', desc: 0 },
-    { value: 'power', text: 'Power Descending', desc: 1 },
-    { value: 'year', text: 'First Registration Ascending', desc: 0 },
-    { value: 'year', text: 'First Registration Descending', desc: 1 }
   ];
+  // return [
+  //   { value: 'age', text: 'Latest Offer First', desc: 1 },
+  //   { value: 'standard', text: 'Standard results', desc: 0 },
+  //   { value: 'price', text: 'Price Ascending', desc: 0 },
+  //   { value: 'price', text: 'Price Descending', desc: 1 },
+  //   { value: 'mileage', text: 'Mileage Ascending', desc: 0 },
+  //   { value: 'mileage', text: 'Mileage Descending', desc: 1 },
+  //   { value: 'power', text: 'Power Ascending', desc: 0 },
+  //   { value: 'power', text: 'Power Descending', desc: 1 },
+  //   { value: 'year', text: 'First Registration Ascending', desc: 0 },
+  //   { value: 'year', text: 'First Registration Descending', desc: 1 }
+  // ];
 }
 
 /**
