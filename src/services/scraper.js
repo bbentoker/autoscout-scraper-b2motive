@@ -263,6 +263,7 @@ async function searchAllPagesViaApi(user, control) {
     console.log(`🧵 Processing up to ${makeConcurrency} makes concurrently`);
     for (let i = 0; i < makeOptions.length; i += makeConcurrency) {
       const batch = makeOptions.slice(i, i + makeConcurrency);
+      
       const batchPromises = batch.map((make) => fetchMake(make));
       await Promise.allSettled(batchPromises);
       // small delay between batches

@@ -148,10 +148,9 @@ async function getListingInfos(advertUrl, advertId, user) {
       drivetrain: drivetrain || 'Unknown Drivetrain',
       seats: parseInt(seats) || null,
       doors: parseInt(doors) || null,
-      country_version: countryVersion || 'Unknown Country Version',
-      colour: colour || 'Unknown Colour',
+      color: colour || 'Unknown Colour',
       paint: paint || 'Unknown Paint',
-      upholstery_colour: upholsteryColour || 'Unknown Upholstery Colour',
+      upholstery_color: upholsteryColour || 'Unknown Upholstery Colour',
       upholstery: upholstery || 'Unknown Upholstery',
       emission_class: emissionClass || 'Unknown Emission Class',
       fuel_type: fuelType || 'Unknown Fuel Type',
@@ -181,9 +180,38 @@ async function getListingInfos(advertUrl, advertId, user) {
 async function extractNewAdvert(advertUrl, advertId, user) {
   try {
     const extractedData = await getListingInfos(advertUrl, advertId, user);
-    
-    // Save to database with image URL
-    await Advert.create(extractedData);
+   
+    // Check for existing listing with same characteristics (excluding autoscout_id and image URLs)
+    const existingListing = await Advert.findOne({
+      where: {
+        make: extractedData.make,
+        model: extractedData.model,
+        seller_name: extractedData.seller_name,
+        mileage: extractedData.mileage,
+        location: extractedData.location,
+        previous_owner: extractedData.previous_owner,
+      }
+    });
+    if (existingListing) {
+      console.log(`Found existing listing with ID: ${existingListing.id}. Updating autoscout_id and reactivating.`);
+      
+      // Update the existing listing with new autoscout_id and image URLs, and reactivate it
+      await existingListing.update({
+        autoscout_id: extractedData.autoscout_id,
+        image_url: extractedData.image_url,
+        original_image_url: extractedData.original_image_url,
+        is_active: true,
+        last_seen: new Date()
+      });
+      
+      console.log(`Updated existing listing with new autoscout_id: ${extractedData.autoscout_id}`);
+      return existingListing;
+    } else {
+      // No existing listing found, create new one
+      console.log('No existing listing found. Creating new advert.');
+      const newAdvert = await Advert.create(extractedData);
+      return newAdvert;
+    }
   } catch (error) {
     console.error(`Error creating advert: ${advertUrl}`, error.message);
     throw error;
