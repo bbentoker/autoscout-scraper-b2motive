@@ -132,7 +132,7 @@ async function searchAllPagesViaApi(user, control) {
       }
     }));
     const html = dealerRes.data;
-    const customerId = extractCustomerIdFromHtml(html);
+    const customerId = await extractCustomerIdFromHtml(html);
     console.log("scraping user", user.id);
     console.log('customerId', customerId);
     if (!customerId) {

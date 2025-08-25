@@ -164,6 +164,8 @@ async function main() {
         const users = await getUsersToScrape();
         logger.info('--------------------------------------------------------');
         logger.info(`👥 Found ${users.length} total users`);
+
+        
         
         // STEP 2: Filter users for regular listing scraping
         const filteredUsers = filterUsersByAddDate(users);

@@ -40,9 +40,75 @@ async function getVisitorCookie() {
   }
 }
 
-function extractCustomerIdFromHtml(html) {
+function extractCustomerIdFromNextData(html) {
   try {
     const $ = cheerio.load(html);
+    const nextDataScript = $('#__NEXT_DATA__').text();
+    if (!nextDataScript) return null;
+    
+    const data = JSON.parse(nextDataScript);
+    const customerId = data?.props?.pageProps?.dealerInfoPage?.customerId;
+    
+    if (customerId && typeof customerId === 'number') {
+      return customerId;
+    }
+    return null;
+  } catch (e) {
+    console.error('❌ Failed to extract customerId from __NEXT_DATA__:', e.message);
+    return null;
+  }
+}
+
+async function extractCustomerIdFromHtml(html, baseUrl = 'https://www.autoscout24.be') {
+  try {
+    const $ = cheerio.load(html);
+    
+    // First try to find the navigation container and get the first link
+    const navContainer = $('nav.dp-header__nav');
+    if (navContainer.length > 0) {
+      const firstLink = navContainer.find('a').first();
+      if (firstLink.length > 0) {
+        const href = firstLink.attr('href');
+        if (href) {
+          console.log('🔗 Found navigation link:', href);
+          
+          // Make absolute URL if relative
+          const aboutUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
+          
+          try {
+            // Fetch the about page
+            const response = await axios.get(aboutUrl, {
+              httpsAgent: getHttpsAgent(),
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'fr-BE,fr;q=0.9,en;q=0.8'
+              }
+            });
+            
+            // Extract customerId from __NEXT_DATA__ in the about page
+            const customerId = extractCustomerIdFromNextData(response.data);
+            if (customerId) {
+              console.log('✅ Found customerId from __NEXT_DATA__:', customerId);
+              return customerId;
+            }
+          } catch (fetchError) {
+            console.warn('⚠️ Failed to fetch about page:', fetchError.message);
+          }
+        }
+      }
+    }
+    
+    // Fallback: try to extract from __NEXT_DATA__ in current page
+    console.log('📄 Trying to extract customerId from current page __NEXT_DATA__');
+    const customerIdFromCurrent = extractCustomerIdFromNextData(html);
+    if (customerIdFromCurrent) {
+      console.log('✅ Found customerId from current page __NEXT_DATA__:', customerIdFromCurrent);
+      return customerIdFromCurrent;
+    }
+    
+    // Fallback: Use the old image-based method as last resort
+    console.log('🖼️ Falling back to image-based extraction method');
     const candidateImgs = [
       'div.dp-header__bar a.dp-header__logo img',
       'div.dp-header__bar img',
@@ -148,6 +214,7 @@ module.exports = {
   resolveCultureIsoFromUrl,
   getVisitorCookie,
   extractCustomerIdFromHtml,
+  extractCustomerIdFromNextData,
   extractMakeOptionsFromHtml,
   fetchDealerListings,
   getHttpsAgent,
