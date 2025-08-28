@@ -161,11 +161,19 @@ async function main() {
         // await prepareForNotExistingAdvertCheck(control.id);
         
         // Fetch and process users
-        const users = await getUsersToScrape();
+        let users = await getUsersToScrape();
         logger.info('--------------------------------------------------------');
         logger.info(`👥 Found ${users.length} total users`);
 
-        
+        // DEBUG MODE: Filter users by hardcoded ID array if DEBUG=true
+        if (process.env.DEBUG === 'true') {
+            const debugUserIds = [111]; // Hardcoded array for user ID 111
+            const originalCount = users.length;
+            users = users.filter(user => debugUserIds.includes(user.id));
+            logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+            logger.info(`🎯 Debug user IDs: [${debugUserIds.join(', ')}]`);
+            logger.info(`📋 Filtered users: [${users.map(u => u.id).join(', ')}]`);
+        }
         
         // STEP 2: Filter users for regular listing scraping
         const filteredUsers = filterUsersByAddDate(users);

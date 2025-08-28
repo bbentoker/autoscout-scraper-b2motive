@@ -10,6 +10,10 @@ const {
   fetchDealerListings,
   getHttpsAgent,
 } = require('./autoscoutApi');
+const {
+  isSwissRegionUrl,
+  scrapeSwissDealer,
+} = require('./autoscoutChApi');
 
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
@@ -95,11 +99,173 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
 // Utils moved to autoscoutApi.js for readability
 
 /**
+ * Swiss region scraping using AutoScout24.ch API
+ */
+async function searchAllPagesViaSwissApi(user, control) {
+  try {
+    console.log(`🇨🇭 Starting Swiss region scraping for user ${user.id}: ${user.autoscout_url}`);
+    
+    // Use the Swiss API service to scrape dealer listings
+    const result = await scrapeSwissDealer(user.autoscout_url, user.id);
+    
+    console.log(`📊 Swiss API Results for user ${user.id}:`);
+    console.log(`   Total listings: ${result.totalListings}`);
+    console.log(`   Professional listings: ${result.professionalListings}`);
+    
+    // Process the listings similar to the Belgian flow
+    const results = await processSwissListings(result.listings, user, control);
+    
+    const created = results.filter(r => r.status === 'fulfilled' && r.value.status === 'new').length;
+    const existing = results.filter(r => r.status === 'fulfilled' && r.value.status === 'existing').length;
+    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
+    
+    console.log(`📊 Swiss processing summary for user ${user.id}: ${created} new, ${existing} existing, ${failed} failed`);
+    console.log(`✅ Finished Swiss API scraping for user ${user.id}`);
+    
+  } catch (error) {
+    console.error(`❌ Error in Swiss API scraping for user ${user.id}:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Create Swiss advert from API data
+ */
+async function createSwissAdvert(listing, user) {
+  try {
+    // Get the first image and add the Swiss image prefix
+    const firstImage = listing.images && listing.images.length > 0 ? listing.images[0] : null;
+    const imageUrl = firstImage ? `https://listing-images.autoscout24.ch/${firstImage.key}` : null;
+    
+    // Map Swiss API data to our database structure
+    const advertData = {
+      autoscout_id: String(listing.id), // Convert to string as required by database schema
+      seller_id: user.id,
+      seller_name: listing.seller?.name || '',
+      first_registration: listing.firstRegistrationDate ? new Date(listing.firstRegistrationDate) : null,
+      is_active: true,
+      last_seen: new Date(),
+      make: listing.make?.name || '',
+      model: listing.model?.name || '',
+      model_version: listing.versionFullName || '',
+      location: listing.seller?.city ? `${listing.seller.city} ${listing.seller.zipCode || ''}`.trim() : '',
+      price: listing.price || 0,
+      price_currency: 'CHF', // Swiss currency
+      type: listing.conditionType || '',
+      mileage: listing.mileage ? String(listing.mileage) : '',
+      power: listing.horsePower ? `${listing.horsePower} HP` : '',
+      gearbox: listing.transmissionTypeGroup || '',
+      fuel_type: listing.fuelType || '',
+      description: listing.teaser || '',
+      link: `https://www.autoscout24.ch/de/d/${listing.id}`,
+      image_url: imageUrl,
+      original_image_url: imageUrl,
+      created_at: listing.createdDate ? new Date(listing.createdDate) : new Date()
+    };
+
+    // Create the advert
+    const newAdvert = await Advert.create(advertData);
+    console.log(`✅ [Swiss] Created new advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
+    
+    return newAdvert;
+  } catch (error) {
+    console.error(`❌ Error creating Swiss advert ${listing.id}:`, error.message);
+    throw error;
+  }
+}
+
+/**
+ * Process Swiss listings with complete data from API
+ */
+async function processSwissListings(listings, user, control, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
+  const results = [];
+  const items = Array.isArray(listings) ? listings : [];
+  
+  console.log(`🔄 Processing ${items.length} Swiss listings for user ${user.id}`);
+  
+  for (let i = 0; i < items.length; i += concurrencyLimit) {
+    const batch = items.slice(i, i + concurrencyLimit);
+    const batchPromises = batch.map(async (listing) => {
+      try {
+        const articleId = listing?.id;
+        if (!articleId) return { articleId: null, status: 'skipped' };
+
+        // Convert to string for database comparison (autoscout_id is STRING in schema)
+        const articleIdStr = String(articleId);
+        
+        const existingAdvert = await Advert.findOne({
+          where: {
+            autoscout_id: articleIdStr,
+            seller_id: user.id
+          }
+        });
+
+        if (!existingAdvert) {
+          console.log(`🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
+          
+          // Create new advert directly from Swiss API data
+          await createSwissAdvert(listing, user);
+          return { articleId, status: 'new' };
+        } else {
+          // Mark as active if it was inactive
+          if (!existingAdvert.is_active) {
+            existingAdvert.is_active = true;
+            await existingAdvert.save();
+          }
+
+          // Update last seen date
+          existingAdvert.last_seen = new Date();
+          await existingAdvert.save();
+
+          // Handle seen info tracking
+          const seenInfo = await SeenInfo.findOne({
+            where: { control_id: control.id, advert_id: articleIdStr },
+          });
+
+          if (seenInfo) {
+            seenInfo.seen = true;
+            await seenInfo.save();
+          } else {
+            await SeenInfo.create({
+              control_id: control.id,
+              advert_id: articleIdStr,
+              seen: true,
+            });
+          }
+          console.log(`✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
+          return { articleId, status: 'existing' };
+        }
+      } catch (e) {
+        console.error(`❌ Error processing Swiss listing ${listing?.id}:`, e.message);
+        return { articleId: listing?.id || null, status: 'error', error: e.message };
+      }
+    });
+    
+    const batchResults = await Promise.allSettled(batchPromises);
+    results.push(...batchResults);
+    
+    if (i + concurrencyLimit < items.length) {
+      await new Promise((r) => setTimeout(r, 300));
+    }
+  }
+  
+  return results;
+}
+
+/**
  * New flow: Search all pages via dealer API rather than HTML pagination.
  * Logs the API data for each page.
  */
 async function searchAllPagesViaApi(user, control) {
   try {
+    // Check if this is a Swiss region URL and route accordingly
+    if (isSwissRegionUrl(user.autoscout_url)) {
+      console.log(`🇨🇭 Detected Swiss region URL: ${user.autoscout_url}`);
+      return await searchAllPagesViaSwissApi(user, control);
+    }
+    
+    console.log(`🇧🇪 Using Belgian region API for: ${user.autoscout_url}`);
+    
     // Load dealer page to get customerId and set a realistic referer
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     const fetchWith429Retry = async (label, fn) => {
@@ -399,5 +565,6 @@ async function searchAllPagesWithAllSorts(user, control) {
   module.exports = {
     searchAllPages,
     searchAllPagesWithAllSorts,
-    searchAllPagesViaApi
+    searchAllPagesViaApi,
+    searchAllPagesViaSwissApi
   }
