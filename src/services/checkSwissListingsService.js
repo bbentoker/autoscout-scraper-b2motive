@@ -17,54 +17,78 @@ async function checkSwissListingsIndividually(user) {
   try {
     logger.info(`🇨🇭 Starting individual Swiss listings check for user ${user.id}: ${user.autoscout_url}`);
     
-    // Get active adverts for this user from database
-    const activeAdverts = await Advert.findAll({
+    // Get all adverts for this user from database (both active and inactive)
+    const allAdverts = await Advert.findAll({
       where: { 
-        is_active: true, 
         seller_id: user.id 
       },
-      attributes: ['id', 'autoscout_id', 'make', 'model', 'price', 'created_at']
+      attributes: ['id', 'autoscout_id', 'make', 'model', 'price', 'created_at', 'is_active']
     });
     
-    logger.info(`💾 Database has ${activeAdverts.length} active adverts for user ${user.id}`);
-    logger.info(`💾 Database advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
+    const activeAdverts = allAdverts.filter(advert => advert.is_active);
+    const inactiveAdverts = allAdverts.filter(advert => !advert.is_active);
+    
+    logger.info(`💾 Database has ${allAdverts.length} total adverts for user ${user.id} (${activeAdverts.length} active, ${inactiveAdverts.length} inactive)`);
+    logger.info(`💾 Active advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
+    logger.info(`💾 Inactive advert IDs: [${inactiveAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
     
     const results = {
       stillAvailable: [],
       noLongerAvailable: [],
+      reactivated: [], // Previously inactive adverts that are now available
       newListings: [], // Not applicable for individual checks
       errors: []
     };
     
-    logger.info(`🔍 Starting individual checks for ${activeAdverts.length} database adverts`);
+    logger.info(`🔍 Starting individual checks for ${allAdverts.length} database adverts (${activeAdverts.length} active + ${inactiveAdverts.length} inactive)`);
     
-    // Check each database advert individually
-    for (const advert of activeAdverts) {
+    // Check each database advert individually (both active and inactive)
+    for (const advert of allAdverts) {
       try {
         logger.info(`🔍 Checking advert ${advert.autoscout_id} individually...`);
         
         const listingData = await fetchSwissListingById(advert.autoscout_id);
+        
         if (listingData) {
-          // Listing exists and is active
-          results.stillAvailable.push({
-            autoscout_id: advert.autoscout_id,
-            make: advert.make,
-            model: advert.model,
-            price: advert.price
-          });
-          logger.info(`✅ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) still available`);
+          // Listing exists and is available
+          if (advert.is_active) {
+            // Already active, just mark as still available
+            results.stillAvailable.push({
+              autoscout_id: advert.autoscout_id,
+              make: advert.make,
+              model: advert.model,
+              price: advert.price
+            });
+            logger.info(`✅ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) still available`);
+          } else {
+            // Was inactive but now available - reactivate it!
+            await reactivateSwissAdvert(advert);
+            results.reactivated.push({
+              autoscout_id: advert.autoscout_id,
+              make: advert.make,
+              model: advert.model,
+              price: advert.price
+            });
+            logger.info(`🔄 [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) reactivated - back online!`);
+          }
         } else {
           // Listing not found (404) or error occurred
-          results.noLongerAvailable.push({
-            autoscout_id: advert.autoscout_id,
-            make: advert.make,
-            model: advert.model,
-            price: advert.price
-          });
-          logger.warn(`❌ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) no longer available`);
-          
-          // Mark as inactive
-          await markSwissAdvertAsInactive(advert);
+          if (advert.is_active) {
+            // Was active but now gone - mark as inactive
+            results.noLongerAvailable.push({
+              autoscout_id: advert.autoscout_id,
+              make: advert.make,
+              model: advert.model,
+              price: advert.price
+            });
+            logger.warn(`❌ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) no longer available`);
+            
+            // Mark as inactive
+            await markSwissAdvertAsInactive(advert);
+          } else {
+            // Was already inactive and still not available - no action needed
+            logger.info(`⏸️ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) remains inactive`);
+          }
         }
         
         // Small delay between individual checks to be respectful
@@ -83,6 +107,7 @@ async function checkSwissListingsIndividually(user) {
     logger.info(`📊 Swiss individual check results for user ${user.id}:`);
     logger.info(`   ✅ Still available: ${results.stillAvailable.length}`);
     logger.info(`   ❌ No longer available: ${results.noLongerAvailable.length}`);
+    logger.info(`   🔄 Reactivated: ${results.reactivated.length}`);
     logger.info(`   ⚠️ Errors: ${results.errors.length}`);
     
     return {
@@ -90,7 +115,9 @@ async function checkSwissListingsIndividually(user) {
       status: 'success',
       method: 'individual_checks',
       ...results,
-      totalActiveAdverts: activeAdverts.length
+      totalActiveAdverts: activeAdverts.length,
+      totalInactiveAdverts: inactiveAdverts.length,
+      totalAdverts: allAdverts.length
     };
     
   } catch (error) {
@@ -234,6 +261,34 @@ async function checkSwissDealerListings(user) {
 }
 
 /**
+ * Reactivate Swiss advert that was previously inactive
+ * @param {Object} advert - Advert object from database
+ */
+async function reactivateSwissAdvert(advert) {
+  try {
+    const now = new Date();
+    
+    // Update advert to active status
+    await Advert.update(
+      {
+        is_active: true,
+        last_seen: now,
+        sell_time: null 
+      },
+      {
+        where: { id: advert.id }
+      }
+    );
+    
+    logger.info(`✅ [Swiss] Reactivated advert ${advert.autoscout_id} - back online!`);
+    
+  } catch (error) {
+    logger.error(`❌ Error reactivating Swiss advert ${advert.autoscout_id}:`, error.message);
+    throw error;
+  }
+}
+
+/**
  * Mark Swiss advert as inactive
  * @param {Object} advert - Advert object from database
  */
@@ -303,9 +358,11 @@ function logSwissCheckerResults(result) {
   }
   
   logger.info(`🇨🇭 Swiss checker completed for user ${result.user}:`);
-  logger.info(`   🏢 Dealer ID: ${result.dealerId}`);
-  logger.info(`   📊 Current API listings: ${result.totalCurrentListings}`);
-  logger.info(`   💾 Database active adverts: ${result.totalActiveAdverts}`);
+  if (result.dealerId) {
+    logger.info(`   🏢 Dealer ID: ${result.dealerId}`);
+    logger.info(`   📊 Current API listings: ${result.totalCurrentListings}`);
+  }
+  logger.info(`   💾 Database adverts: ${result.totalAdverts || result.totalActiveAdverts} total (${result.totalActiveAdverts} active${result.totalInactiveAdverts ? `, ${result.totalInactiveAdverts} inactive` : ''})`);
   
   if (result.stillAvailable.length > 0) {
     logger.info(`   ✅ Still available (${result.stillAvailable.length}):`);
@@ -321,7 +378,14 @@ function logSwissCheckerResults(result) {
     });
   }
   
-  if (result.newListings.length > 0) {
+  if (result.reactivated && result.reactivated.length > 0) {
+    logger.info(`   🔄 Reactivated (${result.reactivated.length}):`);
+    result.reactivated.forEach(advert => {
+      logger.info(`      - ${advert.autoscout_id}: ${advert.make} ${advert.model} (${advert.price})`);
+    });
+  }
+  
+  if (result.newListings && result.newListings.length > 0) {
     logger.info(`   🆕 New listings found (${result.newListings.length}):`);
     result.newListings.forEach(listing => {
       logger.info(`      - ${listing.id}: ${listing.make} ${listing.model} (${listing.price})`);
@@ -341,6 +405,7 @@ module.exports = {
   checkSwissDealerListingsBulk: checkSwissDealerListings, // Keep bulk method as fallback
   checkSwissListingsIndividually,
   markSwissAdvertAsInactive,
+  reactivateSwissAdvert,
   shouldUseSwissChecker,
   logSwissCheckerResults
 };
