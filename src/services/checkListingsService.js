@@ -255,14 +255,13 @@ async function checkListingsAcrossUsers() {
   let users = await getUsersToScrape();
   logger.info(`👥 Found ${users.length} users to check`);
 
-  // DEBUG MODE: Filter users by hardcoded ID array if DEBUG=true
+  // DEBUG MODE: Filter users with Swiss AutoScout24.ch URLs if DEBUG=true
   if (process.env.DEBUG === 'true') {
-    const debugUserIds = [117]; // Hardcoded array for user ID 111
     const originalCount = users.length;
-    users = users.filter(user => debugUserIds.includes(user.id));
+    users = users.filter(user => user.autoscout_url && user.autoscout_url.includes('autoscout24.ch'));
     logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
-    logger.info(`🎯 Debug user IDs: [${debugUserIds.join(', ')}]`);
-    logger.info(`📋 Filtered users: [${users.map(u => u.id).join(', ')}]`);
+    logger.info(`🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
+    logger.info(`📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
   }
     
   if (!Array.isArray(users) || users.length === 0) {
