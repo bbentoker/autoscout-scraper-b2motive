@@ -82,11 +82,25 @@ async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.
   const results = [];
   const chunkSize = Math.min(concurrencyLimit, 10);
 
+  // UUID validation regex pattern
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
   for (let i = 0; i < adverts.length; i += chunkSize) {
     const batch = adverts.slice(i, i + chunkSize);
     logger.info(`🔄 Processing batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(adverts.length / chunkSize)} (${batch.length} adverts)`);
 
     const batchPromises = batch.map(async (advert) => {
+      // Validate UUID format before processing
+      if (!advert.autoscout_id || !uuidRegex.test(advert.autoscout_id)) {
+        logger.error(`❌ Invalid UUID format for advert autoscout_id: ${advert.autoscout_id} - skipping processing`);
+        return { 
+          autoscout_id: advert.autoscout_id, 
+          status: 'error', 
+          message: 'Invalid UUID format - advert skipped',
+          attempts: 0 
+        };
+      }
+
       let lastError = null;
       for (let attempt = 1; attempt <= 3; attempt++) {
         try {
@@ -158,6 +172,7 @@ async function checkListings() {
 
 async function checkListingsForUser(user) {
   try {
+    
     // Check if this is a Swiss region user
     if (shouldUseSwissChecker(user)) {
       logger.info(`🇨🇭 User ${user.id} detected as Swiss region - using Swiss checker`);
@@ -243,6 +258,10 @@ async function processUsersInParallelForChecker(users, concurrencyLimitEnv) {
 async function checkListingsAcrossUsers() {
   logger.info('📋 Starting check listings across users...');
   let users = await getUsersToScrape();
+
+  // remove
+
+  users = users.filter(user => user.id == 105);
 
   // Sort users by created_at (latest first)
   users.sort((a, b) => {
