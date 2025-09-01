@@ -1,5 +1,7 @@
 const logger = require('../utils/logger');
 const { Advert } = require('../../models');
+const fs = require('fs');
+const path = require('path');
 const { 
   isSwissRegionUrl, 
   extractDealerIdFromChUrl,
@@ -9,12 +11,66 @@ const {
 } = require('./autoscoutChApi');
 
 /**
+ * Create debug log file for Swiss checker run
+ * @param {string} userId - User ID for the log file name
+ * @returns {string} - Path to the created log file
+ */
+function createDebugLogFile(userId) {
+  try {
+    // Create logs directory if it doesn't exist
+    const logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+    
+    // Create timestamped log file name
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const logFileName = `swiss-checker-user-${userId}-${timestamp}.log`;
+    const logFilePath = path.join(logsDir, logFileName);
+    
+    // Create empty log file
+    fs.writeFileSync(logFilePath, '');
+    
+    logger.info(`📝 [DEBUG] Created log file: ${logFilePath}`);
+    return logFilePath;
+  } catch (error) {
+    logger.error(`❌ Error creating debug log file: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Write debug log entry to file
+ * @param {string} logFilePath - Path to the log file
+ * @param {string} message - Log message to write
+ */
+function writeDebugLog(logFilePath, message) {
+  if (!logFilePath) return;
+  
+  try {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] ${message}\n`;
+    fs.appendFileSync(logFilePath, logEntry);
+  } catch (error) {
+    logger.error(`❌ Error writing to debug log file: ${error.message}`);
+  }
+}
+
+/**
  * Check Swiss listings availability using individual listing API calls
  * @param {Object} user - User object with autoscout_url
  * @returns {Object} - Results of the availability check
  */
 async function checkSwissListingsIndividually(user) {
+  let debugLogFilePath = null;
+  
   try {
+    // Create debug log file if DEBUG mode is enabled
+    if (process.env.DEBUG === 'true') {
+      debugLogFilePath = createDebugLogFile(user.id);
+      writeDebugLog(debugLogFilePath, `🇨🇭 Starting individual Swiss listings check for user ${user.id}: ${user.autoscout_url}`);
+    }
+    
     logger.info(`🇨🇭 Starting individual Swiss listings check for user ${user.id}: ${user.autoscout_url}`);
     
     // Get all adverts for this user from database (both active and inactive)
@@ -28,9 +84,17 @@ async function checkSwissListingsIndividually(user) {
     const activeAdverts = allAdverts.filter(advert => advert.is_active);
     const inactiveAdverts = allAdverts.filter(advert => !advert.is_active);
     
-    logger.info(`💾 Database has ${allAdverts.length} total adverts for user ${user.id} (${activeAdverts.length} active, ${inactiveAdverts.length} inactive)`);
-    logger.info(`💾 Active advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
-    logger.info(`💾 Inactive advert IDs: [${inactiveAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
+    const dbInfo = `💾 Database has ${allAdverts.length} total adverts for user ${user.id} (${activeAdverts.length} active, ${inactiveAdverts.length} inactive)`;
+    logger.info(dbInfo);
+    writeDebugLog(debugLogFilePath, dbInfo);
+    
+    const activeIds = `💾 Active advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`;
+    logger.info(activeIds);
+    writeDebugLog(debugLogFilePath, activeIds);
+    
+    const inactiveIds = `💾 Inactive advert IDs: [${inactiveAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`;
+    logger.info(inactiveIds);
+    writeDebugLog(debugLogFilePath, inactiveIds);
     
     const results = {
       stillAvailable: [],
@@ -40,15 +104,50 @@ async function checkSwissListingsIndividually(user) {
       errors: []
     };
     
-    logger.info(`🔍 Starting individual checks for ${allAdverts.length} database adverts (${activeAdverts.length} active + ${inactiveAdverts.length} inactive)`);
+    const startInfo = `🔍 Starting individual checks for ${allAdverts.length} database adverts (${activeAdverts.length} active + ${inactiveAdverts.length} inactive)`;
+    logger.info(startInfo);
+    writeDebugLog(debugLogFilePath, startInfo);
     
     // Check each database advert individually (both active and inactive)
     for (const advert of allAdverts) {
       try {
-        logger.info(`🔍 Checking advert ${advert.autoscout_id} individually...`);
+        const checkMsg = `🔍 Checking advert ${advert.autoscout_id} individually...`;
+        logger.info(checkMsg);
+        writeDebugLog(debugLogFilePath, checkMsg);
         
-        const listingData = await fetchSwissListingById(advert.autoscout_id);
+        const listingData = await fetchSwissListingById(advert.autoscout_id, debugLogFilePath);
         
+        // Detailed logging for debugging false negatives
+        const fetchResult = `🔍 [DEBUG] Advert ${advert.autoscout_id} fetch result: ${listingData ? 'SUCCESS' : 'FAILED'}`;
+        logger.info(fetchResult);
+        writeDebugLog(debugLogFilePath, fetchResult);
+        
+        if (listingData) {
+          const dataKeys = `🔍 [DEBUG] Advert ${advert.autoscout_id} data keys: [${Object.keys(listingData).join(', ')}]`;
+          logger.info(dataKeys);
+          writeDebugLog(debugLogFilePath, dataKeys);
+          
+          const title = `🔍 [DEBUG] Advert ${advert.autoscout_id} title: ${listingData.title || 'N/A'}`;
+          logger.info(title);
+          writeDebugLog(debugLogFilePath, title);
+          
+          const price = `🔍 [DEBUG] Advert ${advert.autoscout_id} price: ${listingData.price?.amount || 'N/A'} ${listingData.price?.currency || ''}`;
+          logger.info(price);
+          writeDebugLog(debugLogFilePath, price);
+          
+          const makeModel = `🔍 [DEBUG] Advert ${advert.autoscout_id} make/model: ${listingData.vehicle?.make || listingData.make || 'N/A'} ${listingData.vehicle?.model || listingData.model || 'N/A'}`;
+          logger.info(makeModel);
+          writeDebugLog(debugLogFilePath, makeModel);
+        } else {
+          const url = `🔍 [DEBUG] Advert ${advert.autoscout_id} URL: https://www.autoscout24.ch/de/d/${advert.autoscout_id}`;
+          logger.warn(url);
+          writeDebugLog(debugLogFilePath, url);
+          
+          const manualCheck = `🔍 [DEBUG] Advert ${advert.autoscout_id} - PLEASE MANUALLY CHECK THIS URL TO VERIFY IF IT'S ACTUALLY SOLD`;
+          logger.warn(manualCheck);
+          writeDebugLog(debugLogFilePath, manualCheck);
+        }
+
         if (listingData) {
           // Listing exists and is available
           if (advert.is_active) {
@@ -59,7 +158,9 @@ async function checkSwissListingsIndividually(user) {
               model: advert.model,
               price: advert.price
             });
-            logger.info(`✅ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) still available`);
+            const stillAvailable = `✅ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) still available`;
+            logger.info(stillAvailable);
+            writeDebugLog(debugLogFilePath, stillAvailable);
           } else {
             // Was inactive but now available - reactivate it!
             await reactivateSwissAdvert(advert);
@@ -69,51 +170,105 @@ async function checkSwissListingsIndividually(user) {
               model: advert.model,
               price: advert.price
             });
-            logger.info(`🔄 [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) reactivated - back online!`);
+            const reactivated = `🔄 [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) reactivated - back online!`;
+            logger.info(reactivated);
+            writeDebugLog(debugLogFilePath, reactivated);
           }
         } else {
           // Listing not found (404) or error occurred
           if (advert.is_active) {
             // Was active but now gone - mark as inactive
+            const markingInactive = `🚨 [Swiss Individual] MARKING ADVERT AS INACTIVE: ${advert.autoscout_id} (${advert.make} ${advert.model}) - Please verify manually at: https://www.autoscout24.ch/de/d/${advert.autoscout_id}`;
+            logger.warn(markingInactive);
+            writeDebugLog(debugLogFilePath, markingInactive);
+            
             results.noLongerAvailable.push({
               autoscout_id: advert.autoscout_id,
               make: advert.make,
               model: advert.model,
               price: advert.price
             });
-            logger.warn(`❌ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) no longer available`);
+            const noLongerAvailable = `❌ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) no longer available`;
+            logger.warn(noLongerAvailable);
+            writeDebugLog(debugLogFilePath, noLongerAvailable);
             
             // Mark as inactive
             await markSwissAdvertAsInactive(advert);
           } else {
             // Was already inactive and still not available - no action needed
-            logger.info(`⏸️ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) remains inactive`);
+            const remainsInactive = `⏸️ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) remains inactive`;
+            logger.info(remainsInactive);
+            writeDebugLog(debugLogFilePath, remainsInactive);
           }
         }
         
         // Small delay between individual checks to be respectful
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay to reduce rate limiting
         
       } catch (error) {
-        logger.error(`❌ Error checking Swiss advert ${advert.autoscout_id}:`, error.message);
-        results.errors.push({
-          autoscout_id: advert.autoscout_id,
-          error: error.message
-        });
+        // Special handling for rate limit errors - don't mark as inactive
+        if (error.message && error.message.includes('Rate limit error')) {
+          const rateLimitError = `⚠️ [Swiss Individual] Rate limit error for advert ${advert.autoscout_id} - skipping to avoid false negative`;
+          logger.warn(rateLimitError);
+          writeDebugLog(debugLogFilePath, rateLimitError);
+          
+          results.errors.push({
+            autoscout_id: advert.autoscout_id,
+            error: error.message
+          });
+        } else {
+          const generalError = `❌ Error checking Swiss advert ${advert.autoscout_id}: ${error.message}`;
+          logger.error(generalError);
+          writeDebugLog(debugLogFilePath, generalError);
+          
+          results.errors.push({
+            autoscout_id: advert.autoscout_id,
+            error: error.message
+          });
+        }
       }
     }
     
     // Log summary
-    logger.info(`📊 Swiss individual check results for user ${user.id}:`);
-    logger.info(`   ✅ Still available: ${results.stillAvailable.length}`);
-    logger.info(`   ❌ No longer available: ${results.noLongerAvailable.length}`);
-    logger.info(`   🔄 Reactivated: ${results.reactivated.length}`);
-    logger.info(`   ⚠️ Errors: ${results.errors.length}`);
+    const summary = `📊 Swiss individual check results for user ${user.id}:`;
+    logger.info(summary);
+    writeDebugLog(debugLogFilePath, summary);
+    
+    const stillAvailableCount = `   ✅ Still available: ${results.stillAvailable.length}`;
+    logger.info(stillAvailableCount);
+    writeDebugLog(debugLogFilePath, stillAvailableCount);
+    
+    const noLongerAvailableCount = `   ❌ No longer available: ${results.noLongerAvailable.length}`;
+    logger.info(noLongerAvailableCount);
+    writeDebugLog(debugLogFilePath, noLongerAvailableCount);
+    
+    const reactivatedCount = `   🔄 Reactivated: ${results.reactivated.length}`;
+    logger.info(reactivatedCount);
+    writeDebugLog(debugLogFilePath, reactivatedCount);
+    
+    const errorsCount = `   ⚠️ Errors: ${results.errors.length}`;
+    logger.info(errorsCount);
+    writeDebugLog(debugLogFilePath, errorsCount);
+    
+    // Write final summary to debug log
+    if (debugLogFilePath) {
+      writeDebugLog(debugLogFilePath, `\n=== FINAL SUMMARY ===`);
+      writeDebugLog(debugLogFilePath, `User ID: ${user.id}`);
+      writeDebugLog(debugLogFilePath, `Total Adverts: ${allAdverts.length}`);
+      writeDebugLog(debugLogFilePath, `Active Adverts: ${activeAdverts.length}`);
+      writeDebugLog(debugLogFilePath, `Inactive Adverts: ${inactiveAdverts.length}`);
+      writeDebugLog(debugLogFilePath, `Still Available: ${results.stillAvailable.length}`);
+      writeDebugLog(debugLogFilePath, `No Longer Available: ${results.noLongerAvailable.length}`);
+      writeDebugLog(debugLogFilePath, `Reactivated: ${results.reactivated.length}`);
+      writeDebugLog(debugLogFilePath, `Errors: ${results.errors.length}`);
+      writeDebugLog(debugLogFilePath, `=== END OF LOG ===\n`);
+    }
     
     return {
       user: user.id,
       status: 'success',
       method: 'individual_checks',
+      debugLogFile: debugLogFilePath,
       ...results,
       totalActiveAdverts: activeAdverts.length,
       totalInactiveAdverts: inactiveAdverts.length,
@@ -121,11 +276,15 @@ async function checkSwissListingsIndividually(user) {
     };
     
   } catch (error) {
-    logger.error(`❌ Error checking Swiss listings individually for user ${user.id}:`, error.message);
+    const errorMsg = `❌ Error checking Swiss listings individually for user ${user.id}: ${error.message}`;
+    logger.error(errorMsg);
+    writeDebugLog(debugLogFilePath, errorMsg);
+    
     return {
       user: user.id,
       status: 'error',
       method: 'individual_checks',
+      debugLogFile: debugLogFilePath,
       error: error.message
     };
   }
@@ -354,6 +513,9 @@ function shouldUseSwissChecker(user) {
 function logSwissCheckerResults(result) {
   if (result.status === 'error') {
     logger.error(`❌ Swiss checker failed for user ${result.user}: ${result.error}`);
+    if (result.debugLogFile) {
+      logger.info(`📝 Debug log file created: ${result.debugLogFile}`);
+    }
     return;
   }
   
@@ -363,6 +525,10 @@ function logSwissCheckerResults(result) {
     logger.info(`   📊 Current API listings: ${result.totalCurrentListings}`);
   }
   logger.info(`   💾 Database adverts: ${result.totalAdverts || result.totalActiveAdverts} total (${result.totalActiveAdverts} active${result.totalInactiveAdverts ? `, ${result.totalInactiveAdverts} inactive` : ''})`);
+  
+  if (result.debugLogFile) {
+    logger.info(`   📝 Debug log file: ${result.debugLogFile}`);
+  }
   
   if (result.stillAvailable.length > 0) {
     logger.info(`   ✅ Still available (${result.stillAvailable.length}):`);

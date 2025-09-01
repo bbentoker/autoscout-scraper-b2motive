@@ -1,5 +1,6 @@
 const axios = require('axios');
 const https = require('https');
+const fs = require('fs');
 
 /**
  * AutoScout24.ch (Swiss) API Service
@@ -254,51 +255,118 @@ async function fetchAllSwissDealerListings(dealerId) {
 /**
  * Fetch a single listing by ID from Swiss API
  * @param {string|number} listingId - The listing ID to fetch
+ * @param {string} debugLogFilePath - Optional debug log file path for detailed logging
  * @returns {Object|null} - Listing object if found, null if not found
  */
-async function fetchSwissListingById(listingId) {
+async function fetchSwissListingById(listingId, debugLogFilePath = null) {
   const url = `https://api.autoscout24.ch/v1/listings/${listingId}`;
   const headers = getSwissApiHeaders();
   
+  // Helper function to write to debug log
+  const writeDebugLog = (message) => {
+    if (debugLogFilePath) {
+      try {
+        const timestamp = new Date().toISOString();
+        const logEntry = `[${timestamp}] [API] ${message}\n`;
+        fs.appendFileSync(debugLogFilePath, logEntry);
+      } catch (error) {
+        console.error(`❌ Error writing to debug log file: ${error.message}`);
+      }
+    }
+  };
+  
   try {
-    console.log(`🔍 Checking individual listing: ${listingId}`);
+    const startMsg = `🔍 [API DEBUG] Checking individual listing: ${listingId}`;
+    console.log(startMsg);
+    writeDebugLog(startMsg);
     
     const response = await fetchWithRetry(url, {
       method: 'GET',
       headers: headers
     });
     
+    const statusMsg = `🔍 [API DEBUG] Response status: ${response.status}`;
+    console.log(statusMsg);
+    writeDebugLog(statusMsg);
+    
     if (response.status === 200) {
-      console.log(`✅ Listing ${listingId} found and active`);
+      const successMsg = `✅ [API DEBUG] Listing ${listingId} found and active`;
+      console.log(successMsg);
+      writeDebugLog(successMsg);
       return response.data;
     } else if (response.status === 404) {
-      console.log(`❌ Listing ${listingId} not found (404)`);
+      const notFoundMsg = `❌ [API DEBUG] Listing ${listingId} not found (404) - This listing appears to be sold/removed`;
+      console.log(notFoundMsg);
+      writeDebugLog(notFoundMsg);
       return null;
     } else {
-      console.log(`⚠️ Listing ${listingId} returned status ${response.status}`);
+      const unexpectedMsg = `⚠️ [API DEBUG] Listing ${listingId} returned unexpected status ${response.status}`;
+      console.log(unexpectedMsg);
+      writeDebugLog(unexpectedMsg);
       return null;
     }
     
   } catch (error) {
+    const errorMsg = `🔍 [API DEBUG] Error occurred for listing ${listingId}: ${error.message} (status: ${error.response?.status})`;
+    console.log(errorMsg);
+    writeDebugLog(errorMsg);
+    
     if (error.response && error.response.status === 404) {
-      console.log(`❌ Listing ${listingId} not found (404 error)`);
+      const notFoundMsg = `❌ [API DEBUG] Listing ${listingId} not found (404 error) - This listing appears to be sold/removed`;
+      console.log(notFoundMsg);
+      writeDebugLog(notFoundMsg);
       return null;
     } else if (error.response && error.response.status === 429) {
-      console.log(`⏳ Rate limited checking listing ${listingId}, waiting...`);
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      // Retry once after rate limit
-      try {
-        const retryResponse = await fetchWithRetry(url, {
-          method: 'GET',
-          headers: headers
-        });
-        return retryResponse.status === 200 ? retryResponse.data : null;
-      } catch (retryError) {
-        console.error(`❌ Retry failed for listing ${listingId}:`, retryError.message);
-        return null;
+      const rateLimitMsg = `⏳ [API DEBUG] Rate limited checking listing ${listingId}, waiting and retrying...`;
+      console.log(rateLimitMsg);
+      writeDebugLog(rateLimitMsg);
+      
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Increased wait time
+      // Retry multiple times with exponential backoff for rate limits
+      for (let retryAttempt = 1; retryAttempt <= 3; retryAttempt++) {
+        try {
+          const retryMsg = `🔄 [API DEBUG] Retry attempt ${retryAttempt}/3 for listing ${listingId} after rate limit...`;
+          console.log(retryMsg);
+          writeDebugLog(retryMsg);
+          
+          const retryResponse = await fetchWithRetry(url, {
+            method: 'GET',
+            headers: headers
+          });
+          
+          const retryResultMsg = `🔄 [API DEBUG] Retry result for ${listingId}: status ${retryResponse.status}`;
+          console.log(retryResultMsg);
+          writeDebugLog(retryResultMsg);
+          
+          return retryResponse.status === 200 ? retryResponse.data : null;
+        } catch (retryError) {
+          const retryErrorMsg = `❌ [API DEBUG] Retry attempt ${retryAttempt} failed for listing ${listingId}: ${retryError.message}`;
+          console.error(retryErrorMsg);
+          writeDebugLog(retryErrorMsg);
+          
+          // If retry also fails with 429, wait longer and try again
+          if (retryError.response && retryError.response.status === 429) {
+            if (retryAttempt < 3) {
+              const waitTime = Math.pow(2, retryAttempt) * 2000; // 4s, 8s
+              const waitMsg = `⏳ [API DEBUG] Rate limit persists for ${listingId}, waiting ${waitTime}ms before retry ${retryAttempt + 1}...`;
+              console.log(waitMsg);
+              writeDebugLog(waitMsg);
+              await new Promise(resolve => setTimeout(resolve, waitTime));
+              continue;
+            } else {
+              const skipMsg = `⚠️ [API DEBUG] Rate limit persists for ${listingId} after 3 retries - skipping to avoid false negative`;
+              console.log(skipMsg);
+              writeDebugLog(skipMsg);
+              throw new Error(`Rate limit error for listing ${listingId} - cannot determine if listing is available`);
+            }
+          }
+          return null;
+        }
       }
     } else {
-      console.error(`❌ Error fetching listing ${listingId}:`, error.message);
+      const unexpectedErrorMsg = `❌ [API DEBUG] Unexpected error fetching listing ${listingId}: ${error.message}`;
+      console.error(unexpectedErrorMsg);
+      writeDebugLog(unexpectedErrorMsg);
       return null;
     }
   }

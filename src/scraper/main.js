@@ -167,21 +167,12 @@ async function main() {
 
         // DEBUG MODE: Filter users by hardcoded ID array if DEBUG=true
         if (process.env.DEBUG === 'true') {
+            const debugUserIds = [117]; // Hardcoded array for user ID 111
             const originalCount = users.length;
-            
-            // Filter to only Swiss AutoScout24 users
-            users = users.filter(user => {
-              if (user.autoscout_url && user.autoscout_url.includes('autoscout24.ch')) {
-                return true;
-              }
-              return false;
-            });
-            
-            console.log("users", users);
-            
-            logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} Swiss users from ${originalCount} total users`);
-            logger.info(`🇨🇭 Swiss user IDs: [${users.map(u => u.id).join(', ')}]`);
-            logger.info(`🔗 Swiss URLs: [${users.map(u => `${u.id}:${u.autoscout_url}`).join(', ')}]`);
+            users = users.filter(user => debugUserIds.includes(user.id));
+            logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+            logger.info(`🎯 Debug user IDs: [${debugUserIds.join(', ')}]`);
+            logger.info(`📋 Filtered users: [${users.map(u => u.id).join(', ')}]`);
         }
         
         // STEP 2: Filter users for regular listing scraping
