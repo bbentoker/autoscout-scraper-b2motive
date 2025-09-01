@@ -159,8 +159,8 @@ async function createSwissAdvert(listing, user) {
       description: listing.teaser || '',
       link: `https://www.autoscout24.ch/de/d/${listing.id}`,
       image_url: imageUrl,
-      original_image_url: imageUrl,
-      created_at: listing.createdDate ? new Date(listing.createdDate) : new Date()
+      original_image_url: imageUrl
+      // created_at will be automatically set to current timestamp by model default
     };
 
     // Create the advert
@@ -217,21 +217,7 @@ async function processSwissListings(listings, user, control, concurrencyLimit = 
           existingAdvert.last_seen = new Date();
           await existingAdvert.save();
 
-          // Handle seen info tracking
-          const seenInfo = await SeenInfo.findOne({
-            where: { control_id: control.id, advert_id: articleIdStr },
-          });
-
-          if (seenInfo) {
-            seenInfo.seen = true;
-            await seenInfo.save();
-          } else {
-            await SeenInfo.create({
-              control_id: control.id,
-              advert_id: articleIdStr,
-              seen: true,
-            });
-          }
+         
           console.log(`✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
           return { articleId, status: 'existing' };
         }

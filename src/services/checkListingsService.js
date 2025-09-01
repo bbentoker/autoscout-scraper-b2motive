@@ -5,6 +5,11 @@ const { Advert, SeenInfo, Control } = require('../../models');
 const logger = require('../utils/logger');
 const { getHttpsAgent } = require('./autoscoutApi');
 const { getUsersToScrape } = require('./userService');
+const { 
+  checkSwissDealerListings, 
+  shouldUseSwissChecker, 
+  logSwissCheckerResults 
+} = require('./checkSwissListingsService');
 
 async function handleAdvertNotFound(autoscoutId) {
   try {
@@ -163,6 +168,33 @@ async function checkListings() {
 
 async function checkListingsForUser(user) {
   try {
+    // Check if this is a Swiss region user
+    if (shouldUseSwissChecker(user)) {
+      logger.info(`🇨🇭 User ${user.id} detected as Swiss region - using Swiss checker`);
+      
+      const swissResult = await checkSwissDealerListings(user);
+      logSwissCheckerResults(swissResult);
+      
+      if (swissResult.status === 'error') {
+        return { user: user.id, status: 'error', error: swissResult.error };
+      }
+      
+      // Convert Swiss results to standard format for compatibility
+      return {
+        user: user.id,
+        status: 'success',
+        successful: swissResult.stillAvailable.length,
+        inactive: swissResult.noLongerAvailable.length,
+        failed: swissResult.errors.length,
+        rejected: 0,
+        newListings: swissResult.newListings.length,
+        region: 'swiss'
+      };
+    }
+    
+    // Belgian/standard region processing
+    logger.info(`🇧🇪 User ${user.id} using Belgian region checker`);
+    
     const activeAdverts = await Advert.findAll({
       where: { is_active: true, seller_id: user.id },
       attributes: ['autoscout_id', 'seller_id']
@@ -171,7 +203,7 @@ async function checkListingsForUser(user) {
     logger.info(`👤 User ${user.id}: ${activeAdverts.length} active adverts to check`);
 
     if (activeAdverts.length === 0) {
-      return { user: user.id, status: 'success', successful: 0, inactive: 0, failed: 0, rejected: 0 };
+      return { user: user.id, status: 'success', successful: 0, inactive: 0, failed: 0, rejected: 0, region: 'belgian' };
     }
 
     const results = await processAdvertsInParallel(activeAdverts);
@@ -179,7 +211,16 @@ async function checkListingsForUser(user) {
     const inactive = results.filter((r) => r.status === 'inactive').length;
     const failed = results.filter((r) => r.status === 'error').length;
     const rejected = results.filter((r) => r.status === 'rejected').length;
-    return { user: user.id, status: 'success', successful, inactive, failed, rejected };
+    
+    return { 
+      user: user.id, 
+      status: 'success', 
+      successful, 
+      inactive, 
+      failed, 
+      rejected, 
+      region: 'belgian' 
+    };
   } catch (error) {
     logger.error(`❌ User ${user.id}: checkListingsForUser failed:`, error.message);
     return { user: user.id, status: 'error', error: error.message };
@@ -211,8 +252,18 @@ async function processUsersInParallelForChecker(users, concurrencyLimitEnv) {
 
 async function checkListingsAcrossUsers() {
   logger.info('📋 Starting check listings across users...');
-  const users = await getUsersToScrape();
+  let users = await getUsersToScrape();
   logger.info(`👥 Found ${users.length} users to check`);
+
+  // DEBUG MODE: Filter users by hardcoded ID array if DEBUG=true
+  if (process.env.DEBUG === 'true') {
+    const debugUserIds = [111]; // Hardcoded array for user ID 111
+    const originalCount = users.length;
+    users = users.filter(user => debugUserIds.includes(user.id));
+    logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+    logger.info(`🎯 Debug user IDs: [${debugUserIds.join(', ')}]`);
+    logger.info(`📋 Filtered users: [${users.map(u => u.id).join(', ')}]`);
+  }
     
   if (!Array.isArray(users) || users.length === 0) {
     logger.info('ℹ️ No users to process for checking');
@@ -220,9 +271,23 @@ async function checkListingsAcrossUsers() {
   }
 
   const results = await processUsersInParallelForChecker(users);
+  
+  // Enhanced logging for multi-region support
   const successfulUsers = results.filter((r) => r.status === 'success').length;
   const failedUsers = results.filter((r) => r.status === 'error' || r.status === 'rejected').length;
+  const swissUsers = results.filter((r) => r.region === 'swiss').length;
+  const belgianUsers = results.filter((r) => r.region === 'belgian').length;
+  
   logger.info(`📊 Users processed: ${successfulUsers} successful, ${failedUsers} failed/rejected`);
+  logger.info(`🌍 Region breakdown: ${swissUsers} Swiss 🇨🇭, ${belgianUsers} Belgian 🇧🇪`);
+  
+  // Log totals for successful operations
+  const totalStillAvailable = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.successful || 0), 0);
+  const totalInactive = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.inactive || 0), 0);
+  const totalNewListings = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.newListings || 0), 0);
+  
+  logger.info(`📈 Overall results: ${totalStillAvailable} still available, ${totalInactive} marked inactive, ${totalNewListings} new listings found`);
+  
   return results;
 }
 
