@@ -4,11 +4,108 @@ const {
   isSwissRegionUrl, 
   extractDealerIdFromChUrl,
   fetchSwissDealerListings,
-  fetchAllSwissDealerListings
+  fetchAllSwissDealerListings,
+  fetchSwissListingById
 } = require('./autoscoutChApi');
 
 /**
- * Check Swiss dealer listings availability using CH API
+ * Check Swiss listings availability using individual listing API calls
+ * @param {Object} user - User object with autoscout_url
+ * @returns {Object} - Results of the availability check
+ */
+async function checkSwissListingsIndividually(user) {
+  try {
+    logger.info(`🇨🇭 Starting individual Swiss listings check for user ${user.id}: ${user.autoscout_url}`);
+    
+    // Get active adverts for this user from database
+    const activeAdverts = await Advert.findAll({
+      where: { 
+        is_active: true, 
+        seller_id: user.id 
+      },
+      attributes: ['id', 'autoscout_id', 'make', 'model', 'price', 'created_at']
+    });
+    
+    logger.info(`💾 Database has ${activeAdverts.length} active adverts for user ${user.id}`);
+    logger.info(`💾 Database advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
+    
+    const results = {
+      stillAvailable: [],
+      noLongerAvailable: [],
+      newListings: [], // Not applicable for individual checks
+      errors: []
+    };
+    
+    logger.info(`🔍 Starting individual checks for ${activeAdverts.length} database adverts`);
+    
+    // Check each database advert individually
+    for (const advert of activeAdverts) {
+      try {
+        logger.info(`🔍 Checking advert ${advert.autoscout_id} individually...`);
+        
+        const listingData = await fetchSwissListingById(advert.autoscout_id);
+        if (listingData) {
+          // Listing exists and is active
+          results.stillAvailable.push({
+            autoscout_id: advert.autoscout_id,
+            make: advert.make,
+            model: advert.model,
+            price: advert.price
+          });
+          logger.info(`✅ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) still available`);
+        } else {
+          // Listing not found (404) or error occurred
+          results.noLongerAvailable.push({
+            autoscout_id: advert.autoscout_id,
+            make: advert.make,
+            model: advert.model,
+            price: advert.price
+          });
+          logger.warn(`❌ [Swiss Individual] Advert ${advert.autoscout_id} (${advert.make} ${advert.model}) no longer available`);
+          
+          // Mark as inactive
+          await markSwissAdvertAsInactive(advert);
+        }
+        
+        // Small delay between individual checks to be respectful
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+      } catch (error) {
+        logger.error(`❌ Error checking Swiss advert ${advert.autoscout_id}:`, error.message);
+        results.errors.push({
+          autoscout_id: advert.autoscout_id,
+          error: error.message
+        });
+      }
+    }
+    
+    // Log summary
+    logger.info(`📊 Swiss individual check results for user ${user.id}:`);
+    logger.info(`   ✅ Still available: ${results.stillAvailable.length}`);
+    logger.info(`   ❌ No longer available: ${results.noLongerAvailable.length}`);
+    logger.info(`   ⚠️ Errors: ${results.errors.length}`);
+    
+    return {
+      user: user.id,
+      status: 'success',
+      method: 'individual_checks',
+      ...results,
+      totalActiveAdverts: activeAdverts.length
+    };
+    
+  } catch (error) {
+    logger.error(`❌ Error checking Swiss listings individually for user ${user.id}:`, error.message);
+    return {
+      user: user.id,
+      status: 'error',
+      method: 'individual_checks',
+      error: error.message
+    };
+  }
+}
+
+/**
+ * Check Swiss dealer listings availability using CH API (bulk search method)
  * @param {Object} user - User object with autoscout_url
  * @returns {Object} - Results of the availability check
  */
@@ -27,6 +124,8 @@ async function checkSwissDealerListings(user) {
     // Fetch current listings from Swiss API
     const currentListings = await fetchAllSwissDealerListings(dealerId);
     logger.info(`📊 Swiss API returned ${currentListings.length} current listings for dealer ${dealerId}`);
+    console.log(currentListings.map(listing => listing.id));
+    logger.info(`📊 Seller types from API: [${currentListings.map(listing => `${listing.id}:${listing.seller?.type || 'unknown'}`).join(', ')}]`);
 
 
     // Get active adverts for this user from database
@@ -35,18 +134,16 @@ async function checkSwissDealerListings(user) {
         is_active: true, 
         seller_id: user.id 
       },
-      attributes: ['id', 'autoscout_id', 'make', 'model', 'price']
+      attributes: ['id', 'autoscout_id', 'make', 'model', 'price', 'created_at']
     });
     logger.info(`💾 Database has ${activeAdverts.length} active adverts for user ${user.id}`);
+    logger.info(`💾 Database advert IDs: [${activeAdverts.map(advert => advert.autoscout_id).sort().join(', ')}]`);
     
-    // Create a set of current listing IDs for fast lookup
-    const currentListingIds = new Set(
-      currentListings
-        .filter(listing => listing.seller?.type === 'professional')
-        .map(listing => String(listing.id))
-    );
+    // Create a set of current listing IDs for fast lookup (all listings, regardless of seller type)
+    const currentListingIds = new Set(currentListings.map(listing => String(listing.id)));
     
-    logger.info(`🔍 Found ${currentListingIds.size} professional listings in Swiss API`);
+    logger.info(`🔍 Found ${currentListingIds.size} listings in Swiss API (all types)`);
+    logger.info(`🔍 All listing IDs from API: [${Array.from(currentListingIds).sort().join(', ')}]`);
     
     // Check which database adverts are still available
     const results = {
@@ -57,8 +154,15 @@ async function checkSwissDealerListings(user) {
     };
     
     // Check each database advert against current API listings
+    logger.info(`🔍 Starting comparison of ${activeAdverts.length} database adverts against ${currentListingIds.size} API listings`);
+    
     for (const advert of activeAdverts) {
       try {
+        logger.info(`🔍 Checking advert ${advert.autoscout_id} (type: ${typeof advert.autoscout_id}) - exists in API: ${currentListingIds.has(advert.autoscout_id)}`);
+        if (!currentListingIds.has(advert.autoscout_id)) {
+          logger.warn(`🔍 Advert ${advert.autoscout_id} NOT FOUND in API. API has: [${Array.from(currentListingIds).slice(0, 5).join(', ')}...]`);
+        }
+        
         if (currentListingIds.has(advert.autoscout_id)) {
           results.stillAvailable.push({
             autoscout_id: advert.autoscout_id,
@@ -92,7 +196,7 @@ async function checkSwissDealerListings(user) {
     const databaseListingIds = new Set(activeAdverts.map(advert => advert.autoscout_id));
     
     for (const listing of currentListings) {
-      if (listing.seller?.type === 'professional' && !databaseListingIds.has(String(listing.id))) {
+      if (!databaseListingIds.has(String(listing.id))) {
         results.newListings.push({
           id: listing.id,
           make: listing.make?.name || 'Unknown',
@@ -233,7 +337,9 @@ function logSwissCheckerResults(result) {
 }
 
 module.exports = {
-  checkSwissDealerListings,
+  checkSwissDealerListings: checkSwissListingsIndividually, // Use individual checks by default
+  checkSwissDealerListingsBulk: checkSwissDealerListings, // Keep bulk method as fallback
+  checkSwissListingsIndividually,
   markSwissAdvertAsInactive,
   shouldUseSwissChecker,
   logSwissCheckerResults

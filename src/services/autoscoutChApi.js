@@ -106,11 +106,23 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
   
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const response = await axios.post(url, options.data, {
-        headers: options.headers,
-        httpsAgent: getHttpsAgent(),
-        timeout: 30000 // 30 seconds as per documentation
-      });
+      const method = options.method || 'POST';
+      let response;
+      
+      if (method.toUpperCase() === 'GET') {
+        response = await axios.get(url, {
+          headers: options.headers,
+          httpsAgent: getHttpsAgent(),
+          timeout: 30000
+        });
+      } else {
+        response = await axios.post(url, options.data, {
+          headers: options.headers,
+          httpsAgent: getHttpsAgent(),
+          timeout: 30000
+        });
+      }
+      
       return response;
     } catch (error) {
       lastError = error;
@@ -174,9 +186,11 @@ async function fetchSwissDealerListings(dealerId, page = 0, size = 20) {
  */
 async function fetchAllSwissDealerListings(dealerId) {
   const allListings = [];
+  const seenIds = new Set(); // Track seen IDs to avoid duplicates
   let page = 0;
   let hasMore = true;
   const maxPages = 100; // Safety limit
+  let totalElements = 0;
   
   console.log(`🔎 Fetching all listings for Swiss dealer ${dealerId}`);
   
@@ -185,8 +199,24 @@ async function fetchAllSwissDealerListings(dealerId) {
       const result = await fetchSwissDealerListings(dealerId, page);
       
       if (result.listings && result.listings.length > 0) {
-        allListings.push(...result.listings);
-        console.log(`📄 Page ${page + 1}: Added ${result.listings.length} listings (total: ${allListings.length})`);
+        // Deduplicate listings based on ID
+        const newListings = result.listings.filter(listing => {
+          if (seenIds.has(listing.id)) {
+            console.log(`🔄 Duplicate listing found: ${listing.id} (skipping)`);
+            return false;
+          }
+          seenIds.add(listing.id);
+          return true;
+        });
+        
+        allListings.push(...newListings);
+        console.log(`📄 Page ${page + 1}: Added ${newListings.length} new listings (${result.listings.length - newListings.length} duplicates, total unique: ${allListings.length})`);
+        
+        // Store total elements from first page
+        if (page === 0) {
+          totalElements = result.totalElements || 0;
+          console.log(`📊 API reports total elements: ${totalElements}`);
+        }
       }
       
       hasMore = result.hasMore;
@@ -194,18 +224,84 @@ async function fetchAllSwissDealerListings(dealerId) {
       
       // Small delay between requests to be respectful
       if (hasMore) {
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay
       }
       
     } catch (error) {
       console.error(`❌ Error on page ${page}:`, error.message);
-      // Break on error to avoid infinite loops
-      break;
+      // Don't break immediately, try a few more times with longer delays
+      if (page < 3) {
+        console.log(`🔄 Retrying page ${page} after error...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        continue;
+      } else {
+        console.error(`❌ Too many errors, stopping at page ${page}`);
+        break;
+      }
     }
   }
   
-  console.log(`✅ Completed fetching Swiss dealer listings. Total: ${allListings.length} listings`);
+  console.log(`✅ Completed fetching Swiss dealer listings. Total unique: ${allListings.length} listings`);
+  
+  // Warning if we got fewer listings than expected
+  if (totalElements > 0 && allListings.length < totalElements) {
+    console.warn(`⚠️ Warning: Expected ${totalElements} listings but got ${allListings.length}. Some listings might be missing.`);
+  }
+  
   return allListings;
+}
+
+/**
+ * Fetch a single listing by ID from Swiss API
+ * @param {string|number} listingId - The listing ID to fetch
+ * @returns {Object|null} - Listing object if found, null if not found
+ */
+async function fetchSwissListingById(listingId) {
+  const url = `https://api.autoscout24.ch/v1/listings/${listingId}`;
+  const headers = getSwissApiHeaders();
+  
+  try {
+    console.log(`🔍 Checking individual listing: ${listingId}`);
+    
+    const response = await fetchWithRetry(url, {
+      method: 'GET',
+      headers: headers
+    });
+    
+    if (response.status === 200) {
+      console.log(`✅ Listing ${listingId} found and active`);
+      return response.data;
+    } else if (response.status === 404) {
+      console.log(`❌ Listing ${listingId} not found (404)`);
+      return null;
+    } else {
+      console.log(`⚠️ Listing ${listingId} returned status ${response.status}`);
+      return null;
+    }
+    
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      console.log(`❌ Listing ${listingId} not found (404 error)`);
+      return null;
+    } else if (error.response && error.response.status === 429) {
+      console.log(`⏳ Rate limited checking listing ${listingId}, waiting...`);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Retry once after rate limit
+      try {
+        const retryResponse = await fetchWithRetry(url, {
+          method: 'GET',
+          headers: headers
+        });
+        return retryResponse.status === 200 ? retryResponse.data : null;
+      } catch (retryError) {
+        console.error(`❌ Retry failed for listing ${listingId}:`, retryError.message);
+        return null;
+      }
+    } else {
+      console.error(`❌ Error fetching listing ${listingId}:`, error.message);
+      return null;
+    }
+  }
 }
 
 /**
@@ -271,6 +367,7 @@ module.exports = {
   extractDealerIdFromChUrl,
   fetchSwissDealerListings,
   fetchAllSwissDealerListings,
+  fetchSwissListingById,
   scrapeSwissDealer,
   convertSwissListingToStandard,
   createDealerSearchPayload,
