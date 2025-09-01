@@ -17,7 +17,6 @@ autoscout-scraper-b2motive/
 ├── models/                       # Database models
 │   ├── advert.js
 │   ├── control.js
-│   ├── seen_info.js
 │   └── index.js
 ├── config/                       # Configuration files
 │   └── database.js              # Database configuration
@@ -79,7 +78,6 @@ Extracts detailed information from individual advert pages.
 
 - **Advert**: Stores car listing information
 - **Control**: Tracks scraping sessions
-- **SeenInfo**: Tracks which adverts were seen in each session
 
 ## Logging
 

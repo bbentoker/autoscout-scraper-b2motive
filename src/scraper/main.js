@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { searchAllPages, searchAllPagesWithAllSorts, searchAllPagesViaApi } = require('../services/scraper');
 const { getUsersToScrape } = require('../services/userService');
-const { prepareForNotExistingAdvertCheck, markUnseenAdvertsAsInactive } = require('../services/advertService');
 const { Control } = require('../../models');
 const logger = require('../utils/logger');
 const axios = require('axios');
@@ -157,8 +156,7 @@ async function main() {
         const control = await Control.create({ date: new Date() });
         logger.info(`📌 Created control ID: ${control.id}`);
         
-        // Prepare SeenInfo records for existing active adverts
-        // await prepareForNotExistingAdvertCheck(control.id);
+
         
         // Fetch and process users
         let users = await getUsersToScrape();
@@ -194,8 +192,7 @@ async function main() {
         const failed = results.filter(r => r.status === 'error').length;
         logger.info(`📊 Processing complete: ${successful} successful, ${failed} failed`);
         
-        // Mark adverts as inactive if they weren't seen in this session
-        // await markUnseenAdvertsAsInactive(control);
+
         
         const endTime = new Date();
         const duration = endTime - startTime;

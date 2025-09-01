@@ -1,7 +1,7 @@
 require('dotenv').config();
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { Advert, SeenInfo, Control } = require('../../models');
+const { Advert, Control } = require('../../models');
 const logger = require('../utils/logger');
 const { getHttpsAgent } = require('./autoscoutApi');
 const { getUsersToScrape } = require('./userService');
@@ -21,18 +21,8 @@ async function handleAdvertNotFound(autoscoutId) {
       return;
     }
 
-    const latestSeenInfo = await SeenInfo.findOne({
-      where: { advert_id: autoscoutId },
-      order: [['id', 'DESC']],
-      include: [{ model: Control, as: 'control' }]
-    });
-
-    const lastSeenDate = latestSeenInfo && latestSeenInfo.control ? latestSeenInfo.control.date : new Date();
-    if (latestSeenInfo && latestSeenInfo.control) {
-      logger.info(`📅 Setting last_seen to control date: ${lastSeenDate}`);
-    } else {
-      logger.info(`📅 Setting last_seen to current date: ${lastSeenDate}`);
-    }
+    const lastSeenDate = new Date();
+    logger.info(`📅 Setting last_seen to current date: ${lastSeenDate}`);
 
     for (const advert of adverts) {
       try {
@@ -253,7 +243,22 @@ async function processUsersInParallelForChecker(users, concurrencyLimitEnv) {
 async function checkListingsAcrossUsers() {
   logger.info('📋 Starting check listings across users...');
   let users = await getUsersToScrape();
-  logger.info(`👥 Found ${users.length} users to check`);
+
+  // Sort users by created_at (latest first)
+  users.sort((a, b) => {
+    // If both have created_at, sort by most recent first
+    if (a.created_at && b.created_at) {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
+    // If one has created_at and the other doesn't, prioritize the one with created_at
+    if (a.created_at && !b.created_at) return -1;
+    if (!a.created_at && b.created_at) return 1;
+    
+    // If neither has created_at, sort by id (highest first, assuming newer users have higher IDs)
+    return b.id - a.id;
+  });
+
+  logger.info(`📋 Sorted ${users.length} users by created_at (latest first)`);
 
   // DEBUG MODE: Filter users with Swiss AutoScout24.ch URLs if DEBUG=true
   if (process.env.DEBUG === 'true') {

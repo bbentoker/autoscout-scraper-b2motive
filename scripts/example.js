@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { Advert, Control, SeenInfo } = require('../models');
+const { Advert, Control } = require('../models');
 const { extractNewAdvert } = require('./extractNewAdvert');
 const fs = require('fs');
 const JSONStream = require('JSONStream');
@@ -76,20 +76,7 @@ const clearCheckpoint = () => {
   }
 };
 
-async function prepareForNotExistingAdvertCheck(controlID) {
-  const adverts = await Advert.findAll({ where: { is_active: true } });
-  const advertIds = adverts.map((advert) => advert.id);
 
-  await Promise.all(
-    advertIds.map((advertId) =>
-      SeenInfo.create({
-        control_id: controlID,
-        advert_id: advertId,
-        seen: false,
-      })
-    )
-  );
-}
 
 async function searchAllPages(fullUrl, control, make, model) {
   try {
@@ -138,16 +125,6 @@ async function searchAllPages(fullUrl, control, make, model) {
               if (!existingAdvert.is_active) {
                 existingAdvert.is_active = true;
                 await existingAdvert.save();
-              }
-
-              const seenInfo = await SeenInfo.findOne({
-                where: { control_id: control.id, advert_id: articleId },
-              });
-
-              if (seenInfo) {
-                seenInfo.seen = true;
-                await seenInfo.save();
-                console.log(`✅ Advert ID ${articleId} marked as seen.`);
               }
             }
           }
@@ -233,7 +210,6 @@ async function fetchAndParse() {
     const pMap = (await import('p-map')).default;
 
     let control = await Control.create({ date: new Date() });
-    await prepareForNotExistingAdvertCheck(control.id);
     console.log(`📌 Latest control ID: ${control.id}`);
 
     const jsonStream = fileStream.pipe(JSONStream.parse('$*'));
@@ -278,24 +254,6 @@ async function fetchAndParse() {
     // Clear checkpoint after successful completion
     clearCheckpoint();
     console.log(`✅ Completed processing all makes & models.`);
-
-    const advertsToUpdate = await SeenInfo.findAll({
-      where: { control_id: control.id, seen: false },
-    });
-
-    await pMap(
-      advertsToUpdate,
-      async (seenInfo) => {
-        const advert = await Advert.findOne({
-          where: { id: seenInfo.advert_id },
-        });
-        advert.is_active = false;
-        advert.last_seen = control.date;
-        await advert.save();
-        console.log(`🔄 Advert ID ${seenInfo.advert_id} updated.`);
-      },
-      { concurrency: 10 }
-    );
   } catch (error) {
     console.error(`❌ Error fetching content:`, error.message);
   } finally {

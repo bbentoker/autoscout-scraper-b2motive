@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { extractNewAdvert } = require('./extractNewAdvert');
-const { Advert, Control, SeenInfo, AutoScoutInventory } = require('../../models');
+const { Advert, Control, AutoScoutInventory } = require('../../models');
 const {
   resolveCultureIsoFromUrl,
   getVisitorCookie,
@@ -57,22 +57,7 @@ async function processElementsInParallel(elements, $$, user, control, concurrenc
                             await existingAdvert.save();
                         }
 
-                        const seenInfo = await SeenInfo.findOne({
-                            where: { control_id: control.id, advert_id: articleId },
-                        });
-
-                        if (seenInfo) {
-                            seenInfo.seen = true;
-                            await seenInfo.save();
-                          }
-                          else{
-                            const seenInfo = await SeenInfo.create({
-                              control_id: control.id,
-                              advert_id: articleId,
-                              seen: true,
-                            });
-                          }
-                          console.log(`✅ Advert ID ${articleId} marked as seen.`);
+                        console.log(`✅ Advert ID ${articleId} already exists.`);
                         return { articleId, status: 'existing' };
                     }
                 }

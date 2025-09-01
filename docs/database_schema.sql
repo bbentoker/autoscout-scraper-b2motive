@@ -57,13 +57,7 @@ CREATE TABLE autoscout_controls (
     date TIMESTAMP
 );
 
--- Create autoscout_seen_info table
-CREATE TABLE autoscout_seen_info (
-    id SERIAL PRIMARY KEY,
-    control_id INTEGER,
-    advert_id UUID,
-    seen BOOLEAN
-);
+
 
 -- Create autoscout_inventory table
 CREATE TABLE autoscout_inventory (
@@ -79,11 +73,8 @@ CREATE INDEX idx_autoscout_adverts_make_model ON autoscout_adverts(make, model);
 CREATE INDEX idx_autoscout_adverts_price ON autoscout_adverts(price);
 CREATE INDEX idx_autoscout_adverts_is_active ON autoscout_adverts(is_active);
 CREATE INDEX idx_autoscout_adverts_created_at ON autoscout_adverts(created_at);
-CREATE INDEX idx_autoscout_seen_info_control_id ON autoscout_seen_info(control_id);
-CREATE INDEX idx_autoscout_seen_info_advert_id ON autoscout_seen_info(advert_id);
+
 CREATE INDEX idx_autoscout_inventory_seller_id ON autoscout_inventory(seller_id);
 CREATE INDEX idx_autoscout_inventory_created_at ON autoscout_inventory(created_at);
 
--- Add foreign key constraints (optional - uncomment if needed)
--- ALTER TABLE autoscout_seen_info ADD CONSTRAINT fk_autoscout_seen_info_control_id FOREIGN KEY (control_id) REFERENCES autoscout_controls(id);
--- ALTER TABLE autoscout_seen_info ADD CONSTRAINT fk_autoscout_seen_info_advert_id FOREIGN KEY (advert_id) REFERENCES autoscout_adverts(id); 
+-- Add foreign key constraints (optional - uncomment if needed) 
