@@ -78,67 +78,79 @@ async function checkAdvertAvailability(autoscoutId) {
   return isValidListing;
 }
 
-async function processAdvertsInParallel(adverts, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY_CHECKER || 1) {
-  const results = [];
-  const chunkSize = Math.min(concurrencyLimit, 10);
+async function processAdvertsSequentially(adverts) {
+  let successCount = 0;
+  let inactiveCount = 0;
+  let errorCount = 0;
 
   // UUID validation regex pattern
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  for (let i = 0; i < adverts.length; i += chunkSize) {
-    const batch = adverts.slice(i, i + chunkSize);
-    logger.info(`🔄 Processing batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(adverts.length / chunkSize)} (${batch.length} adverts)`);
+  logger.info(`🔄 Processing ${adverts.length} adverts sequentially`);
 
-    const batchPromises = batch.map(async (advert) => {
-      // Validate UUID format before processing
-      if (!advert.autoscout_id || !uuidRegex.test(advert.autoscout_id)) {
-        logger.error(`❌ Invalid UUID format for advert autoscout_id: ${advert.autoscout_id} - skipping processing`);
-        return { 
-          autoscout_id: advert.autoscout_id, 
-          status: 'error', 
-          message: 'Invalid UUID format - advert skipped',
-          attempts: 0 
-        };
-      }
+  for (let i = 0; i < adverts.length; i++) {
+    const advert = adverts[i];
+    logger.info(`📋 Processing advert ${i + 1}/${adverts.length}: ${advert.autoscout_id}`);
 
-      let lastError = null;
-      for (let attempt = 1; attempt <= 3; attempt++) {
-        try {
-          logger.info(`🔎 Checking availability for advert: ${advert.autoscout_id} (attempt ${attempt}/3)`);
-          const isAvailable = await checkAdvertAvailability(advert.autoscout_id);
-          if (!isAvailable) throw new Error('Listing elements not found on page');
-          logger.info(`✅ Listing appears available for advert: ${advert.autoscout_id} on attempt ${attempt}`);
-          return { autoscout_id: advert.autoscout_id, status: 'success', attempts: attempt };
-        } catch (error) {
-          lastError = error;
-          logger.warn(`⚠️ Attempt ${attempt}/3 failed for advert ${advert.autoscout_id}:`, error.message);
-          if (attempt === 3) {
-            logger.error(`❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
-            await handleAdvertNotFound(advert.autoscout_id);
-            return { autoscout_id: advert.autoscout_id, status: 'inactive', message: 'Advert marked as inactive after 3 failed checks', attempts: 3 };
-          }
+    // Validate UUID format before processing
+    if (!advert.autoscout_id || !uuidRegex.test(advert.autoscout_id)) {
+      logger.error(`❌ Invalid UUID format for advert autoscout_id: ${advert.autoscout_id} - skipping processing`);
+      errorCount++;
+      continue;
+    }
+
+    let lastError = null;
+    let processed = false;
+    
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        logger.info(`🔎 Checking availability for advert: ${advert.autoscout_id} (attempt ${attempt}/3)`);
+        const isAvailable = await checkAdvertAvailability(advert.autoscout_id);
+        if (!isAvailable) throw new Error('Listing elements not found on page');
+        logger.info(`✅ Listing appears available for advert: ${advert.autoscout_id} on attempt ${attempt}`);
+        successCount++;
+        processed = true;
+        break;
+      } catch (error) {
+        lastError = error;
+        logger.warn(`⚠️ Attempt ${attempt}/3 failed for advert ${advert.autoscout_id}:`, error.message);
+        if (attempt === 3) {
+          logger.error(`❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
+          await handleAdvertNotFound(advert.autoscout_id);
+          inactiveCount++;
+          processed = true;
+        } else {
           logger.info(`⏳ Waiting 1 second before retry for advert ${advert.autoscout_id}...`);
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
-    });
-
-    const batchResults = await Promise.allSettled(batchPromises);
-    for (const result of batchResults) {
-      if (result.status === 'fulfilled') {
-        results.push(result.value);
-      } else {
-        results.push({ autoscout_id: 'unknown', status: 'rejected', error: result.reason?.message || 'Unknown error' });
-      }
+    }
+    
+    if (!processed) {
+      errorCount++;
     }
 
-    if (i + chunkSize < adverts.length) {
-      logger.info('⏳ Waiting 2 seconds before next batch...');
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Aggressive memory cleanup every 5 adverts
+    if ((i + 1) % 5 === 0 && global.gc) {
+      global.gc();
+      const memUsage = process.memoryUsage();
+      const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+      const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+      logger.info(`🧹 GC after ${i + 1} adverts: ${heapUsedMB}MB/${heapTotalMB}MB`);
+    }
+
+    // Small delay between adverts for memory cleanup and server respect
+    if (i < adverts.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   }
 
-  return results;
+  return {
+    successful: successCount,
+    inactive: inactiveCount,
+    error: errorCount,
+    total: adverts.length
+  };
 }
 
 async function checkListings() {
@@ -155,14 +167,9 @@ async function checkListings() {
       return;
     }
 
-    const results = await processAdvertsInParallel(activeAdverts);
+    const results = await processAdvertsSequentially(activeAdverts);
 
-    const successful = results.filter((r) => r.status === 'success').length;
-    const inactive = results.filter((r) => r.status === 'inactive').length;
-    const failed = results.filter((r) => r.status === 'error').length;
-    const rejected = results.filter((r) => r.status === 'rejected').length;
-
-    logger.info(`📊 Processing complete: ${successful} successful, ${inactive} marked inactive, ${failed} failed, ${rejected} rejected`);
+    logger.info(`📊 Processing complete: ${results.successful} successful, ${results.inactive} marked inactive, ${results.error} failed`);
     logger.info('✅ Check listings job completed successfully');
   } catch (error) {
     logger.error('❌ Check listings job failed:', error.message);
@@ -211,19 +218,15 @@ async function checkListingsForUser(user) {
       return { user: user.id, status: 'success', successful: 0, inactive: 0, failed: 0, rejected: 0, region: 'belgian' };
     }
 
-    const results = await processAdvertsInParallel(activeAdverts);
-    const successful = results.filter((r) => r.status === 'success').length;
-    const inactive = results.filter((r) => r.status === 'inactive').length;
-    const failed = results.filter((r) => r.status === 'error').length;
-    const rejected = results.filter((r) => r.status === 'rejected').length;
+    const results = await processAdvertsSequentially(activeAdverts);
     
     return { 
       user: user.id, 
       status: 'success', 
-      successful, 
-      inactive, 
-      failed, 
-      rejected, 
+      successful: results.successful, 
+      inactive: results.inactive, 
+      failed: results.error, 
+      rejected: 0, 
       region: 'belgian' 
     };
   } catch (error) {
@@ -232,27 +235,52 @@ async function checkListingsForUser(user) {
   }
 }
 
-async function processUsersInParallelForChecker(users, concurrencyLimitEnv) {
-  const limit = Math.max(1, parseInt(concurrencyLimitEnv || process.env.USER_PROCESSING_CONCURRENCY_CHECKER || '2', 10));
-  const results = [];
-  const chunkSize = Math.min(limit, 10);
+async function processUsersSequentiallyForChecker(users) {
+  let successCount = 0;
+  let errorCount = 0;
 
-  for (let i = 0; i < users.length; i += chunkSize) {
-    const batch = users.slice(i, i + chunkSize);
-    logger.info(`🧵 Checking users batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(users.length / chunkSize)} (${batch.length} users)`);
-    const batchPromises = batch.map((user) => checkListingsForUser(user));
-    const batchResults = await Promise.allSettled(batchPromises);
-    for (const result of batchResults) {
-      if (result.status === 'fulfilled') results.push(result.value);
-      else results.push({ user: 'unknown', status: 'rejected', error: result.reason?.message || 'Unknown error' });
+  logger.info(`🔄 Processing ${users.length} users sequentially for checker`);
+
+  for (let i = 0; i < users.length; i++) {
+    const user = users[i];
+    logger.info(`📋 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
+
+    try {
+      const result = await checkListingsForUser(user);
+      
+      if (result.status === 'success') {
+        successCount++;
+        logger.info(`✅ User ${user.id} completed: ${result.successful} successful, ${result.inactive} inactive, ${result.failed} failed`);
+      } else {
+        errorCount++;
+        logger.error(`❌ User ${user.id} failed: ${result.error}`);
+      }
+    } catch (error) {
+      errorCount++;
+      logger.error(`❌ User ${user.id} processing error:`, error.message);
     }
-    if (i + chunkSize < users.length) {
-      logger.info('⏳ Waiting 1 second before next users batch...');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Aggressive memory cleanup every 3 users
+    if ((i + 1) % 3 === 0 && global.gc) {
+      global.gc();
+      const memUsage = process.memoryUsage();
+      const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+      const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+      logger.info(`🧹 GC after ${i + 1} users: ${heapUsedMB}MB/${heapTotalMB}MB`);
+    }
+
+    // Small delay between users for memory cleanup and server respect
+    if (i < users.length - 1) {
+      logger.info('⏳ Waiting 2 seconds before next user...');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
-  return results;
+  return {
+    successful: successCount,
+    failed: errorCount,
+    total: users.length
+  };
 }
 
 async function checkListingsAcrossUsers() {
@@ -289,31 +317,17 @@ async function checkListingsAcrossUsers() {
     return [];
   }
 
-  const results = await processUsersInParallelForChecker(users);
+  const results = await processUsersSequentiallyForChecker(users);
   
-  // Enhanced logging for multi-region support
-  const successfulUsers = results.filter((r) => r.status === 'success').length;
-  const failedUsers = results.filter((r) => r.status === 'error' || r.status === 'rejected').length;
-  const swissUsers = results.filter((r) => r.region === 'swiss').length;
-  const belgianUsers = results.filter((r) => r.region === 'belgian').length;
-  
-  logger.info(`📊 Users processed: ${successfulUsers} successful, ${failedUsers} failed/rejected`);
-  logger.info(`🌍 Region breakdown: ${swissUsers} Swiss 🇨🇭, ${belgianUsers} Belgian 🇧🇪`);
-  
-  // Log totals for successful operations
-  const totalStillAvailable = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.successful || 0), 0);
-  const totalInactive = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.inactive || 0), 0);
-  const totalNewListings = results.filter(r => r.status === 'success').reduce((sum, r) => sum + (r.newListings || 0), 0);
-  
-  logger.info(`📈 Overall results: ${totalStillAvailable} still available, ${totalInactive} marked inactive, ${totalNewListings} new listings found`);
+  logger.info(`📊 Check listings across users complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} users`);
   
   return results;
 }
 
 module.exports = {
   checkListings,
-  processAdvertsInParallel,
+  processAdvertsSequentially,
   checkListingsForUser,
-  processUsersInParallelForChecker,
+  processUsersSequentiallyForChecker,
   checkListingsAcrossUsers,
 }; 
