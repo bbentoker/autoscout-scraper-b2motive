@@ -259,10 +259,6 @@ async function checkListingsAcrossUsers() {
   logger.info('📋 Starting check listings across users...');
   let users = await getUsersToScrape();
 
-  // remove
-
-  users = users.filter(user => user.id == 105);
-
   // Sort users by created_at (latest first)
   users.sort((a, b) => {
     // If both have created_at, sort by most recent first

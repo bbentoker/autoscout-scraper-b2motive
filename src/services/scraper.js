@@ -121,7 +121,7 @@ async function createSwissAdvert(listing, user) {
     // Get the first image and add the Swiss image prefix
     const firstImage = listing.images && listing.images.length > 0 ? listing.images[0] : null;
     const imageUrl = firstImage ? `https://listing-images.autoscout24.ch/${firstImage.key}` : null;
-    
+
     // Map Swiss API data to our database structure
     const advertData = {
       autoscout_id: String(listing.id), // Convert to string as required by database schema
@@ -131,7 +131,7 @@ async function createSwissAdvert(listing, user) {
       is_active: true,
       last_seen: new Date(),
       make: listing.make?.name || '',
-      model: listing.model?.name || '',
+      model: listing.versionFullName || listing.model?.name || '',
       model_version: listing.versionFullName || '',
       location: listing.seller?.city ? `${listing.seller.city} ${listing.seller.zipCode || ''}`.trim() : '',
       price: listing.price || 0,
