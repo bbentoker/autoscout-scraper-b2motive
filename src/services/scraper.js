@@ -18,67 +18,104 @@ const {
 const advertBaseUrl = 'https://www.autoscout24.com/offers/';
 
 /**
- * Process elements in parallel with a concurrency limit
+ * Aggressive memory cleanup utility
+ */
+function forceMemoryCleanup(context = 'unknown') {
+  if (global.gc) {
+    // Run garbage collection multiple times for thorough cleanup
+    global.gc();
+    setTimeout(() => global.gc(), 50);
+    setTimeout(() => global.gc(), 100);
+    
+    const memUsage = process.memoryUsage();
+    const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+    const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+    const heapPercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
+    
+    console.log(`🧹 Aggressive cleanup (${context}): ${heapUsedMB}MB used / ${heapTotalMB}MB total (${heapPercent}%)`);
+    
+    // If still high memory usage, try more aggressive cleanup
+    if (heapPercent > 80) {
+      console.log(`⚠️ High memory usage detected (${heapPercent}%), performing additional cleanup...`);
+      setTimeout(() => {
+        if (global.gc) {
+          global.gc();
+          global.gc();
+        }
+      }, 200);
+    }
+  }
+}
+
+/**
+ * Process elements sequentially to prevent memory overflow
  * @param {Array} elements - Array of cheerio elements to process
  * @param {Object} $$ - Cheerio instance
  * @param {Object} user - User object
  * @param {Object} control - Control object
- * @param {number} concurrencyLimit - Maximum number of concurrent operations
  */
-async function processElementsInParallel(elements, $$, user, control, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
-    const results = [];
+async function processElementsSequentially(elements, $$, user, control) {
+    let newCount = 0;
+    let existingCount = 0;
+    let errorCount = 0;
     
-    for (let i = 0; i < elements.length; i += concurrencyLimit) {
-        const batch = elements.slice(i, i + concurrencyLimit);
-        console.log(`🔄 Processing batch ${Math.floor(i / concurrencyLimit) + 1}/${Math.ceil(elements.length / concurrencyLimit)} (${batch.length} elements)`);
+    console.log(`🔄 Processing ${elements.length} elements sequentially`);
+    
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        console.log(`📋 Processing element ${i + 1}/${elements.length}`);
         
-        const batchPromises = batch.map(async (element) => {
-            try {
-                const articleId = $$(element).attr('id');
-                const advertLink = $$(element).find('a').first().attr('href');
+        try {
+            const articleId = $$(element).attr('id');
+            const advertLink = $$(element).find('a').first().attr('href');
 
-                if (articleId && advertLink) {
-                    const fullAdvertLink = `${advertBaseUrl}${articleId}`;
-                    
-                    const existingAdvert = await Advert.findOne({
-                        where: { 
-                          autoscout_id: articleId,
-                          seller_id : user.id
-                         },
-                    });
+            if (articleId && advertLink) {
+                const fullAdvertLink = `${advertBaseUrl}${articleId}`;
+                
+                const existingAdvert = await Advert.findOne({
+                    where: { 
+                      autoscout_id: articleId,
+                      seller_id : user.id
+                     },
+                });
 
-                    if (!existingAdvert) {
-                        console.log(`🆕 Fetching details for new advert ID: ${articleId}`);
-                        await extractNewAdvert(fullAdvertLink, articleId, user);
-                        return { articleId, status: 'new' };
-                    } else {
-                        if (!existingAdvert.is_active) {
-                            existingAdvert.is_active = true;
-                            await existingAdvert.save();
-                        }
-
-                        console.log(`✅ Advert ID ${articleId} already exists.`);
-                        return { articleId, status: 'existing' };
+                if (!existingAdvert) {
+                    console.log(`🆕 Fetching details for new advert ID: ${articleId}`);
+                    await extractNewAdvert(fullAdvertLink, articleId, user);
+                    newCount++;
+                } else {
+                    if (!existingAdvert.is_active) {
+                        existingAdvert.is_active = true;
+                        await existingAdvert.save();
                     }
+
+                    console.log(`✅ Advert ID ${articleId} already exists.`);
+                    existingCount++;
                 }
-                return { articleId: null, status: 'skipped' };
-            } catch (error) {
-                console.error(`❌ Error processing element:`, error.message);
-                return { articleId: null, status: 'error', error: error.message };
+            } else {
+                errorCount++;
             }
-        });
+        } catch (error) {
+            console.error(`❌ Error processing element:`, error.message);
+            errorCount++;
+        }
         
-        const batchResults = await Promise.allSettled(batchPromises);
-        results.push(...batchResults);
+        // Aggressive memory cleanup every 2 elements for HTML processing
+        if ((i + 1) % 2 === 0) {
+            forceMemoryCleanup(`HTML element ${i + 1}/${elements.length}`);
+        }
         
-        // Small delay between batches to be respectful to the server
-        if (i + concurrencyLimit < elements.length) {
-            console.log('⏳ Waiting 1 second before next batch...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // Small delay between elements for memory cleanup and server respect
+        if (i < elements.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
     }
     
-    return results;
+    return {
+        new: newCount,
+        existing: existingCount,
+        error: errorCount
+    };
 }
 
 // Utils moved to autoscoutApi.js for readability
@@ -97,18 +134,29 @@ async function searchAllPagesViaSwissApi(user, control) {
     console.log(`   Total listings: ${result.totalListings}`);
     console.log(`   Professional listings: ${result.professionalListings}`);
     
-    // Process the listings similar to the Belgian flow
-    const results = await processSwissListings(result.listings, user, control);
+    // Process the listings sequentially to prevent memory overflow
+    const results = await processSwissListingsSequentially(result.listings, user, control);
     
-    const created = results.filter(r => r.status === 'fulfilled' && r.value.status === 'new').length;
-    const existing = results.filter(r => r.status === 'fulfilled' && r.value.status === 'existing').length;
-    const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
+    const { summary } = results;
     
-    console.log(`📊 Swiss processing summary for user ${user.id}: ${created} new, ${existing} existing, ${failed} failed`);
+    console.log(`📊 Swiss processing summary for user ${user.id}: ${summary.new} new, ${summary.existing} existing, ${summary.error} failed`);
     console.log(`✅ Finished Swiss API scraping for user ${user.id}`);
+    
+    // Final garbage collection for this Swiss user
+    if (global.gc) {
+      global.gc();
+      console.log(`🧹 Final garbage collection for Swiss user ${user.id}`);
+    }
     
   } catch (error) {
     console.error(`❌ Error in Swiss API scraping for user ${user.id}:`, error.message);
+    
+    // Garbage collection even on error to free memory
+    if (global.gc) {
+      global.gc();
+      console.log(`🧹 Error cleanup - garbage collection for Swiss user ${user.id}`);
+    }
+    
     throw error;
   }
 }
@@ -160,67 +208,86 @@ async function createSwissAdvert(listing, user) {
 }
 
 /**
- * Process Swiss listings with complete data from API
+ * Process Swiss listings sequentially to prevent memory overflow
  */
-async function processSwissListings(listings, user, control, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
-  const results = [];
+async function processSwissListingsSequentially(listings, user, control) {
+  let newCount = 0;
+  let existingCount = 0;
+  let errorCount = 0;
   const items = Array.isArray(listings) ? listings : [];
   
-  console.log(`🔄 Processing ${items.length} Swiss listings for user ${user.id}`);
+  console.log(`🔄 Processing ${items.length} Swiss listings sequentially for user ${user.id}`);
   
-  for (let i = 0; i < items.length; i += concurrencyLimit) {
-    const batch = items.slice(i, i + concurrencyLimit);
-    const batchPromises = batch.map(async (listing) => {
-      try {
-        const articleId = listing?.id;
-        if (!articleId) return { articleId: null, status: 'skipped' };
-
-        // Convert to string for database comparison (autoscout_id is STRING in schema)
-        const articleIdStr = String(articleId);
-        
-        const existingAdvert = await Advert.findOne({
-          where: {
-            autoscout_id: articleIdStr,
-            seller_id: user.id
-          }
-        });
-
-        if (!existingAdvert) {
-          console.log(`🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
-          
-          // Create new advert directly from Swiss API data
-          await createSwissAdvert(listing, user);
-          return { articleId, status: 'new' };
-        } else {
-          // Mark as active if it was inactive
-          if (!existingAdvert.is_active) {
-            existingAdvert.is_active = true;
-            await existingAdvert.save();
-          }
-
-          // Update last seen date
-          existingAdvert.last_seen = new Date();
-          await existingAdvert.save();
-
-         
-          console.log(`✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
-          return { articleId, status: 'existing' };
-        }
-      } catch (e) {
-        console.error(`❌ Error processing Swiss listing ${listing?.id}:`, e.message);
-        return { articleId: listing?.id || null, status: 'error', error: e.message };
+  for (let i = 0; i < items.length; i++) {
+    const listing = items[i];
+    console.log(`📋 Processing Swiss listing ${i + 1}/${items.length}`);
+    
+    try {
+      const articleId = listing?.id;
+      if (!articleId) {
+        errorCount++;
+        continue;
       }
-    });
+
+      // Convert to string for database comparison (autoscout_id is STRING in schema)
+      const articleIdStr = String(articleId);
+      
+      const existingAdvert = await Advert.findOne({
+        where: {
+          autoscout_id: articleIdStr,
+          seller_id: user.id
+        }
+      });
+
+      if (!existingAdvert) {
+        console.log(`🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
+        
+        // Create new advert directly from Swiss API data
+        await createSwissAdvert(listing, user);
+        newCount++;
+      } else {
+        // Mark as active if it was inactive
+        if (!existingAdvert.is_active) {
+          existingAdvert.is_active = true;
+          await existingAdvert.save();
+        }
+
+        // Update last seen date
+        existingAdvert.last_seen = new Date();
+        await existingAdvert.save();
+
+        console.log(`✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
+        existingCount++;
+      }
+    } catch (e) {
+      console.error(`❌ Error processing Swiss listing ${listing?.id}:`, e.message);
+      errorCount++;
+    }
     
-    const batchResults = await Promise.allSettled(batchPromises);
-    results.push(...batchResults);
+    // Aggressive memory cleanup every 3 listings for Swiss processing
+    if ((i + 1) % 3 === 0) {
+      forceMemoryCleanup(`Swiss listing ${i + 1}/${items.length}`);
+      
+      // Clear any potential references
+      listing.images = null;
+      listing.seller = null;
+    }
     
-    if (i + concurrencyLimit < items.length) {
+    // Small delay between listings for memory cleanup and server respect
+    if (i < items.length - 1) {
       await new Promise((r) => setTimeout(r, 300));
     }
   }
   
-  return results;
+  // Return summary counts instead of full results array
+  return {
+    summary: {
+      new: newCount,
+      existing: existingCount,
+      error: errorCount,
+      total: items.length
+    }
+  };
 }
 
 /**
@@ -311,44 +378,62 @@ async function searchAllPagesViaApi(user, control) {
 
     let totalListings = 0;
 
-    // Process a single page worth of listings with concurrency control
-    async function processApiListings(listings, concurrencyLimit = process.env.ADVERT_PROCESSING_CONCURRENCY || 5) {
-      const results = [];
+    // Process listings sequentially to prevent memory overflow
+    async function processApiListingsSequentially(listings) {
+      let newCount = 0;
+      let existingCount = 0;
+      let errorCount = 0;
       const items = Array.isArray(listings) ? listings : [];
-      for (let i = 0; i < items.length; i += concurrencyLimit) {
-        const batch = items.slice(i, i + concurrencyLimit);
-        const batchPromises = batch.map(async (listing) => {
-          try {
-            const articleId = listing?.id;
-            if (!articleId) return { articleId: null, status: 'skipped' };
-
-            const fullAdvertLink = `${advertBaseUrl}${articleId}`;
-            const existingAdvert = await Advert.findOne({
-              where: {
-                autoscout_id: articleId,
-                seller_id: user.id
-              }
-            });
-
-            if (!existingAdvert) {
-              console.log(`🆕 [API] New advert: ${articleId}. Extracting...`);
-              await extractNewAdvert(fullAdvertLink, articleId, user);
-              return { articleId, status: 'new' };
-            }
-
-            return { articleId, status: 'existing' };
-          } catch (e) {
-            console.error('❌ Error processing API listing:', e.message);
-            return { articleId: listing?.id || null, status: 'error', error: e.message };
+      
+      console.log(`🔄 Processing ${items.length} API listings sequentially`);
+      
+      for (let i = 0; i < items.length; i++) {
+        const listing = items[i];
+        console.log(`📋 Processing API listing ${i + 1}/${items.length}`);
+        
+        try {
+          const articleId = listing?.id;
+          if (!articleId) {
+            errorCount++;
+            continue;
           }
-        });
-        const batchResults = await Promise.allSettled(batchPromises);
-        results.push(...batchResults);
-        if (i + concurrencyLimit < items.length) {
+
+          const fullAdvertLink = `${advertBaseUrl}${articleId}`;
+          const existingAdvert = await Advert.findOne({
+            where: {
+              autoscout_id: articleId,
+              seller_id: user.id
+            }
+          });
+
+          if (!existingAdvert) {
+            console.log(`🆕 [API] New advert: ${articleId}. Extracting...`);
+            await extractNewAdvert(fullAdvertLink, articleId, user);
+            newCount++;
+          } else {
+            existingCount++;
+          }
+        } catch (e) {
+          console.error('❌ Error processing API listing:', e.message);
+          errorCount++;
+        }
+        
+        // Aggressive memory cleanup every 3 listings
+        if ((i + 1) % 3 === 0) {
+          forceMemoryCleanup(`API listing ${i + 1}/${items.length}`);
+        }
+        
+        // Small delay between listings for memory cleanup and server respect
+        if (i < items.length - 1) {
           await new Promise((r) => setTimeout(r, 300));
         }
       }
-      return results;
+      
+      return {
+        new: newCount,
+        existing: existingCount,
+        error: errorCount
+      };
     }
 
     // Per-make fetch function (single-call then pagination fallback)
@@ -378,11 +463,11 @@ async function searchAllPagesViaApi(user, control) {
           totalListings += count;
           console.log(`📥 API page ${page} (${make.label}) returned ${count} listings`);
           if (count > 0) {
-            const results = await processApiListings(items);
-            const created = results.filter(r => r.status === 'fulfilled' && r.value.status === 'new').length;
-            const exist = results.filter(r => r.status === 'fulfilled' && r.value.status === 'existing').length;
-            const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
-            console.log(`📊 API page ${page} (${make.label}): ${created} new, ${exist} existing, ${failed} failed`);
+            const results = await processApiListingsSequentially(items);
+            console.log(`📊 API page ${page} (${make.label}): ${results.new} new, ${results.existing} existing, ${results.error} failed`);
+            
+            // Clear items array to free memory
+            items.length = 0;
           }
           if (count === 0) break;
         } catch (e) {
@@ -391,27 +476,59 @@ async function searchAllPagesViaApi(user, control) {
         }
 
         page += 1;
+        
+        // Force garbage collection after each page if available
+        if (global.gc) {
+          global.gc();
+          console.log(`🧹 Garbage collection triggered after page ${page - 1}`);
+        }
+        
         await new Promise((r) => setTimeout(r, 300));
       }
     }
 
-    // Process makes with concurrency limit from env
-    const makeConcurrency = Math.max(1, parseInt(process.env.MAKE_PROCESSING_CONCURRENCY || '3', 10));
-    console.log(`🧵 Processing up to ${makeConcurrency} makes concurrently`);
-    for (let i = 0; i < makeOptions.length; i += makeConcurrency) {
-      const batch = makeOptions.slice(i, i + makeConcurrency);
+    // Process makes sequentially to prevent memory overflow
+    console.log(`🧵 Processing ${makeOptions.length} makes sequentially`);
+    for (let i = 0; i < makeOptions.length; i++) {
+      const make = makeOptions[i];
+      console.log(`📋 Processing make ${i + 1}/${makeOptions.length}: ${make.label}`);
       
-      const batchPromises = batch.map((make) => fetchMake(make));
-      await Promise.allSettled(batchPromises);
-      // small delay between batches
-      if (i + makeConcurrency < makeOptions.length) {
-        await new Promise((r) => setTimeout(r, 500));
+      try {
+        await fetchMake(make);
+        console.log(`✅ Completed make: ${make.label}`);
+      } catch (error) {
+        console.error(`❌ Error processing make ${make.label}:`, error.message);
+      }
+      
+      // Force garbage collection after each make if available
+      if (global.gc) {
+        global.gc();
+        console.log(`🧹 Garbage collection triggered after make: ${make.label}`);
+      }
+      
+      // Delay between makes for memory cleanup and server respect
+      if (i < makeOptions.length - 1) {
+        console.log('⏳ Waiting 2 seconds before next make...');
+        await new Promise((r) => setTimeout(r, 2000));
       }
     }
 
     console.log(`✅ Finished API scraping for user ${user.id}. Total listings processed: ${totalListings}`);
+    
+    // Final garbage collection for this user
+    if (global.gc) {
+      global.gc();
+      console.log(`🧹 Final garbage collection for user ${user.id}`);
+    }
+    
   } catch (error) {
     console.error('❌ Error in searchAllPagesViaApi:', error.message);
+    
+    // Garbage collection even on error to free memory
+    if (global.gc) {
+      global.gc();
+      console.log(`🧹 Error cleanup - garbage collection for user ${user.id}`);
+    }
   }
 }
 
@@ -460,13 +577,11 @@ async function searchAllPages(user, control) {
             throw new Error('No articles found , url is not valid')
           }
           
-          // Process elements in parallel
-          const results = await processElementsInParallel(articles.toArray(), $$, user, control);
+          // Process elements sequentially
+          const results = await processElementsSequentially(articles.toArray(), $$, user, control);
           
           // Log summary for this page
-          const successful = results.filter(r => r.status === 'fulfilled' && r.value.status !== 'error').length;
-          const failed = results.filter(r => r.status === 'rejected' || (r.status === 'fulfilled' && r.value.status === 'error')).length;
-          console.log(`📊 Page ${page} complete: ${successful} successful, ${failed} failed`);
+          console.log(`📊 Page ${page} complete: ${results.new} new, ${results.existing} existing, ${results.error} failed`);
           
         } catch (error) {
           console.error(

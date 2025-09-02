@@ -88,58 +88,61 @@ function filterUsersByAddDate(users) {
 }
 
 /**
- * Process users in parallel with a concurrency limit
+ * Process users sequentially to prevent memory overflow
  * @param {Array} users - Array of users to process
  * @param {Object} control - Control object for tracking
- * @param {number} concurrencyLimit - Maximum number of concurrent operations
  */
-async function processUsersInParallel(users, control, concurrencyLimit = process.env.USER_PROCESSING_CONCURRENCY || 5) {
-    const results = [];
+async function  processUsersSequentially(users, control) {
+    let successCount = 0;
+    let errorCount = 0;
     
-    // Process in smaller chunks to prevent memory issues
-    const chunkSize = Math.min(concurrencyLimit, 5); // Max 5 users at a time
-    
-    for (let i = 0; i < users.length; i += chunkSize) {
-        const batch = users.slice(i, i + chunkSize);
-        logger.info(`🔄 Processing batch ${Math.floor(i / chunkSize) + 1}/${Math.ceil(users.length / chunkSize)} (${batch.length} users)`);
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        logger.info(`🔄 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
         
-        const batchPromises = batch.map(async (user) => {
-            try {
-                logger.info(`📝 Scraping user: ${user.id}`);
-                await scrapeUsersListings(user, control);
-                return { user: user.id, status: 'success' };
-            } catch (error) {
-                logger.error(`❌ Error scraping user ${user.id}:`, error.message);
-                return { user: user.id, status: 'error', error: error.message };
-            }
-        });
-        
-        const batchResults = await Promise.allSettled(batchPromises);
-        
-        // Process results immediately to free memory
-        for (const result of batchResults) {
-            if (result.status === 'fulfilled') {
-                results.push(result.value);
-            } else {
-                results.push({ 
-                    user: 'unknown', 
-                    status: 'rejected', 
-                    error: result.reason?.message || 'Unknown error'
-                });
-            }
+        try {
+            logger.info(`📝 Scraping user: ${user.id}`);
+            await scrapeUsersListings(user, control);
+            successCount++;
+            logger.info(`✅ Successfully processed user ${user.id}`);
+        } catch (error) {
+            logger.error(`❌ Error scraping user ${user.id}:`, error.message);
+            errorCount++;
         }
         
-        // Clear batch results to free memory
-        batchResults.length = 0;
+        // Multiple aggressive garbage collection attempts after each user
+        if (global.gc) {
+            global.gc();
+            // Wait a bit and run GC again for more thorough cleanup
+            await new Promise(resolve => setTimeout(resolve, 100));
+            global.gc();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            global.gc();
+            
+            const memUsage = process.memoryUsage();
+            const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
+            const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+            const heapPercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
+            
+            logger.info(`🧹 Triple GC after user ${user.id}: ${heapUsedMB}MB/${heapTotalMB}MB (${heapPercent}%)`);
+        }
         
-        // Small delay between batches to be respectful to the server
-        if (i + chunkSize < users.length) {
-            logger.info('⏳ Waiting 2 seconds before next batch...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+        // Clear any potential references
+        user.tempData = null;
+        
+        // Small delay between users to allow memory cleanup and be respectful to server
+        if (i < users.length - 1) {
+            logger.info('⏳ Waiting 3 seconds before next user...');
+            await new Promise(resolve => setTimeout(resolve, 3000));
         }
     }
     
-    return results;
+    // Return summary instead of full results array
+    return {
+        successful: successCount,
+        failed: errorCount,
+        total: users.length
+    };
 }
 
 /**
@@ -150,6 +153,13 @@ async function main() {
     const startTime = new Date();
     logger.info('🚀 Starting AutoScout24 scraper...');
     logger.info(`⏰ Start time: ${startTime.toLocaleString()}`);
+    
+    // Check if garbage collection is available
+    if (global.gc) {
+        logger.info('🧹 Garbage collection is available - memory cleanup enabled');
+    } else {
+        logger.warn('⚠️ Garbage collection not available. Start Node.js with --expose-gc flag for better memory management');
+    }
     
     try {
         // Create a control record for this scraping session
@@ -189,13 +199,11 @@ async function main() {
             return;
         }
         
-        // Process users in parallel with concurrency limit for regular listing scraping
-        const results = await processUsersInParallel(filteredUsers, control);
+        // Process users sequentially to prevent memory overflow
+        const results = await processUsersSequentially(filteredUsers, control);
         
         // Log summary of results
-        const successful = results.filter(r => r.status === 'success').length;
-        const failed = results.filter(r => r.status === 'error').length;
-        logger.info(`📊 Processing complete: ${successful} successful, ${failed} failed`);
+        logger.info(`📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);
         
 
         
