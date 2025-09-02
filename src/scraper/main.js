@@ -160,6 +160,11 @@ async function main() {
         
         // Fetch and process users
         let users = await getUsersToScrape();
+        
+        users.sort((a, b) => {
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+        
         logger.info('--------------------------------------------------------');
         logger.info(`👥 Found ${users.length} total users`);
 
