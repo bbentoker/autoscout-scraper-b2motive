@@ -6,7 +6,10 @@
     "start": "node --expose-gc main.js",
     "dev": "node --expose-gc main.js",
     "start:memory-optimized": "node --expose-gc --max-old-space-size=512 main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-scheduler": "node --expose-gc test-scheduler.js",
+    "test-scraper-only": "TEST_CHECKER_ON=false node --expose-gc test-scheduler.js",
+    "test-checker-only": "TEST_SCRAPER_ON=false node --expose-gc test-scheduler.js"
   },
   "keywords": [
     "scraper",
