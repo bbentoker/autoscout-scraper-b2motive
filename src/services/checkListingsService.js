@@ -13,16 +13,16 @@ const {
 
 async function handleAdvertNotFound(autoscoutId) {
   try {
-    logger.warn(`🚫 Advert ${autoscoutId} not available, marking ALL with same autoscout_id as inactive...`);
+    logger.warn(`[CHECKER] 🚫 Advert ${autoscoutId} not available, marking ALL with same autoscout_id as inactive...`);
 
     const adverts = await Advert.findAll({ where: { autoscout_id: autoscoutId } });
     if (!adverts || adverts.length === 0) {
-      logger.error(`❌ No adverts found in database for autoscout_id ${autoscoutId}`);
+      logger.error(`[CHECKER] ❌ No adverts found in database for autoscout_id ${autoscoutId}`);
       return;
     }
 
     const lastSeenDate = new Date();
-    logger.info(`📅 Setting last_seen to current date: ${lastSeenDate}`);
+    logger.info(`[CHECKER] 📅 Setting last_seen to current date: ${lastSeenDate}`);
 
     for (const advert of adverts) {
       try {
@@ -33,19 +33,19 @@ async function handleAdvertNotFound(autoscoutId) {
         const daysBetween = timeDiffDays < 1 ? 0 : Math.floor(timeDiffDays);
         advert.sell_time = daysBetween;
         await advert.save();
-        logger.info(`✅ Advert id=${advert.id} (autoscout_id=${autoscoutId}) marked as inactive`);
+        logger.info(`[CHECKER] ✅ Advert id=${advert.id} (autoscout_id=${autoscoutId}) marked as inactive`);
       } catch (rowErr) {
-        logger.error(`❌ Failed to mark advert id=${advert.id} inactive:`, rowErr.message);
+        logger.error(`[CHECKER] ❌ Failed to mark advert id=${advert.id} inactive:`, rowErr.message);
       }
     }
   } catch (error) {
-    logger.error(`❌ Error handling not-available adverts for autoscout_id ${autoscoutId}:`, error.message);
+    logger.error(`[CHECKER] ❌ Error handling not-available adverts for autoscout_id ${autoscoutId}:`, error.message);
     // Fallback: best-effort bulk deactivate without dates/sell_time calc
     try {
       await Advert.update({ is_active: false }, { where: { autoscout_id: autoscoutId } });
-      logger.info(`✅ Fallback: All adverts with autoscout_id=${autoscoutId} marked inactive`);
+      logger.info(`[CHECKER] ✅ Fallback: All adverts with autoscout_id=${autoscoutId} marked inactive`);
     } catch (fallbackError) {
-      logger.error(`❌ Fallback error bulk-updating autoscout_id ${autoscoutId}:`, fallbackError.message);
+      logger.error(`[CHECKER] ❌ Fallback error bulk-updating autoscout_id ${autoscoutId}:`, fallbackError.message);
     }
   }
 }
@@ -86,15 +86,15 @@ async function processAdvertsSequentially(adverts) {
   // UUID validation regex pattern
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  logger.info(`🔄 Processing ${adverts.length} adverts sequentially`);
+  logger.info(`[CHECKER] 🔄 Processing ${adverts.length} adverts sequentially`);
 
   for (let i = 0; i < adverts.length; i++) {
     const advert = adverts[i];
-    logger.info(`📋 Processing advert ${i + 1}/${adverts.length}: ${advert.autoscout_id}`);
+    logger.info(`[CHECKER] 📋 Processing advert ${i + 1}/${adverts.length}: ${advert.autoscout_id}`);
 
     // Validate UUID format before processing
     if (!advert.autoscout_id || !uuidRegex.test(advert.autoscout_id)) {
-      logger.error(`❌ Invalid UUID format for advert autoscout_id: ${advert.autoscout_id} - skipping processing`);
+      logger.error(`[CHECKER] ❌ Invalid UUID format for advert autoscout_id: ${advert.autoscout_id} - skipping processing`);
       errorCount++;
       continue;
     }
@@ -104,23 +104,23 @@ async function processAdvertsSequentially(adverts) {
     
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        logger.info(`🔎 Checking availability for advert: ${advert.autoscout_id} (attempt ${attempt}/3)`);
+        logger.info(`[CHECKER] 🔎 Checking availability for advert: ${advert.autoscout_id} (attempt ${attempt}/3)`);
         const isAvailable = await checkAdvertAvailability(advert.autoscout_id);
         if (!isAvailable) throw new Error('Listing elements not found on page');
-        logger.info(`✅ Listing appears available for advert: ${advert.autoscout_id} on attempt ${attempt}`);
+        logger.info(`[CHECKER] ✅ Listing appears available for advert: ${advert.autoscout_id} on attempt ${attempt}`);
         successCount++;
         processed = true;
         break;
       } catch (error) {
         lastError = error;
-        logger.warn(`⚠️ Attempt ${attempt}/3 failed for advert ${advert.autoscout_id}:`, error.message);
+        logger.warn(`[CHECKER] ⚠️ Attempt ${attempt}/3 failed for advert ${advert.autoscout_id}:`, error.message);
         if (attempt === 3) {
-          logger.error(`❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
+          logger.error(`[CHECKER] ❌ All 3 attempts failed for advert ${advert.autoscout_id}:`, error.message);
           await handleAdvertNotFound(advert.autoscout_id);
           inactiveCount++;
           processed = true;
         } else {
-          logger.info(`⏳ Waiting 1 second before retry for advert ${advert.autoscout_id}...`);
+          logger.info(`[CHECKER] ⏳ Waiting 1 second before retry for advert ${advert.autoscout_id}...`);
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
@@ -136,7 +136,7 @@ async function processAdvertsSequentially(adverts) {
       const memUsage = process.memoryUsage();
       const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
       const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
-      logger.info(`🧹 GC after ${i + 1} adverts: ${heapUsedMB}MB/${heapTotalMB}MB`);
+      logger.info(`[CHECKER] 🧹 GC after ${i + 1} adverts: ${heapUsedMB}MB/${heapTotalMB}MB`);
     }
 
     // Small delay between adverts for memory cleanup and server respect
@@ -154,25 +154,25 @@ async function processAdvertsSequentially(adverts) {
 }
 
 async function checkListings() {
-  logger.info('📋 Starting check listings job...');
+  logger.info('[CHECKER] 📋 Starting check listings job...');
   try {
     const activeAdverts = await Advert.findAll({
       where: { is_active: true },
       attributes: ['autoscout_id', 'seller_id']
     });
 
-    logger.info(`📊 Found ${activeAdverts.length} active adverts to check`);
+    logger.info(`[CHECKER] 📊 Found ${activeAdverts.length} active adverts to check`);
     if (activeAdverts.length === 0) {
-      logger.info('ℹ️ No active adverts found to check');
+      logger.info('[CHECKER] ℹ️ No active adverts found to check');
       return;
     }
 
     const results = await processAdvertsSequentially(activeAdverts);
 
-    logger.info(`📊 Processing complete: ${results.successful} successful, ${results.inactive} marked inactive, ${results.error} failed`);
-    logger.info('✅ Check listings job completed successfully');
+    logger.info(`[CHECKER] 📊 Processing complete: ${results.successful} successful, ${results.inactive} marked inactive, ${results.error} failed`);
+    logger.info('[CHECKER] ✅ Check listings job completed successfully');
   } catch (error) {
-    logger.error('❌ Check listings job failed:', error.message);
+    logger.error('[CHECKER] ❌ Check listings job failed:', error.message);
     throw error;
   }
 }
@@ -182,7 +182,7 @@ async function checkListingsForUser(user) {
     
     // Check if this is a Swiss region user
     if (shouldUseSwissChecker(user)) {
-      logger.info(`🇨🇭 User ${user.id} detected as Swiss region - using Swiss checker`);
+      logger.info(`[CHECKER] 🇨🇭 User ${user.id} detected as Swiss region - using Swiss checker`);
       
       const swissResult = await checkSwissDealerListings(user);
       logSwissCheckerResults(swissResult);
@@ -205,14 +205,14 @@ async function checkListingsForUser(user) {
     }
     
     // Belgian/standard region processing
-    logger.info(`🇧🇪 User ${user.id} using Belgian region checker`);
+    logger.info(`[CHECKER] 🇧🇪 User ${user.id} using Belgian region checker`);
     
     const activeAdverts = await Advert.findAll({
       where: { is_active: true, seller_id: user.id },
       attributes: ['autoscout_id', 'seller_id']
     });
 
-    logger.info(`👤 User ${user.id}: ${activeAdverts.length} active adverts to check`);
+    logger.info(`[CHECKER] 👤 User ${user.id}: ${activeAdverts.length} active adverts to check`);
 
     if (activeAdverts.length === 0) {
       return { user: user.id, status: 'success', successful: 0, inactive: 0, failed: 0, rejected: 0, region: 'belgian' };
@@ -230,7 +230,7 @@ async function checkListingsForUser(user) {
       region: 'belgian' 
     };
   } catch (error) {
-    logger.error(`❌ User ${user.id}: checkListingsForUser failed:`, error.message);
+    logger.error(`[CHECKER] ❌ User ${user.id}: checkListingsForUser failed:`, error.message);
     return { user: user.id, status: 'error', error: error.message };
   }
 }
@@ -239,25 +239,25 @@ async function processUsersSequentiallyForChecker(users) {
   let successCount = 0;
   let errorCount = 0;
 
-  logger.info(`🔄 Processing ${users.length} users sequentially for checker`);
+  logger.info(`[CHECKER] 🔄 Processing ${users.length} users sequentially for checker`);
 
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
-    logger.info(`📋 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
+    logger.info(`[CHECKER] 📋 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
 
     try {
       const result = await checkListingsForUser(user);
       
       if (result.status === 'success') {
         successCount++;
-        logger.info(`✅ User ${user.id} completed: ${result.successful} successful, ${result.inactive} inactive, ${result.failed} failed`);
+        logger.info(`[CHECKER] ✅ User ${user.id} completed: ${result.successful} successful, ${result.inactive} inactive, ${result.failed} failed`);
       } else {
         errorCount++;
-        logger.error(`❌ User ${user.id} failed: ${result.error}`);
+        logger.error(`[CHECKER] ❌ User ${user.id} failed: ${result.error}`);
       }
     } catch (error) {
       errorCount++;
-      logger.error(`❌ User ${user.id} processing error:`, error.message);
+      logger.error(`[CHECKER] ❌ User ${user.id} processing error:`, error.message);
     }
 
     // Aggressive memory cleanup every 3 users
@@ -266,12 +266,12 @@ async function processUsersSequentiallyForChecker(users) {
       const memUsage = process.memoryUsage();
       const heapUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
       const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
-      logger.info(`🧹 GC after ${i + 1} users: ${heapUsedMB}MB/${heapTotalMB}MB`);
+      logger.info(`[CHECKER] 🧹 GC after ${i + 1} users: ${heapUsedMB}MB/${heapTotalMB}MB`);
     }
 
     // Small delay between users for memory cleanup and server respect
     if (i < users.length - 1) {
-      logger.info('⏳ Waiting 2 seconds before next user...');
+      logger.info('[CHECKER] ⏳ Waiting 2 seconds before next user...');
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
@@ -284,8 +284,8 @@ async function processUsersSequentiallyForChecker(users) {
 }
 
 async function checkListingsAcrossUsers() {
-  logger.info('📋 Starting check listings across users...');
-  let users = await getUsersToScrape();
+  logger.info('[CHECKER] 📋 Starting check listings across users...');
+  let users = await getUsersToScrape('CHECKER');
 
   // Sort users by created_at (latest first)
   users.sort((a, b) => {
@@ -301,25 +301,25 @@ async function checkListingsAcrossUsers() {
     return b.id - a.id;
   });
 
-  logger.info(`📋 Sorted ${users.length} users by created_at (latest first)`);
+  logger.info(`[CHECKER] 📋 Sorted ${users.length} users by created_at (latest first)`);
 
   // DEBUG MODE: Filter users with Swiss AutoScout24.ch URLs if DEBUG=true
   if (process.env.DEBUG === 'true') {
     const originalCount = users.length;
     users = users.filter(user => user.autoscout_url && user.autoscout_url.includes('autoscout24.ch'));
-    logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
-    logger.info(`🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
-    logger.info(`📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
+    logger.info(`[CHECKER] 🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+    logger.info(`[CHECKER] 🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
+    logger.info(`[CHECKER] 📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
   }
     
   if (!Array.isArray(users) || users.length === 0) {
-    logger.info('ℹ️ No users to process for checking');
+    logger.info('[CHECKER] ℹ️ No users to process for checking');
     return [];
   }
 
   const results = await processUsersSequentiallyForChecker(users);
   
-  logger.info(`📊 Check listings across users complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} users`);
+  logger.info(`[CHECKER] 📊 Check listings across users complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} users`);
   
   return results;
 }
