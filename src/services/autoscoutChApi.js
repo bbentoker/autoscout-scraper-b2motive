@@ -26,7 +26,7 @@ function extractDealerIdFromChUrl(url) {
     const match = url.match(/seller-(\d+)/);
     return match ? parseInt(match[1], 10) : null;
   } catch (error) {
-    console.error('❌ Error extracting dealer ID from CH URL:', error.message);
+    console.error('[SCRAPER] ❌ Error extracting dealer ID from CH URL:', error.message);
     return null;
   }
 }
@@ -135,7 +135,7 @@ async function fetchWithRetry(url, options, maxRetries = 3) {
       if (shouldRetry && attempt < maxRetries) {
         // Exponential backoff: 1s, 2s, 4s
         const delay = Math.pow(2, attempt) * 1000;
-        console.warn(`⚠️ Request failed with status ${status}. Retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries})`);
+        console.warn(`[SCRAPER] ⚠️ Request failed with status ${status}. Retrying in ${delay}ms... (attempt ${attempt + 1}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
@@ -156,7 +156,7 @@ async function fetchSwissDealerListings(dealerId, page = 0, size = 20) {
   const headers = getSwissApiHeaders();
   
   try {
-    console.log(`📤 Fetching Swiss dealer listings for dealer ${dealerId}, page ${page}`);
+    console.log(`[SCRAPER] 📤 Fetching Swiss dealer listings for dealer ${dealerId}, page ${page}`);
     
     const response = await fetchWithRetry(LISTINGS_SEARCH_ENDPOINT, {
       data: payload,
@@ -166,8 +166,8 @@ async function fetchSwissDealerListings(dealerId, page = 0, size = 20) {
     const data = response.data;
     const listings = data?.content || [];
     
-    console.log(`📥 Swiss API returned ${listings.length} listings for dealer ${dealerId}, page ${page}`);
-    console.log(`📊 Total pages: ${data?.totalPages || 0}, Total elements: ${data?.totalElements || 0}`);
+    console.log(`[SCRAPER] 📥 Swiss API returned ${listings.length} listings for dealer ${dealerId}, page ${page}`);
+    console.log(`[SCRAPER] 📊 Total pages: ${data?.totalPages || 0}, Total elements: ${data?.totalElements || 0}`);
     
     return {
       listings: listings,
@@ -177,7 +177,7 @@ async function fetchSwissDealerListings(dealerId, page = 0, size = 20) {
     };
     
   } catch (error) {
-    console.error(`❌ Error fetching Swiss dealer listings for dealer ${dealerId}:`, error.message);
+    console.error(`[SCRAPER] ❌ Error fetching Swiss dealer listings for dealer ${dealerId}:`, error.message);
     throw error;
   }
 }
@@ -193,7 +193,7 @@ async function fetchAllSwissDealerListings(dealerId) {
   const maxPages = 100; // Safety limit
   let totalElements = 0;
   
-  console.log(`🔎 Fetching all listings for Swiss dealer ${dealerId}`);
+  console.log(`[SCRAPER] 🔎 Fetching all listings for Swiss dealer ${dealerId}`);
   
   while (hasMore && page < maxPages) {
     try {
@@ -203,7 +203,7 @@ async function fetchAllSwissDealerListings(dealerId) {
         // Deduplicate listings based on ID
         const newListings = result.listings.filter(listing => {
           if (seenIds.has(listing.id)) {
-            console.log(`🔄 Duplicate listing found: ${listing.id} (skipping)`);
+            console.log(`[SCRAPER] 🔄 Duplicate listing found: ${listing.id} (skipping)`);
             return false;
           }
           seenIds.add(listing.id);
@@ -211,12 +211,12 @@ async function fetchAllSwissDealerListings(dealerId) {
         });
         
         allListings.push(...newListings);
-        console.log(`📄 Page ${page + 1}: Added ${newListings.length} new listings (${result.listings.length - newListings.length} duplicates, total unique: ${allListings.length})`);
+        console.log(`[SCRAPER] 📄 Page ${page + 1}: Added ${newListings.length} new listings (${result.listings.length - newListings.length} duplicates, total unique: ${allListings.length})`);
         
         // Store total elements from first page
         if (page === 0) {
           totalElements = result.totalElements || 0;
-          console.log(`📊 API reports total elements: ${totalElements}`);
+          console.log(`[SCRAPER] 📊 API reports total elements: ${totalElements}`);
         }
       }
       
@@ -229,24 +229,24 @@ async function fetchAllSwissDealerListings(dealerId) {
       }
       
     } catch (error) {
-      console.error(`❌ Error on page ${page}:`, error.message);
+      console.error(`[SCRAPER] ❌ Error on page ${page}:`, error.message);
       // Don't break immediately, try a few more times with longer delays
       if (page < 3) {
-        console.log(`🔄 Retrying page ${page} after error...`);
+        console.log(`[SCRAPER] 🔄 Retrying page ${page} after error...`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         continue;
       } else {
-        console.error(`❌ Too many errors, stopping at page ${page}`);
+        console.error(`[SCRAPER] ❌ Too many errors, stopping at page ${page}`);
         break;
       }
     }
   }
   
-  console.log(`✅ Completed fetching Swiss dealer listings. Total unique: ${allListings.length} listings`);
+  console.log(`[SCRAPER] ✅ Completed fetching Swiss dealer listings. Total unique: ${allListings.length} listings`);
   
   // Warning if we got fewer listings than expected
   if (totalElements > 0 && allListings.length < totalElements) {
-    console.warn(`⚠️ Warning: Expected ${totalElements} listings but got ${allListings.length}. Some listings might be missing.`);
+    console.warn(`[SCRAPER] ⚠️ Warning: Expected ${totalElements} listings but got ${allListings.length}. Some listings might be missing.`);
   }
   
   return allListings;
@@ -270,14 +270,14 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
         const logEntry = `[${timestamp}] [API] ${message}\n`;
         fs.appendFileSync(debugLogFilePath, logEntry);
       } catch (error) {
-        console.error(`❌ Error writing to debug log file: ${error.message}`);
+        console.error(`[SCRAPER] ❌ Error writing to debug log file: ${error.message}`);
       }
     }
   };
   
   try {
     const startMsg = `🔍 [API DEBUG] Checking individual listing: ${listingId}`;
-    console.log(startMsg);
+    console.log('[SCRAPER] ' + startMsg);
     writeDebugLog(startMsg);
     
     const response = await fetchWithRetry(url, {
@@ -286,39 +286,39 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
     });
     
     const statusMsg = `🔍 [API DEBUG] Response status: ${response.status}`;
-    console.log(statusMsg);
+    console.log('[SCRAPER] ' + statusMsg);
     writeDebugLog(statusMsg);
     
     if (response.status === 200) {
       const successMsg = `✅ [API DEBUG] Listing ${listingId} found and active`;
-      console.log(successMsg);
+      console.log('[SCRAPER] ' + successMsg);
       writeDebugLog(successMsg);
       return response.data;
     } else if (response.status === 404) {
       const notFoundMsg = `❌ [API DEBUG] Listing ${listingId} not found (404) - This listing appears to be sold/removed`;
-      console.log(notFoundMsg);
+      console.log('[SCRAPER] ' + notFoundMsg);
       writeDebugLog(notFoundMsg);
       return null;
     } else {
       const unexpectedMsg = `⚠️ [API DEBUG] Listing ${listingId} returned unexpected status ${response.status}`;
-      console.log(unexpectedMsg);
+      console.log('[SCRAPER] ' + unexpectedMsg);
       writeDebugLog(unexpectedMsg);
       return null;
     }
     
   } catch (error) {
     const errorMsg = `🔍 [API DEBUG] Error occurred for listing ${listingId}: ${error.message} (status: ${error.response?.status})`;
-    console.log(errorMsg);
+    console.log('[SCRAPER] ' + errorMsg);
     writeDebugLog(errorMsg);
     
     if (error.response && error.response.status === 404) {
       const notFoundMsg = `❌ [API DEBUG] Listing ${listingId} not found (404 error) - This listing appears to be sold/removed`;
-      console.log(notFoundMsg);
+      console.log('[SCRAPER] ' + notFoundMsg);
       writeDebugLog(notFoundMsg);
       return null;
     } else if (error.response && error.response.status === 429) {
       const rateLimitMsg = `⏳ [API DEBUG] Rate limited checking listing ${listingId}, waiting and retrying...`;
-      console.log(rateLimitMsg);
+      console.log('[SCRAPER] ' + rateLimitMsg);
       writeDebugLog(rateLimitMsg);
       
       await new Promise(resolve => setTimeout(resolve, 5000)); // Increased wait time
@@ -326,7 +326,7 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
       for (let retryAttempt = 1; retryAttempt <= 3; retryAttempt++) {
         try {
           const retryMsg = `🔄 [API DEBUG] Retry attempt ${retryAttempt}/3 for listing ${listingId} after rate limit...`;
-          console.log(retryMsg);
+          console.log('[SCRAPER] ' + retryMsg);
           writeDebugLog(retryMsg);
           
           const retryResponse = await fetchWithRetry(url, {
@@ -335,13 +335,13 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
           });
           
           const retryResultMsg = `🔄 [API DEBUG] Retry result for ${listingId}: status ${retryResponse.status}`;
-          console.log(retryResultMsg);
+          console.log('[SCRAPER] ' + retryResultMsg);
           writeDebugLog(retryResultMsg);
           
           return retryResponse.status === 200 ? retryResponse.data : null;
         } catch (retryError) {
           const retryErrorMsg = `❌ [API DEBUG] Retry attempt ${retryAttempt} failed for listing ${listingId}: ${retryError.message}`;
-          console.error(retryErrorMsg);
+          console.error('[SCRAPER] ' + retryErrorMsg);
           writeDebugLog(retryErrorMsg);
           
           // If retry also fails with 429, wait longer and try again
@@ -349,13 +349,13 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
             if (retryAttempt < 3) {
               const waitTime = Math.pow(2, retryAttempt) * 2000; // 4s, 8s
               const waitMsg = `⏳ [API DEBUG] Rate limit persists for ${listingId}, waiting ${waitTime}ms before retry ${retryAttempt + 1}...`;
-              console.log(waitMsg);
+              console.log('[SCRAPER] ' + waitMsg);
               writeDebugLog(waitMsg);
               await new Promise(resolve => setTimeout(resolve, waitTime));
               continue;
             } else {
               const skipMsg = `⚠️ [API DEBUG] Rate limit persists for ${listingId} after 3 retries - skipping to avoid false negative`;
-              console.log(skipMsg);
+              console.log('[SCRAPER] ' + skipMsg);
               writeDebugLog(skipMsg);
               throw new Error(`Rate limit error for listing ${listingId} - cannot determine if listing is available`);
             }
@@ -365,7 +365,7 @@ async function fetchSwissListingById(listingId, debugLogFilePath = null) {
       }
     } else {
       const unexpectedErrorMsg = `❌ [API DEBUG] Unexpected error fetching listing ${listingId}: ${error.message}`;
-      console.error(unexpectedErrorMsg);
+      console.error('[SCRAPER] ' + unexpectedErrorMsg);
       writeDebugLog(unexpectedErrorMsg);
       return null;
     }

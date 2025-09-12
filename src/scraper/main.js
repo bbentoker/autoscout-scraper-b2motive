@@ -46,7 +46,7 @@ function filterUsersByAddDate(users) {
     for (const user of users) {
         if (!user.autoscout_url_add_date) {
             // If no date is provided, include the user
-            logger.info(`✅ User ${user.id}: No autoscout_url_add_date provided - will be processed`);
+            logger.info(`[SCRAPER] ✅ User ${user.id}: No autoscout_url_add_date provided - will be processed`);
             filteredUsers.push(user);
             continue;
         }
@@ -67,21 +67,21 @@ function filterUsersByAddDate(users) {
             skippedUsers.push(skipInfo);
             
             // Log each skipped user immediately
-            logger.info(`⏭️ SKIPPED User ${user.id}:`);
-            logger.info(`   📊 User: ${user.company_name}`);
-            logger.info(`   📅 Add Date: ${user.autoscout_url_add_date}`);
-            logger.info(`   📊 Days Old: ${daysDifference}`);
-            logger.info(`   📈 Within Current Week: ${isWithinWeek}`);
-            logger.info(`   🚫 Reason: ${skipInfo.reason}`);
-            logger.info(`   ──────────────────────────────────────────`);
+            logger.info(`[SCRAPER] ⏭️ SKIPPED User ${user.id}:`);
+            logger.info(`[SCRAPER]    📊 User: ${user.company_name}`);
+            logger.info(`[SCRAPER]    📅 Add Date: ${user.autoscout_url_add_date}`);
+            logger.info(`[SCRAPER]    📊 Days Old: ${daysDifference}`);
+            logger.info(`[SCRAPER]    📈 Within Current Week: ${isWithinWeek}`);
+            logger.info(`[SCRAPER]    🚫 Reason: ${skipInfo.reason}`);
+            logger.info(`[SCRAPER]    ──────────────────────────────────────────`);
         } else {
-            logger.info(`✅ User ${user.id}: Will be processed (${daysDifference} days old, within week: ${isWithinWeek})`);
+            logger.info(`[SCRAPER] ✅ User ${user.id}: Will be processed (${daysDifference} days old, within week: ${isWithinWeek})`);
             filteredUsers.push(user);
         }
     }
     
     if (skippedUsers.length > 0) {
-        logger.info(`📊 SUMMARY: Skipped ${skippedUsers.length} users due to autoscout_url_add_date within current week`);
+        logger.info(`[SCRAPER] 📊 SUMMARY: Skipped ${skippedUsers.length} users due to autoscout_url_add_date within current week`);
     }
     
     return filteredUsers;
@@ -98,15 +98,15 @@ async function  processUsersSequentially(users, control) {
     
     for (let i = 0; i < users.length; i++) {
         const user = users[i];
-        logger.info(`🔄 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
+        logger.info(`[SCRAPER] 🔄 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
         
         try {
-            logger.info(`📝 Scraping user: ${user.id}`);
+            logger.info(`[SCRAPER] 📝 Scraping user: ${user.id}`);
             await scrapeUsersListings(user, control);
             successCount++;
-            logger.info(`✅ Successfully processed user ${user.id}`);
+            logger.info(`[SCRAPER] ✅ Successfully processed user ${user.id}`);
         } catch (error) {
-            logger.error(`❌ Error scraping user ${user.id}:`, error.message);
+            logger.error(`[SCRAPER] ❌ Error scraping user ${user.id}:`, error.message);
             errorCount++;
         }
         
@@ -124,7 +124,7 @@ async function  processUsersSequentially(users, control) {
             const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
             const heapPercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
             
-            logger.info(`🧹 Triple GC after user ${user.id}: ${heapUsedMB}MB/${heapTotalMB}MB (${heapPercent}%)`);
+            logger.info(`[SCRAPER] 🧹 Triple GC after user ${user.id}: ${heapUsedMB}MB/${heapTotalMB}MB (${heapPercent}%)`);
         }
         
         // Clear any potential references
@@ -132,7 +132,7 @@ async function  processUsersSequentially(users, control) {
         
         // Small delay between users to allow memory cleanup and be respectful to server
         if (i < users.length - 1) {
-            logger.info('⏳ Waiting 3 seconds before next user...');
+            logger.info('[SCRAPER] ⏳ Waiting 3 seconds before next user...');
             await new Promise(resolve => setTimeout(resolve, 3000));
         }
     }
@@ -151,20 +151,20 @@ async function  processUsersSequentially(users, control) {
  */
 async function main() {
     const startTime = new Date();
-    logger.info('🚀 Starting AutoScout24 scraper...');
-    logger.info(`⏰ Start time: ${startTime.toLocaleString()}`);
+    logger.info('[SCRAPER] 🚀 Starting AutoScout24 scraper...');
+    logger.info(`[SCRAPER] ⏰ Start time: ${startTime.toLocaleString()}`);
     
     // Check if garbage collection is available
     if (global.gc) {
-        logger.info('🧹 Garbage collection is available - memory cleanup enabled');
+        logger.info('[SCRAPER] 🧹 Garbage collection is available - memory cleanup enabled');
     } else {
-        logger.warn('⚠️ Garbage collection not available. Start Node.js with --expose-gc flag for better memory management');
+        logger.warn('[SCRAPER] ⚠️ Garbage collection not available. Start Node.js with --expose-gc flag for better memory management');
     }
     
     try {
         // Create a control record for this scraping session
         const control = await Control.create({ date: new Date() });
-        logger.info(`📌 Created control ID: ${control.id}`);
+        logger.info(`[SCRAPER] 📌 Created control ID: ${control.id}`);
         
 
         
@@ -175,27 +175,28 @@ async function main() {
             return new Date(b.created_at) - new Date(a.created_at);
         });
         
-        logger.info('--------------------------------------------------------');
-        logger.info(`👥 Found ${users.length} total users`);
+        logger.info('[SCRAPER] --------------------------------------------------------');
+        logger.info(`[SCRAPER] 👥 Found ${users.length} total users`);
 
         // DEBUG MODE: Filter users with Swiss AutoScout24.ch URLs if DEBUG=true
         if (process.env.DEBUG === 'true') {
             const originalCount = users.length;
             users = users.filter(user => user.autoscout_url && user.autoscout_url.includes('autoscout24.ch'));
-            logger.info(`🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
-            logger.info(`🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
-            logger.info(`📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
+            logger.info(`[SCRAPER] 🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+            logger.info(`[SCRAPER] 🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
+            logger.info(`[SCRAPER] 📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
         }
         
         // STEP 2: Filter users for regular listing scraping
         const filteredUsers = filterUsersByAddDate(users);
-        logger.info(`✅ ${filteredUsers.length} users will be processed for regular listing scraping after filtering`);
-        logger.info('--------------------------------------------------------');
+        console.log('filteredUsers', filteredUsers.length);
+        logger.info(`[SCRAPER] ✅ ${filteredUsers.length} users will be processed for regular listing scraping after filtering`);
+        logger.info('[SCRAPER] --------------------------------------------------------');
         
         // Check if there are any users to process for regular scraping
         if (filteredUsers.length === 0) {
-            logger.info('⏭️ No users to process for regular listing scraping after filtering. All users are within the current week or less than 7 days old.');
-            logger.info('✅ Inventory count scraping was still completed for all users.');
+            logger.info('[SCRAPER] ⏭️ No users to process for regular listing scraping after filtering. All users are within the current week or less than 7 days old.');
+            logger.info('[SCRAPER] ✅ Inventory count scraping was still completed for all users.');
             return;
         }
         
@@ -203,7 +204,7 @@ async function main() {
         const results = await processUsersSequentially(filteredUsers, control);
         
         // Log summary of results
-        logger.info(`📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);
+        logger.info(`[SCRAPER] 📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);
         
 
         
@@ -213,9 +214,9 @@ async function main() {
         const durationSeconds = Math.floor((duration % 60000) / 1000);
         const durationMs = duration % 1000;
         
-        logger.info(`⏰ End time: ${endTime.toLocaleString()}`);
-        logger.info(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
-        logger.info('✅ Scraping session completed successfully');
+        logger.info(`[SCRAPER] ⏰ End time: ${endTime.toLocaleString()}`);
+        logger.info(`[SCRAPER] ⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
+        logger.info('[SCRAPER] ✅ Scraping session completed successfully');
         
     } catch (error) {
         const endTime = new Date();
@@ -224,9 +225,9 @@ async function main() {
         const durationSeconds = Math.floor((duration % 60000) / 1000);
         const durationMs = duration % 1000;
         
-        logger.info(`⏰ End time: ${endTime.toLocaleString()}`);
-        logger.info(`⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
-        logger.error('❌ Error during scraping session:', error.message);
+        logger.info(`[SCRAPER] ⏰ End time: ${endTime.toLocaleString()}`);
+        logger.info(`[SCRAPER] ⏱️ Total duration: ${durationMinutes}m ${durationSeconds}s ${durationMs}ms`);
+        logger.error('[SCRAPER] ❌ Error during scraping session:', error.message);
         throw error;
     }
 }

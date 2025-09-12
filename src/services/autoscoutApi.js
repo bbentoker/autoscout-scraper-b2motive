@@ -35,7 +35,7 @@ async function getVisitorCookie() {
     const value = cookie.split(';')[0];
     return value;
   } catch (e) {
-    console.warn('⚠️ Could not fetch as24Visitor cookie:', e.message);
+    console.warn('[SCRAPER] ⚠️ Could not fetch as24Visitor cookie:', e.message);
     return null;
   }
 }
@@ -54,7 +54,7 @@ function extractCustomerIdFromNextData(html) {
     }
     return null;
   } catch (e) {
-    console.error('❌ Failed to extract customerId from __NEXT_DATA__:', e.message);
+    console.error('[SCRAPER] ❌ Failed to extract customerId from __NEXT_DATA__:', e.message);
     return null;
   }
 }
@@ -70,7 +70,7 @@ async function extractCustomerIdFromHtml(html, baseUrl = 'https://www.autoscout2
       if (firstLink.length > 0) {
         const href = firstLink.attr('href');
         if (href) {
-          console.log('🔗 Found navigation link:', href);
+          console.log('[SCRAPER] 🔗 Found navigation link:', href);
           
           // Make absolute URL if relative
           const aboutUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
@@ -89,26 +89,26 @@ async function extractCustomerIdFromHtml(html, baseUrl = 'https://www.autoscout2
             // Extract customerId from __NEXT_DATA__ in the about page
             const customerId = extractCustomerIdFromNextData(response.data);
             if (customerId) {
-              console.log('✅ Found customerId from __NEXT_DATA__:', customerId);
+              console.log('[SCRAPER] ✅ Found customerId from __NEXT_DATA__:', customerId);
               return customerId;
             }
           } catch (fetchError) {
-            console.warn('⚠️ Failed to fetch about page:', fetchError.message);
+            console.warn('[SCRAPER] ⚠️ Failed to fetch about page:', fetchError.message);
           }
         }
       }
     }
     
     // Fallback: try to extract from __NEXT_DATA__ in current page
-    console.log('📄 Trying to extract customerId from current page __NEXT_DATA__');
+    console.log('[SCRAPER] 📄 Trying to extract customerId from current page __NEXT_DATA__');
     const customerIdFromCurrent = extractCustomerIdFromNextData(html);
     if (customerIdFromCurrent) {
-      console.log('✅ Found customerId from current page __NEXT_DATA__:', customerIdFromCurrent);
+      console.log('[SCRAPER] ✅ Found customerId from current page __NEXT_DATA__:', customerIdFromCurrent);
       return customerIdFromCurrent;
     }
     
     // Fallback: Use the old image-based method as last resort
-    console.log('🖼️ Falling back to image-based extraction method');
+    console.log('[SCRAPER] 🖼️ Falling back to image-based extraction method');
     const candidateImgs = [
       'div.dp-header__bar a.dp-header__logo img',
       'div.dp-header__bar img',
@@ -135,7 +135,7 @@ async function extractCustomerIdFromHtml(html, baseUrl = 'https://www.autoscout2
     if (idMatch2) return parseInt(idMatch2[1], 10);
     return null;
   } catch (e) {
-    console.error('❌ Failed to extract customerId:', e.message);
+    console.error('[SCRAPER] ❌ Failed to extract customerId:', e.message);
     return null;
   }
 }

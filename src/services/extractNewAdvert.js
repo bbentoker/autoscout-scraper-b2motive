@@ -17,7 +17,7 @@ function extractFirstMileageValue(mileageRaw) {
   }
 
   if (matches.length > 1) {
-    console.log('Multiple mileage values detected, using the first one:', mileageRaw);
+    console.log('[SCRAPER] Multiple mileage values detected, using the first one:', mileageRaw);
   }
 
   const firstMatch = matches[0][0];
@@ -26,7 +26,7 @@ function extractFirstMileageValue(mileageRaw) {
 
 async function getListingInfos(advertUrl, advertId, user) {
   try {
-    console.log(`Fetching advert page: ${advertUrl}`);
+    console.log(`[SCRAPER] Fetching advert page: ${advertUrl}`);
     const response = await axios.get(advertUrl);
 
     const html = response.data;
@@ -45,7 +45,7 @@ async function getListingInfos(advertUrl, advertId, user) {
 
     if(!sellerName){
       sellerName = $('.TieredPricingRatingsSection_nameContainer__fMSj2').text().trim();
-      console.log(sellerName) 
+      console.log('[SCRAPER] Seller name:', sellerName) 
     }
     const extractDetail = (label) => {
       return $(`dt:contains("${label}")`).next('dd').text().trim();
@@ -53,7 +53,7 @@ async function getListingInfos(advertUrl, advertId, user) {
     
     // Extract image URL
     const imageUrl = $('img').eq(9).attr('src');
-    console.log('Found image URL:', imageUrl);
+    console.log('[SCRAPER] Found image URL:', imageUrl);
     
     // Upload image to S3 and get the S3 URL
     const s3ImageUrl = await uploadImageToS3(imageUrl, advertId);
@@ -85,7 +85,7 @@ async function getListingInfos(advertUrl, advertId, user) {
     const mileage = extractFirstMileageValue(mileageRaw);
     const firstRegistrationRaw = extractDetail('First registration');
    
-    console.log("First registration raw value:", firstRegistrationRaw);
+    console.log("[SCRAPER] First registration raw value:", firstRegistrationRaw);
     let firstRegistration = null;
 
     if (firstRegistrationRaw != null && firstRegistrationRaw != '-' && firstRegistrationRaw != '') {
@@ -100,7 +100,7 @@ async function getListingInfos(advertUrl, advertId, user) {
     const previousOwner = extractDetail('Previous owner');
     const fullServiceHistory = extractDetail('Full service history');
 
-    console.log(`Extracted details for advert ID ${advertId}: \n`);
+    console.log(`[SCRAPER] Extracted details for advert ID ${advertId}: \n`);
     // console.log({
     //   make,
     //   model,
@@ -171,7 +171,7 @@ async function getListingInfos(advertUrl, advertId, user) {
       original_image_url: imageUrl || null,
     };
   } catch (error) {
-    console.error(`Error fetching advert page: ${advertUrl}`, error.message);
+    console.error(`[SCRAPER] Error fetching advert page: ${advertUrl}`, error.message);
     throw error;
   }
 }
@@ -193,7 +193,7 @@ async function extractNewAdvert(advertUrl, advertId, user) {
       }
     });
     if (existingListing) {
-      console.log(`Found existing listing with ID: ${existingListing.id}. Updating autoscout_id and reactivating.`);
+      console.log(`[SCRAPER] Found existing listing with ID: ${existingListing.id}. Updating autoscout_id and reactivating.`);
       
       // Update the existing listing with new autoscout_id and image URLs, and reactivate it
       await existingListing.update({
@@ -204,16 +204,16 @@ async function extractNewAdvert(advertUrl, advertId, user) {
         last_seen: new Date()
       });
       
-      console.log(`Updated existing listing with new autoscout_id: ${extractedData.autoscout_id}`);
+      console.log(`[SCRAPER] Updated existing listing with new autoscout_id: ${extractedData.autoscout_id}`);
       return existingListing;
     } else {
       // No existing listing found, create new one
-      console.log('No existing listing found. Creating new advert.');
+      console.log('[SCRAPER] No existing listing found. Creating new advert.');
       const newAdvert = await Advert.create(extractedData);
       return newAdvert;
     }
   } catch (error) {
-    console.error(`Error creating advert: ${advertUrl}`, error.message);
+    console.error(`[SCRAPER] Error creating advert: ${advertUrl}`, error.message);
     throw error;
   }
 }

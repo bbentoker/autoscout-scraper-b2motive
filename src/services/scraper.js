@@ -32,11 +32,11 @@ function forceMemoryCleanup(context = 'unknown') {
     const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
     const heapPercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
     
-    console.log(`🧹 Aggressive cleanup (${context}): ${heapUsedMB}MB used / ${heapTotalMB}MB total (${heapPercent}%)`);
+    console.log(`[SCRAPER] 🧹 Aggressive cleanup (${context}): ${heapUsedMB}MB used / ${heapTotalMB}MB total (${heapPercent}%)`);
     
     // If still high memory usage, try more aggressive cleanup
     if (heapPercent > 80) {
-      console.log(`⚠️ High memory usage detected (${heapPercent}%), performing additional cleanup...`);
+      console.log(`[SCRAPER] ⚠️ High memory usage detected (${heapPercent}%), performing additional cleanup...`);
       setTimeout(() => {
         if (global.gc) {
           global.gc();
@@ -59,11 +59,11 @@ async function processElementsSequentially(elements, $$, user, control) {
     let existingCount = 0;
     let errorCount = 0;
     
-    console.log(`🔄 Processing ${elements.length} elements sequentially`);
+    console.log(`[SCRAPER] 🔄 Processing ${elements.length} elements sequentially`);
     
     for (let i = 0; i < elements.length; i++) {
         const element = elements[i];
-        console.log(`📋 Processing element ${i + 1}/${elements.length}`);
+        console.log(`[SCRAPER] 📋 Processing element ${i + 1}/${elements.length}`);
         
         try {
             const articleId = $$(element).attr('id');
@@ -80,7 +80,7 @@ async function processElementsSequentially(elements, $$, user, control) {
                 });
 
                 if (!existingAdvert) {
-                    console.log(`🆕 Fetching details for new advert ID: ${articleId}`);
+                    console.log(`[SCRAPER] 🆕 Fetching details for new advert ID: ${articleId}`);
                     await extractNewAdvert(fullAdvertLink, articleId, user);
                     newCount++;
                 } else {
@@ -89,14 +89,14 @@ async function processElementsSequentially(elements, $$, user, control) {
                         await existingAdvert.save();
                     }
 
-                    console.log(`✅ Advert ID ${articleId} already exists.`);
+                    console.log(`[SCRAPER] ✅ Advert ID ${articleId} already exists.`);
                     existingCount++;
                 }
             } else {
                 errorCount++;
             }
         } catch (error) {
-            console.error(`❌ Error processing element:`, error.message);
+            console.error(`[SCRAPER] ❌ Error processing element:`, error.message);
             errorCount++;
         }
         
@@ -125,36 +125,36 @@ async function processElementsSequentially(elements, $$, user, control) {
  */
 async function searchAllPagesViaSwissApi(user, control) {
   try {
-    console.log(`🇨🇭 Starting Swiss region scraping for user ${user.id}: ${user.autoscout_url}`);
+    console.log(`[SCRAPER] 🇨🇭 Starting Swiss region scraping for user ${user.id}: ${user.autoscout_url}`);
     
     // Use the Swiss API service to scrape dealer listings
     const result = await scrapeSwissDealer(user.autoscout_url, user.id);
     
-    console.log(`📊 Swiss API Results for user ${user.id}:`);
-    console.log(`   Total listings: ${result.totalListings}`);
-    console.log(`   Professional listings: ${result.professionalListings}`);
+    console.log(`[SCRAPER] 📊 Swiss API Results for user ${user.id}:`);
+    console.log(`[SCRAPER]    Total listings: ${result.totalListings}`);
+    console.log(`[SCRAPER]    Professional listings: ${result.professionalListings}`);
     
     // Process the listings sequentially to prevent memory overflow
     const results = await processSwissListingsSequentially(result.listings, user, control);
     
     const { summary } = results;
     
-    console.log(`📊 Swiss processing summary for user ${user.id}: ${summary.new} new, ${summary.existing} existing, ${summary.error} failed`);
-    console.log(`✅ Finished Swiss API scraping for user ${user.id}`);
+    console.log(`[SCRAPER] 📊 Swiss processing summary for user ${user.id}: ${summary.new} new, ${summary.existing} existing, ${summary.error} failed`);
+    console.log(`[SCRAPER] ✅ Finished Swiss API scraping for user ${user.id}`);
     
     // Final garbage collection for this Swiss user
     if (global.gc) {
       global.gc();
-      console.log(`🧹 Final garbage collection for Swiss user ${user.id}`);
+      console.log(`[SCRAPER] 🧹 Final garbage collection for Swiss user ${user.id}`);
     }
     
   } catch (error) {
-    console.error(`❌ Error in Swiss API scraping for user ${user.id}:`, error.message);
+    console.error(`[SCRAPER] ❌ Error in Swiss API scraping for user ${user.id}:`, error.message);
     
     // Garbage collection even on error to free memory
     if (global.gc) {
       global.gc();
-      console.log(`🧹 Error cleanup - garbage collection for Swiss user ${user.id}`);
+      console.log(`[SCRAPER] 🧹 Error cleanup - garbage collection for Swiss user ${user.id}`);
     }
     
     throw error;
@@ -198,11 +198,11 @@ async function createSwissAdvert(listing, user) {
 
     // Create the advert
     const newAdvert = await Advert.create(advertData);
-    console.log(`✅ [Swiss] Created new advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
+    console.log(`[SCRAPER] ✅ [Swiss] Created new advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
     
     return newAdvert;
   } catch (error) {
-    console.error(`❌ Error creating Swiss advert ${listing.id}:`, error.message);
+    console.error(`[SCRAPER] ❌ Error creating Swiss advert ${listing.id}:`, error.message);
     throw error;
   }
 }
@@ -216,11 +216,11 @@ async function processSwissListingsSequentially(listings, user, control) {
   let errorCount = 0;
   const items = Array.isArray(listings) ? listings : [];
   
-  console.log(`🔄 Processing ${items.length} Swiss listings sequentially for user ${user.id}`);
+  console.log(`[SCRAPER] 🔄 Processing ${items.length} Swiss listings sequentially for user ${user.id}`);
   
   for (let i = 0; i < items.length; i++) {
     const listing = items[i];
-    console.log(`📋 Processing Swiss listing ${i + 1}/${items.length}`);
+    console.log(`[SCRAPER] 📋 Processing Swiss listing ${i + 1}/${items.length}`);
     
     try {
       const articleId = listing?.id;
@@ -240,7 +240,7 @@ async function processSwissListingsSequentially(listings, user, control) {
       });
 
       if (!existingAdvert) {
-        console.log(`🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
+        console.log(`[SCRAPER] 🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
         
         // Create new advert directly from Swiss API data
         await createSwissAdvert(listing, user);
@@ -256,11 +256,11 @@ async function processSwissListingsSequentially(listings, user, control) {
         existingAdvert.last_seen = new Date();
         await existingAdvert.save();
 
-        console.log(`✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
+        console.log(`[SCRAPER] ✅ [Swiss] Advert ID ${articleId} marked as seen and updated.`);
         existingCount++;
       }
     } catch (e) {
-      console.error(`❌ Error processing Swiss listing ${listing?.id}:`, e.message);
+      console.error(`[SCRAPER] ❌ Error processing Swiss listing ${listing?.id}:`, e.message);
       errorCount++;
     }
     
@@ -298,11 +298,11 @@ async function searchAllPagesViaApi(user, control) {
   try {
     // Check if this is a Swiss region URL and route accordingly
     if (isSwissRegionUrl(user.autoscout_url)) {
-      console.log(`🇨🇭 Detected Swiss region URL: ${user.autoscout_url}`);
+      console.log(`[SCRAPER] 🇨🇭 Detected Swiss region URL: ${user.autoscout_url}`);
       return await searchAllPagesViaSwissApi(user, control);
     }
     
-    console.log(`🇧🇪 Using Belgian region API for: ${user.autoscout_url}`);
+    console.log(`[SCRAPER] 🇧🇪 Using Belgian region API for: ${user.autoscout_url}`);
     
     // Load dealer page to get customerId and set a realistic referer
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -319,7 +319,7 @@ async function searchAllPagesViaApi(user, control) {
             const waitMs = (retryAfterSec && !Number.isNaN(retryAfterSec))
               ? retryAfterSec * 1000
               : parseInt(process.env.RATE_LIMIT_WAIT_MS || '60000', 10);
-            console.warn(`⚠️ 429 on ${label}. Waiting ${Math.round(waitMs / 1000)}s before retry...`);
+            console.warn(`[SCRAPER] ⚠️ 429 on ${label}. Waiting ${Math.round(waitMs / 1000)}s before retry...`);
             await sleep(waitMs);
             continue;
           }
@@ -337,15 +337,15 @@ async function searchAllPagesViaApi(user, control) {
     }));
     const html = dealerRes.data;
     const customerId = await extractCustomerIdFromHtml(html);
-    console.log("scraping user", user.id);
-    console.log('customerId', customerId);
+    console.log("[SCRAPER] scraping user", user.id);
+    console.log('[SCRAPER] customerId', customerId);
     if (!customerId) {
-      console.error('❌ Could not resolve customerId from dealer page:', user.autoscout_url);
+      console.error('[SCRAPER] ❌ Could not resolve customerId from dealer page:', user.autoscout_url);
       return;
     }
     const cultureIso = resolveCultureIsoFromUrl(user.autoscout_url);
     const visitorCookie = await fetchWith429Retry('visitor cookie', () => getVisitorCookie());
-    console.log(`🏷️ Using customerId=${customerId}, cultureIso=${cultureIso}`);
+    console.log(`[SCRAPER] 🏷️ Using customerId=${customerId}, cultureIso=${cultureIso}`);
 
     // Extract brand options from page
     function extractMakeOptionsFromHtml(html) {
@@ -374,7 +374,7 @@ async function searchAllPagesViaApi(user, control) {
     }
 
     const makeOptions = extractMakeOptionsFromHtml(html);
-    console.log(`🧭 Found ${makeOptions.length} makes to scrape`);
+    console.log(`[SCRAPER] 🧭 Found ${makeOptions.length} makes to scrape`);
 
     let totalListings = 0;
 
@@ -385,11 +385,11 @@ async function searchAllPagesViaApi(user, control) {
       let errorCount = 0;
       const items = Array.isArray(listings) ? listings : [];
       
-      console.log(`🔄 Processing ${items.length} API listings sequentially`);
+      console.log(`[SCRAPER] 🔄 Processing ${items.length} API listings sequentially`);
       
       for (let i = 0; i < items.length; i++) {
         const listing = items[i];
-        console.log(`📋 Processing API listing ${i + 1}/${items.length}`);
+        console.log(`[SCRAPER] 📋 Processing API listing ${i + 1}/${items.length}`);
         
         try {
           const articleId = listing?.id;
@@ -407,14 +407,14 @@ async function searchAllPagesViaApi(user, control) {
           });
 
           if (!existingAdvert) {
-            console.log(`🆕 [API] New advert: ${articleId}. Extracting...`);
+            console.log(`[SCRAPER] 🆕 [API] New advert: ${articleId}. Extracting...`);
             await extractNewAdvert(fullAdvertLink, articleId, user);
             newCount++;
           } else {
             existingCount++;
           }
         } catch (e) {
-          console.error('❌ Error processing API listing:', e.message);
+          console.error('[SCRAPER] ❌ Error processing API listing:', e.message);
           errorCount++;
         }
         
@@ -438,17 +438,17 @@ async function searchAllPagesViaApi(user, control) {
 
     // Per-make fetch function (single-call then pagination fallback)
     async function fetchMake(make) {
-      console.log(`🔎 Fetching listings for makeId=${make.id} (${make.label})`);
+      console.log(`[SCRAPER] 🔎 Fetching listings for makeId=${make.id} (${make.label})`);
       let page = 1;
       let safetyStop = 0;
       while (true) {
         safetyStop += 1;
         if (safetyStop > 100) {
-          console.warn(`⚠️ Safety stop reached for make ${make.label}.`);
+          console.warn(`[SCRAPER] ⚠️ Safety stop reached for make ${make.label}.`);
           break;
         }
 
-        console.log(`📤 Posting to dealer API page=${page} for customerId=${customerId} makeId=${make.id}`);
+        console.log(`[SCRAPER] 📤 Posting to dealer API page=${page} for customerId=${customerId} makeId=${make.id}`);
         const data = await fetchWith429Retry('dealer listings', () => fetchDealerListings({
           customerId,
           page,
@@ -461,17 +461,17 @@ async function searchAllPagesViaApi(user, control) {
           const items = data?.listings || data?.result?.listings || data?.data || [];
           const count = Array.isArray(items) ? items.length : 0;
           totalListings += count;
-          console.log(`📥 API page ${page} (${make.label}) returned ${count} listings`);
+          console.log(`[SCRAPER] 📥 API page ${page} (${make.label}) returned ${count} listings`);
           if (count > 0) {
             const results = await processApiListingsSequentially(items);
-            console.log(`📊 API page ${page} (${make.label}): ${results.new} new, ${results.existing} existing, ${results.error} failed`);
+            console.log(`[SCRAPER] 📊 API page ${page} (${make.label}): ${results.new} new, ${results.existing} existing, ${results.error} failed`);
             
             // Clear items array to free memory
             items.length = 0;
           }
           if (count === 0) break;
         } catch (e) {
-          console.warn(`⚠️ Could not parse listings for make ${make.label}`);
+          console.warn(`[SCRAPER] ⚠️ Could not parse listings for make ${make.label}`);
           break;
         }
 
@@ -480,7 +480,7 @@ async function searchAllPagesViaApi(user, control) {
         // Force garbage collection after each page if available
         if (global.gc) {
           global.gc();
-          console.log(`🧹 Garbage collection triggered after page ${page - 1}`);
+          console.log(`[SCRAPER] 🧹 Garbage collection triggered after page ${page - 1}`);
         }
         
         await new Promise((r) => setTimeout(r, 300));
@@ -488,46 +488,46 @@ async function searchAllPagesViaApi(user, control) {
     }
 
     // Process makes sequentially to prevent memory overflow
-    console.log(`🧵 Processing ${makeOptions.length} makes sequentially`);
+    console.log(`[SCRAPER] 🧵 Processing ${makeOptions.length} makes sequentially`);
     for (let i = 0; i < makeOptions.length; i++) {
       const make = makeOptions[i];
-      console.log(`📋 Processing make ${i + 1}/${makeOptions.length}: ${make.label}`);
+      console.log(`[SCRAPER] 📋 Processing make ${i + 1}/${makeOptions.length}: ${make.label}`);
       
       try {
         await fetchMake(make);
-        console.log(`✅ Completed make: ${make.label}`);
+        console.log(`[SCRAPER] ✅ Completed make: ${make.label}`);
       } catch (error) {
-        console.error(`❌ Error processing make ${make.label}:`, error.message);
+        console.error(`[SCRAPER] ❌ Error processing make ${make.label}:`, error.message);
       }
       
       // Force garbage collection after each make if available
       if (global.gc) {
         global.gc();
-        console.log(`🧹 Garbage collection triggered after make: ${make.label}`);
+        console.log(`[SCRAPER] 🧹 Garbage collection triggered after make: ${make.label}`);
       }
       
       // Delay between makes for memory cleanup and server respect
       if (i < makeOptions.length - 1) {
-        console.log('⏳ Waiting 2 seconds before next make...');
+        console.log('[SCRAPER] ⏳ Waiting 2 seconds before next make...');
         await new Promise((r) => setTimeout(r, 2000));
       }
     }
 
-    console.log(`✅ Finished API scraping for user ${user.id}. Total listings processed: ${totalListings}`);
+    console.log(`[SCRAPER] ✅ Finished API scraping for user ${user.id}. Total listings processed: ${totalListings}`);
     
     // Final garbage collection for this user
     if (global.gc) {
       global.gc();
-      console.log(`🧹 Final garbage collection for user ${user.id}`);
+      console.log(`[SCRAPER] 🧹 Final garbage collection for user ${user.id}`);
     }
     
   } catch (error) {
-    console.error('❌ Error in searchAllPagesViaApi:', error.message);
+    console.error('[SCRAPER] ❌ Error in searchAllPagesViaApi:', error.message);
     
     // Garbage collection even on error to free memory
     if (global.gc) {
       global.gc();
-      console.log(`🧹 Error cleanup - garbage collection for user ${user.id}`);
+      console.log(`[SCRAPER] 🧹 Error cleanup - garbage collection for user ${user.id}`);
     }
   }
 }
@@ -544,11 +544,11 @@ async function searchAllPages(user, control) {
           ?.trim() || '1'
       );
   
-      console.log(`📄 Total pages found: ${totalPages}`);
+      console.log(`[SCRAPER] 📄 Total pages found: ${totalPages}`);
   
             for (let page = 1; page <= totalPages; page++) {
         console.log(
-          `📥 Fetching content from page ${page}`
+          `[SCRAPER] 📥 Fetching content from page ${page}`
         );
 
         try {
@@ -562,16 +562,16 @@ async function searchAllPages(user, control) {
                                 // On first run (page 1), get and log the elements with specified class
            if (page === 1) {
              const titleCountElements = $$('.dp-list__title__count.sc-ellipsis.sc-font-xl');
-             console.log(`🔍 Found ${titleCountElements.length} elements with class 'dp-list__title__count sc-ellipsis sc-font-xl' on page ${page}`);
+             console.log(`[SCRAPER] 🔍 Found ${titleCountElements.length} elements with class 'dp-list__title__count sc-ellipsis sc-font-xl' on page ${page}`);
              
              titleCountElements.each((index, element) => {
                const elementText = $$(element).text().trim();
-               console.log(`📋 Element ${index + 1} content: "${elementText}"`);
+               console.log(`[SCRAPER] 📋 Element ${index + 1} content: "${elementText}"`);
              });
            }
           const articles = $$('article');
           console.log(
-            `📝 Found ${articles.length} <article> elements on page ${page}`
+            `[SCRAPER] 📝 Found ${articles.length} <article> elements on page ${page}`
           );
           if(page === 1 && articles.length === 0){
             throw new Error('No articles found , url is not valid')
@@ -581,18 +581,18 @@ async function searchAllPages(user, control) {
           const results = await processElementsSequentially(articles.toArray(), $$, user, control);
           
           // Log summary for this page
-          console.log(`📊 Page ${page} complete: ${results.new} new, ${results.existing} existing, ${results.error} failed`);
+          console.log(`[SCRAPER] 📊 Page ${page} complete: ${results.new} new, ${results.existing} existing, ${results.error} failed`);
           
         } catch (error) {
           console.error(
-            `❌ Error fetching content from page ${page}:`,
+            `[SCRAPER] ❌ Error fetching content from page ${page}:`,
             error.message
           );
         }
       }
     } catch (error) {
       console.error(
-        `❌ Error fetching content:`,
+        `[SCRAPER] ❌ Error fetching content:`,
         error.message
       );
     }
@@ -639,12 +639,12 @@ async function searchAllPagesWithAllSorts(user, control) {
       url = url.replace(/([&?])desc=[^&]*/g, '$1').replace(/[?&]$/, '');
       // Add sort and desc params
       url += (url.includes('?') ? '&' : '?') + `sort=${encodeURIComponent(sortOption.value)}&desc=${sortOption.desc}`;
-      console.log(`\n🔗 Scraping with sort: ${sortOption.text} (${sortOption.value}, desc: ${sortOption.desc})`);
+      console.log(`\n[SCRAPER] 🔗 Scraping with sort: ${sortOption.text} (${sortOption.value}, desc: ${sortOption.desc})`);
       // 3. Call your existing searchAllPages logic for this sort
       await searchAllPages({ ...user, autoscout_url: url }, control);
     }
   } catch (error) {
-    console.error('❌ Error in searchAllPagesWithAllSorts:', error.message);
+    console.error('[SCRAPER] ❌ Error in searchAllPagesWithAllSorts:', error.message);
   }
 }
 

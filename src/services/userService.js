@@ -10,7 +10,7 @@ async function getUsersToScrape() {
     }
     const apiUrl = process.env.API_URL;
   
-    console.log(`Fetching from: ${apiUrl}/auth/autoscout-scraper-user-infos`);
+    console.log(`[SCRAPER] Fetching from: ${apiUrl}/auth/autoscout-scraper-user-infos`);
     
     const response = await fetch(`${apiUrl}/auth/autoscout-scraper-user-infos`);
     
