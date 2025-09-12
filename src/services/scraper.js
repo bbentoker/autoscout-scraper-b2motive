@@ -81,7 +81,7 @@ async function processElementsSequentially(elements, $$, user, control) {
 
                 if (!existingAdvert) {
                     console.log(`[SCRAPER] 🆕 Fetching details for new advert ID: ${articleId}`);
-                    await extractNewAdvert(fullAdvertLink, articleId, user);
+                    await extractNewAdvert(fullAdvertLink, articleId, user, isInitialRun);
                     newCount++;
                 } else {
                     if (!existingAdvert.is_active) {
@@ -123,7 +123,7 @@ async function processElementsSequentially(elements, $$, user, control) {
 /**
  * Swiss region scraping using AutoScout24.ch API
  */
-async function searchAllPagesViaSwissApi(user, control) {
+async function searchAllPagesViaSwissApi(user, control, isInitialRun = false) {
   try {
     console.log(`[SCRAPER] 🇨🇭 Starting Swiss region scraping for user ${user.id}: ${user.autoscout_url}`);
     
@@ -135,7 +135,7 @@ async function searchAllPagesViaSwissApi(user, control) {
     console.log(`[SCRAPER]    Professional listings: ${result.professionalListings}`);
     
     // Process the listings sequentially to prevent memory overflow
-    const results = await processSwissListingsSequentially(result.listings, user, control);
+    const results = await processSwissListingsSequentially(result.listings, user, control, isInitialRun);
     
     const { summary } = results;
     
@@ -148,6 +148,15 @@ async function searchAllPagesViaSwissApi(user, control) {
       console.log(`[SCRAPER] 🧹 Final garbage collection for Swiss user ${user.id}`);
     }
     
+    // Return comprehensive statistics for Swiss scraping
+    return {
+      totalListings: result.totalListings || 0,
+      newListings: summary.new || 0,
+      existingListings: summary.existing || 0,
+      errorCount: summary.error || 0,
+      professionalListings: result.professionalListings || 0
+    };
+    
   } catch (error) {
     console.error(`[SCRAPER] ❌ Error in Swiss API scraping for user ${user.id}:`, error.message);
     
@@ -157,6 +166,7 @@ async function searchAllPagesViaSwissApi(user, control) {
       console.log(`[SCRAPER] 🧹 Error cleanup - garbage collection for Swiss user ${user.id}`);
     }
     
+    // Re-throw the error
     throw error;
   }
 }
@@ -164,7 +174,7 @@ async function searchAllPagesViaSwissApi(user, control) {
 /**
  * Create Swiss advert from API data
  */
-async function createSwissAdvert(listing, user) {
+async function createSwissAdvert(listing, user, isInitialRun = false) {
   try {
     // Get the first image and add the Swiss image prefix
     const firstImage = listing.images && listing.images.length > 0 ? listing.images[0] : null;
@@ -192,13 +202,18 @@ async function createSwissAdvert(listing, user) {
       description: listing.teaser || '',
       link: `https://www.autoscout24.ch/de/d/${listing.id}`,
       image_url: imageUrl,
-      original_image_url: imageUrl
+      original_image_url: imageUrl,
+      is_initial_run_listing: isInitialRun
       // created_at will be automatically set to current timestamp by model default
     };
 
     // Create the advert
     const newAdvert = await Advert.create(advertData);
-    console.log(`[SCRAPER] ✅ [Swiss] Created new advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
+    if (isInitialRun) {
+      console.log(`[SCRAPER] ✅ [Swiss] Created new INITIAL RUN advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
+    } else {
+      console.log(`[SCRAPER] ✅ [Swiss] Created new advert: ${listing.id} (${listing.make?.name} ${listing.model?.name})`);
+    }
     
     return newAdvert;
   } catch (error) {
@@ -210,7 +225,7 @@ async function createSwissAdvert(listing, user) {
 /**
  * Process Swiss listings sequentially to prevent memory overflow
  */
-async function processSwissListingsSequentially(listings, user, control) {
+async function processSwissListingsSequentially(listings, user, control, isInitialRun = false) {
   let newCount = 0;
   let existingCount = 0;
   let errorCount = 0;
@@ -243,7 +258,7 @@ async function processSwissListingsSequentially(listings, user, control) {
         console.log(`[SCRAPER] 🆕 [Swiss API] New advert: ${articleId}. Creating from API data...`);
         
         // Create new advert directly from Swiss API data
-        await createSwissAdvert(listing, user);
+        await createSwissAdvert(listing, user, isInitialRun);
         newCount++;
       } else {
         // Mark as active if it was inactive
@@ -294,12 +309,12 @@ async function processSwissListingsSequentially(listings, user, control) {
  * New flow: Search all pages via dealer API rather than HTML pagination.
  * Logs the API data for each page.
  */
-async function searchAllPagesViaApi(user, control) {
+async function searchAllPagesViaApi(user, control, isInitialRun = false) {
   try {
     // Check if this is a Swiss region URL and route accordingly
     if (isSwissRegionUrl(user.autoscout_url)) {
       console.log(`[SCRAPER] 🇨🇭 Detected Swiss region URL: ${user.autoscout_url}`);
-      return await searchAllPagesViaSwissApi(user, control);
+      return await searchAllPagesViaSwissApi(user, control, isInitialRun);
     }
     
     console.log(`[SCRAPER] 🇧🇪 Using Belgian region API for: ${user.autoscout_url}`);
@@ -377,6 +392,9 @@ async function searchAllPagesViaApi(user, control) {
     console.log(`[SCRAPER] 🧭 Found ${makeOptions.length} makes to scrape`);
 
     let totalListings = 0;
+    let totalNewListings = 0;
+    let totalExistingListings = 0;
+    let totalErrorCount = 0;
 
     // Process listings sequentially to prevent memory overflow
     async function processApiListingsSequentially(listings) {
@@ -408,7 +426,7 @@ async function searchAllPagesViaApi(user, control) {
 
           if (!existingAdvert) {
             console.log(`[SCRAPER] 🆕 [API] New advert: ${articleId}. Extracting...`);
-            await extractNewAdvert(fullAdvertLink, articleId, user);
+            await extractNewAdvert(fullAdvertLink, articleId, user, isInitialRun);
             newCount++;
           } else {
             existingCount++;
@@ -466,6 +484,11 @@ async function searchAllPagesViaApi(user, control) {
             const results = await processApiListingsSequentially(items);
             console.log(`[SCRAPER] 📊 API page ${page} (${make.label}): ${results.new} new, ${results.existing} existing, ${results.error} failed`);
             
+            // Accumulate totals
+            totalNewListings += results.new;
+            totalExistingListings += results.existing;
+            totalErrorCount += results.error;
+            
             // Clear items array to free memory
             items.length = 0;
           }
@@ -514,12 +537,21 @@ async function searchAllPagesViaApi(user, control) {
     }
 
     console.log(`[SCRAPER] ✅ Finished API scraping for user ${user.id}. Total listings processed: ${totalListings}`);
+    console.log(`[SCRAPER] 📊 Final statistics: ${totalNewListings} new, ${totalExistingListings} existing, ${totalErrorCount} errors`);
     
     // Final garbage collection for this user
     if (global.gc) {
       global.gc();
       console.log(`[SCRAPER] 🧹 Final garbage collection for user ${user.id}`);
     }
+    
+    // Return comprehensive statistics
+    return {
+      totalListings: totalListings,
+      newListings: totalNewListings,
+      existingListings: totalExistingListings,
+      errorCount: totalErrorCount
+    };
     
   } catch (error) {
     console.error('[SCRAPER] ❌ Error in searchAllPagesViaApi:', error.message);
@@ -529,6 +561,9 @@ async function searchAllPagesViaApi(user, control) {
       global.gc();
       console.log(`[SCRAPER] 🧹 Error cleanup - garbage collection for user ${user.id}`);
     }
+    
+    // Re-throw the error with empty statistics
+    throw error;
   }
 }
 

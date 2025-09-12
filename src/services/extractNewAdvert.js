@@ -24,7 +24,7 @@ function extractFirstMileageValue(mileageRaw) {
   return firstMatch.replace(/\s+/g, ' ').trim();
 }
 
-async function getListingInfos(advertUrl, advertId, user) {
+async function getListingInfos(advertUrl, advertId, user, isInitialRun = false) {
   try {
     console.log(`[SCRAPER] Fetching advert page: ${advertUrl}`);
     const response = await axios.get(advertUrl);
@@ -169,6 +169,7 @@ async function getListingInfos(advertUrl, advertId, user) {
       full_service_history: fullServiceHistory === 'Yes',
       image_url: s3ImageUrl || null,
       original_image_url: imageUrl || null,
+      is_initial_run_listing: isInitialRun,
     };
   } catch (error) {
     console.error(`[SCRAPER] Error fetching advert page: ${advertUrl}`, error.message);
@@ -177,9 +178,9 @@ async function getListingInfos(advertUrl, advertId, user) {
 }
 
 // Keep the old function name for backward compatibility
-async function extractNewAdvert(advertUrl, advertId, user) {
+async function extractNewAdvert(advertUrl, advertId, user, isInitialRun = false) {
   try {
-    const extractedData = await getListingInfos(advertUrl, advertId, user);
+    const extractedData = await getListingInfos(advertUrl, advertId, user, isInitialRun);
    
     // Check for existing listing with same characteristics (excluding autoscout_id and image URLs)
     const existingListing = await Advert.findOne({
@@ -208,7 +209,11 @@ async function extractNewAdvert(advertUrl, advertId, user) {
       return existingListing;
     } else {
       // No existing listing found, create new one
-      console.log('[SCRAPER] No existing listing found. Creating new advert.');
+      if (isInitialRun) {
+        console.log('[SCRAPER] No existing listing found. Creating new INITIAL RUN advert.');
+      } else {
+        console.log('[SCRAPER] No existing listing found. Creating new advert.');
+      }
       const newAdvert = await Advert.create(extractedData);
       return newAdvert;
     }

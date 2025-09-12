@@ -74,7 +74,11 @@ module.exports = (sequelize,DataTypes) => {
       link:DataTypes.STRING,
       sell_time:DataTypes.INTEGER,
       image_url:DataTypes.STRING,
-      original_image_url:DataTypes.STRING
+      original_image_url:DataTypes.STRING,
+      is_initial_run_listing: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

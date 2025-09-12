@@ -101,10 +101,12 @@ async function  processUsersSequentially(users, control) {
         logger.info(`[SCRAPER] 🔄 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
         
         try {
-            logger.info(`[SCRAPER] 📝 Scraping user: ${user.id}`);
-            await scrapeUsersListings(user, control);
+            const userStats = await scrapeUsersListings(user, control);
             successCount++;
-            logger.info(`[SCRAPER] ✅ Successfully processed user ${user.id}`);
+            
+            // Additional summary log for this user
+            logger.info(`[SCRAPER] 📈 User ${user.id} Summary: ${userStats.newListings} new, ${userStats.existingListings} existing, ${userStats.totalListings} total (${userStats.durationMinutes}m ${userStats.durationSeconds}s)`);
+            
         } catch (error) {
             logger.error(`[SCRAPER] ❌ Error scraping user ${user.id}:`, error.message);
             errorCount++;
@@ -170,11 +172,11 @@ async function main() {
         
         // Fetch and process users
         let users = await getUsersToScrape();
-        
+      
         users.sort((a, b) => {
             return new Date(b.created_at) - new Date(a.created_at);
         });
-        
+        console.log("first user to scrape", users[0]);  
         logger.info('[SCRAPER] --------------------------------------------------------');
         logger.info(`[SCRAPER] 👥 Found ${users.length} total users`);
 
@@ -188,20 +190,19 @@ async function main() {
         }
         
         // STEP 2: Filter users for regular listing scraping
-        const filteredUsers = filterUsersByAddDate(users);
-        console.log('filteredUsers', filteredUsers.length);
-        logger.info(`[SCRAPER] ✅ ${filteredUsers.length} users will be processed for regular listing scraping after filtering`);
+        console.log('users', users.length);
+        logger.info(`[SCRAPER] ✅ ${users.length} users will be processed for regular listing scraping`);
         logger.info('[SCRAPER] --------------------------------------------------------');
         
         // Check if there are any users to process for regular scraping
-        if (filteredUsers.length === 0) {
-            logger.info('[SCRAPER] ⏭️ No users to process for regular listing scraping after filtering. All users are within the current week or less than 7 days old.');
+        if (users.length === 0) {
+            logger.info('[SCRAPER] ⏭️ No users to process for regular listing scraping ');
             logger.info('[SCRAPER] ✅ Inventory count scraping was still completed for all users.');
             return;
         }
         
         // Process users sequentially to prevent memory overflow
-        const results = await processUsersSequentially(filteredUsers, control);
+        const results = await processUsersSequentially(users, control);
         
         // Log summary of results
         logger.info(`[SCRAPER] 📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);
@@ -238,10 +239,90 @@ async function main() {
  * Scrape listings for a specific user
  * @param {Object} user - User object with autoscout_url
  * @param {Object} control - Control object for tracking
+ * @returns {Object} - Statistics about the scraping session
  */
 async function scrapeUsersListings(user, control) {
-    // Prefer the new API-based flow
-    await searchAllPagesViaApi(user, control);
+    const userStartTime = new Date();
+    
+    // Check if this is the user's first scraping run
+    const isInitialRun = user.autoscout_adverts_count === 0;
+    
+    logger.info(`[SCRAPER] 🚀 Starting scraping session for user ${user.id} (${user.company_name || 'Unknown'})`);
+    logger.info(`[SCRAPER] 🔗 URL: ${user.autoscout_url}`);
+    logger.info(`[SCRAPER] ⏰ Session start time: ${userStartTime.toLocaleString()}`);
+    
+    if (isInitialRun) {
+        logger.info(`[SCRAPER] 🔄 INITIAL RUN detected for user ${user.id} (autoscout_adverts_count: ${user.autoscout_adverts_count})`);
+        logger.info(`[SCRAPER] 📝 All new listings for this user will be marked as initial run listings`);
+    } else {
+        logger.info(`[SCRAPER] ✅ Regular run for user ${user.id} (autoscout_adverts_count: ${user.autoscout_adverts_count})`);
+    }
+    
+    try {
+        // Prefer the new API-based flow, pass initial run flag
+        const results = await searchAllPagesViaApi(user, control, isInitialRun);
+        
+        const userEndTime = new Date();
+        const userDuration = userEndTime - userStartTime;
+        const userDurationMinutes = Math.floor(userDuration / 60000);
+        const userDurationSeconds = Math.floor((userDuration % 60000) / 1000);
+        
+        // Default statistics if results is not returned or incomplete
+        const stats = {
+            userId: user.id,
+            companyName: user.company_name || 'Unknown',
+            url: user.autoscout_url,
+            startTime: userStartTime,
+            endTime: userEndTime,
+            durationMinutes: userDurationMinutes,
+            durationSeconds: userDurationSeconds,
+            totalListings: results?.totalListings || 0,
+            newListings: results?.newListings || 0,
+            existingListings: results?.existingListings || 0,
+            errorCount: results?.errorCount || 0,
+            status: 'success'
+        };
+        
+        logger.info(`[SCRAPER] 🎉 Completed scraping session for user ${user.id}`);
+        logger.info(`[SCRAPER] ⏰ Session end time: ${userEndTime.toLocaleString()}`);
+        logger.info(`[SCRAPER] ⏱️ Total duration: ${userDurationMinutes}m ${userDurationSeconds}s`);
+        logger.info(`[SCRAPER] 📊 Total listings processed: ${stats.totalListings}`);
+        logger.info(`[SCRAPER] 🆕 New listings found: ${stats.newListings}`);
+        logger.info(`[SCRAPER] ✅ Existing listings updated: ${stats.existingListings}`);
+        logger.info(`[SCRAPER] ❌ Errors encountered: ${stats.errorCount}`);
+        logger.info(`[SCRAPER] 🏁 Session completed successfully for user ${user.id}`);
+        
+        return stats;
+        
+    } catch (error) {
+        const userEndTime = new Date();
+        const userDuration = userEndTime - userStartTime;
+        const userDurationMinutes = Math.floor(userDuration / 60000);
+        const userDurationSeconds = Math.floor((userDuration % 60000) / 1000);
+        
+        const stats = {
+            userId: user.id,
+            companyName: user.company_name || 'Unknown',
+            url: user.autoscout_url,
+            startTime: userStartTime,
+            endTime: userEndTime,
+            durationMinutes: userDurationMinutes,
+            durationSeconds: userDurationSeconds,
+            totalListings: 0,
+            newListings: 0,
+            existingListings: 0,
+            errorCount: 1,
+            status: 'error',
+            error: error.message
+        };
+        
+        logger.error(`[SCRAPER] 💥 Scraping session failed for user ${user.id}`);
+        logger.error(`[SCRAPER] ⏰ Session end time: ${userEndTime.toLocaleString()}`);
+        logger.error(`[SCRAPER] ⏱️ Total duration: ${userDurationMinutes}m ${userDurationSeconds}s`);
+        logger.error(`[SCRAPER] ❌ Error: ${error.message}`);
+        
+        throw error;
+    }
 }
 
 module.exports = { main }; 
