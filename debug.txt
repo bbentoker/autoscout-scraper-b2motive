@@ -1,0 +1,5 @@
+AutoScout24 Scraper Debug Log - Session started at 2025-09-15T16:21:02.965Z
+================================================================================
+[2025-09-15T16:21:11.928Z] 🔥 SCRAPER SESSION STARTED - Processing 303 users
+[2025-09-15T16:21:11.929Z] ================================================================================
+[2025-09-15T16:21:11.929Z] 🚀 STARTED processing user 42 (DEX - Easy Car Shopping) - 1/303 - URL: https://www.autoscout24.be/nl/verkopers/dex-easy-car-shopping

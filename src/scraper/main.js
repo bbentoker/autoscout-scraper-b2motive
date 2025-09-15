@@ -3,6 +3,7 @@ const { searchAllPages, searchAllPagesWithAllSorts, searchAllPagesViaApi } = req
 const { getUsersToScrape } = require('../services/userService');
 const { Control } = require('../../models');
 const logger = require('../utils/logger');
+const debugLogger = require('../utils/debugLogger');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { AutoScoutInventory } = require('../../models');
@@ -98,16 +99,27 @@ async function  processUsersSequentially(users, control) {
     
     for (let i = 0; i < users.length; i++) {
         const user = users[i];
-        logger.info(`[SCRAPER] 🔄 Processing user ${i + 1}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
+        const currentIndex = i + 1;
+        
+        // Debug log: User start
+        debugLogger.logUserStart(user, currentIndex, users.length);
+        
+        logger.info(`[SCRAPER] 🔄 Processing user ${currentIndex}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
         
         try {
             const userStats = await scrapeUsersListings(user, control);
             successCount++;
             
+            // Debug log: User success
+            debugLogger.logUserSuccess(user, userStats, currentIndex, users.length);
+            
             // Additional summary log for this user
             logger.info(`[SCRAPER] 📈 User ${user.id} Summary: ${userStats.newListings} new, ${userStats.existingListings} existing, ${userStats.totalListings} total (${userStats.durationMinutes}m ${userStats.durationSeconds}s)`);
             
         } catch (error) {
+            // Debug log: User error
+            debugLogger.logUserError(user, error, currentIndex, users.length);
+            
             logger.error(`[SCRAPER] ❌ Error scraping user ${user.id}:`, error.message);
             errorCount++;
         }
@@ -153,6 +165,10 @@ async function  processUsersSequentially(users, control) {
  */
 async function main() {
     const startTime = new Date();
+    
+    // Clear and initialize debug log file
+    debugLogger.clearDebugFile();
+    
     logger.info('[SCRAPER] 🚀 Starting AutoScout24 scraper...');
     logger.info(`[SCRAPER] ⏰ Start time: ${startTime.toLocaleString()}`);
     
@@ -169,13 +185,22 @@ async function main() {
         logger.info(`[SCRAPER] 📌 Created control ID: ${control.id}`);
         
 
-        
+        console.log("--------------------------------getting users--------------------------------");
         // Fetch and process users
         let users = await getUsersToScrape();
-      
+        console.log("users", users);
+ 
+        // sort the users by autoscout_adverts_count count desc
         users.sort((a, b) => {
-            return new Date(b.created_at) - new Date(a.created_at);
+            return b.autoscout_adverts_count - a.autoscout_adverts_count;
         });
+        
+        // sort the users by created_at desc
+        // users.sort((a, b) => {
+        //     return new Date(b.created_at) - new Date(a.created_at);
+        // });
+
+        
         console.log("first user to scrape", users[0]);  
         logger.info('[SCRAPER] --------------------------------------------------------');
         logger.info(`[SCRAPER] 👥 Found ${users.length} total users`);
@@ -183,7 +208,8 @@ async function main() {
         // DEBUG MODE: Filter users with Swiss AutoScout24.ch URLs if DEBUG=true
         if (process.env.DEBUG === 'true') {
             const originalCount = users.length;
-            users = users.filter(user => user.autoscout_url && user.autoscout_url.includes('autoscout24.ch'));
+            // users = users.filter(user => user.autoscout_url && user.autoscout_url.includes('autoscout24.ch'));
+            users = users.filter(user => user.id ==42);
             logger.info(`[SCRAPER] 🐛 DEBUG MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
             logger.info(`[SCRAPER] 🎯 Debug filter: Swiss AutoScout24.ch URLs only`);
             logger.info(`[SCRAPER] 📋 Filtered users: [${users.map(u => `${u.id} (${u.autoscout_url})`).join(', ')}]`);
@@ -198,11 +224,19 @@ async function main() {
         if (users.length === 0) {
             logger.info('[SCRAPER] ⏭️ No users to process for regular listing scraping ');
             logger.info('[SCRAPER] ✅ Inventory count scraping was still completed for all users.');
+            debugLogger.logSessionStart(0);
+            debugLogger.logSessionComplete({ successful: 0, failed: 0, total: 0 });
             return;
         }
         
+        // Log session start
+        debugLogger.logSessionStart(users.length);
+        
         // Process users sequentially to prevent memory overflow
         const results = await processUsersSequentially(users, control);
+        
+        // Log session completion
+        debugLogger.logSessionComplete(results);
         
         // Log summary of results
         logger.info(`[SCRAPER] 📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);
