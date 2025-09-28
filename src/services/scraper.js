@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { extractNewAdvert } = require('./extractNewAdvert');
+const { uploadImage } = require('./awsService');
 const { Advert, Control, AutoScoutInventory } = require('../../models');
 const {
   resolveCultureIsoFromUrl,
@@ -178,7 +179,19 @@ async function createSwissAdvert(listing, user, isInitialRun = false) {
   try {
     // Get the first image and add the Swiss image prefix
     const firstImage = listing.images && listing.images.length > 0 ? listing.images[0] : null;
-    const imageUrl = firstImage ? `https://listing-images.autoscout24.ch/${firstImage.key}` : null;
+    const originalImageUrl = firstImage ? `https://listing-images.autoscout24.ch/${firstImage.key}` : null;
+    
+    // Upload image to MinIO and get the MinIO URL
+    let minioImageUrl = null;
+    if (originalImageUrl) {
+      console.log(`[SCRAPER] 🇨🇭 Uploading Swiss image to MinIO: ${originalImageUrl}`);
+      minioImageUrl = await uploadImage(originalImageUrl, String(listing.id));
+      if (minioImageUrl) {
+        console.log(`[SCRAPER] ✅ Swiss image uploaded to MinIO: ${minioImageUrl}`);
+      } else {
+        console.log(`[SCRAPER] ⚠️ Failed to upload Swiss image to MinIO, using original URL`);
+      }
+    }
 
     // Map Swiss API data to our database structure
     const advertData = {
@@ -201,8 +214,8 @@ async function createSwissAdvert(listing, user, isInitialRun = false) {
       fuel_type: listing.fuelType || '',
       description: listing.teaser || '',
       link: `https://www.autoscout24.ch/de/d/${listing.id}`,
-      image_url: imageUrl,
-      original_image_url: imageUrl,
+      image_url: minioImageUrl || originalImageUrl, // Use MinIO URL if available, fallback to original
+      original_image_url: originalImageUrl,
       is_initial_run_listing: isInitialRun
       // created_at will be automatically set to current timestamp by model default
     };
