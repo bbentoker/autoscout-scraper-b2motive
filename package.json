@@ -21,9 +21,10 @@
   "license": "ISC",
   "description": "A Node.js application for scraping car listings from AutoScout24",
   "dependencies": {
-    "aws-sdk": "^2.1692.0",
+    "@aws-sdk/client-s3": "^3.658.1",
     "axios": "^1.10.0",
     "cheerio": "^1.1.1",
+    "client-s3": "github:aws-sdk/client-s3",
     "dotenv": "^17.2.0",
     "node-cron": "^4.2.1",
     "openai": "^4.28.0",

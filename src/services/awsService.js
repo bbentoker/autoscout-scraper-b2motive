@@ -1,14 +1,14 @@
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const axios = require('axios');
 
-// Configure MinIO S3-compatible service
-const s3 = new AWS.S3({
+// Configure MinIO S3-compatible service using AWS SDK v3
+const s3Client = new S3Client({
   endpoint: 'https://s3.b2motive.com', // MinIO S3 endpoint
-  accessKeyId: process.env.MINIO_ROOT_USER || process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey:
-    process.env.MINIO_ROOT_PASSWORD || process.env.AWS_SECRET_ACCESS_KEY,
-  s3ForcePathStyle: true, // required for MinIO
-  signatureVersion: 'v4',
+  credentials: {
+    accessKeyId: process.env.MINIO_ROOT_USER || process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.MINIO_ROOT_PASSWORD || process.env.AWS_SECRET_ACCESS_KEY,
+  },
+  forcePathStyle: true, // required for MinIO
   region: 'us-east-1', // MinIO doesn't need this but AWS SDK requires it
 });
 
@@ -76,7 +76,7 @@ async function uploadImage(imageUrl, advertId) {
     const filename = `autoscout/${advertId}_${timestamp}.${fileExtension}`;
     
     // Upload to MinIO with quality preservation settings
-    const uploadParams = {
+    const uploadCommand = new PutObjectCommand({
       Bucket: process.env.MINIO_BUCKET || process.env.AWS_S3_BUCKET,
       Key: filename,
       Body: imageResponse.data,
@@ -87,13 +87,18 @@ async function uploadImage(imageUrl, advertId) {
         'upload-timestamp': timestamp.toString(),
         'advert-id': advertId
       }
-    };
+    });
 
-    const uploadResult = await s3.upload(uploadParams).promise();
-    console.log(`Image uploaded to MinIO with quality preserved: ${uploadResult.Location}`);
+    const uploadResult = await s3Client.send(uploadCommand);
+    
+    // Construct the URL manually since AWS SDK v3 doesn't return Location in the same way
+    const bucketName = process.env.MINIO_BUCKET || process.env.AWS_S3_BUCKET;
+    const objectUrl = `https://s3.b2motive.com/${bucketName}/${filename}`;
+    
+    console.log(`Image uploaded to MinIO with quality preserved: ${objectUrl}`);
     console.log(`Original size: ${(imageResponse.data.length / 1024).toFixed(2)} KB`);
     
-    return uploadResult.Location;
+    return objectUrl;
   } catch (error) {
     console.error('Error uploading image to MinIO:', error.message);
     return null;
@@ -115,12 +120,12 @@ async function deleteImage(imageUrl) {
     const url = new URL(imageUrl);
     const key = url.pathname.substring(1); // Remove leading slash
 
-    const deleteParams = {
+    const deleteCommand = new DeleteObjectCommand({
       Bucket: process.env.MINIO_BUCKET || process.env.AWS_S3_BUCKET,
       Key: key
-    };
+    });
 
-    await s3.deleteObject(deleteParams).promise();
+    await s3Client.send(deleteCommand);
     console.log(`Image deleted from MinIO: ${imageUrl}`);
     
     return true;

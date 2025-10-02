@@ -4,6 +4,7 @@ const { getUsersToScrape } = require('../services/userService');
 const { Control } = require('../../models');
 const logger = require('../utils/logger');
 const debugLogger = require('../utils/debugLogger');
+const userScrapingLogger = require('../utils/userScrapingLogger');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const { AutoScoutInventory } = require('../../models');
@@ -104,6 +105,9 @@ async function  processUsersSequentially(users, control) {
         // Debug log: User start
         debugLogger.logUserStart(user, currentIndex, users.length);
         
+        // User scraping log: User start
+        userScrapingLogger.logUserStart(user, currentIndex, users.length);
+        
         logger.info(`[SCRAPER] 🔄 Processing user ${currentIndex}/${users.length}: ${user.id} (${user.company_name || 'Unknown'})`);
         
         try {
@@ -113,12 +117,18 @@ async function  processUsersSequentially(users, control) {
             // Debug log: User success
             debugLogger.logUserSuccess(user, userStats, currentIndex, users.length);
             
+            // User scraping log: User success
+            userScrapingLogger.logUserComplete(user, userStats, currentIndex, users.length);
+            
             // Additional summary log for this user
             logger.info(`[SCRAPER] 📈 User ${user.id} Summary: ${userStats.newListings} new, ${userStats.existingListings} existing, ${userStats.totalListings} total (${userStats.durationMinutes}m ${userStats.durationSeconds}s)`);
             
         } catch (error) {
             // Debug log: User error
             debugLogger.logUserError(user, error, currentIndex, users.length);
+            
+            // User scraping log: User error
+            userScrapingLogger.logUserError(user, error, currentIndex, users.length);
             
             logger.error(`[SCRAPER] ❌ Error scraping user ${user.id}:`, error.message);
             errorCount++;
@@ -168,6 +178,9 @@ async function main() {
     
     // Clear and initialize debug log file
     debugLogger.clearDebugFile();
+    
+    // Clear and initialize user scraping log file
+    userScrapingLogger.clearLogFile();
     
     logger.info('[SCRAPER] 🚀 Starting AutoScout24 scraper...');
     logger.info(`[SCRAPER] ⏰ Start time: ${startTime.toLocaleString()}`);
@@ -226,17 +239,21 @@ async function main() {
             logger.info('[SCRAPER] ✅ Inventory count scraping was still completed for all users.');
             debugLogger.logSessionStart(0);
             debugLogger.logSessionComplete({ successful: 0, failed: 0, total: 0 });
+            userScrapingLogger.logSessionStart(0);
+            userScrapingLogger.logSessionComplete({ successful: 0, failed: 0, total: 0 });
             return;
         }
         
         // Log session start
         debugLogger.logSessionStart(users.length);
+        userScrapingLogger.logSessionStart(users.length);
         
         // Process users sequentially to prevent memory overflow
         const results = await processUsersSequentially(users, control);
         
         // Log session completion
         debugLogger.logSessionComplete(results);
+        userScrapingLogger.logSessionComplete(results);
         
         // Log summary of results
         logger.info(`[SCRAPER] 📊 Processing complete: ${results.successful} successful, ${results.failed} failed out of ${results.total} total users`);

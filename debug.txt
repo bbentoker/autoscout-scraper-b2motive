@@ -1,5 +1,545 @@
-AutoScout24 Scraper Debug Log - Session started at 2025-09-15T16:21:02.965Z
+AutoScout24 Scraper Debug Log - Session started at 2025-10-02T16:56:15.947Z
 ================================================================================
-[2025-09-15T16:21:11.928Z] 🔥 SCRAPER SESSION STARTED - Processing 303 users
-[2025-09-15T16:21:11.929Z] ================================================================================
-[2025-09-15T16:21:11.929Z] 🚀 STARTED processing user 42 (DEX - Easy Car Shopping) - 1/303 - URL: https://www.autoscout24.be/nl/verkopers/dex-easy-car-shopping
+[2025-10-02T16:56:47.810Z] 🔥 SCRAPER SESSION STARTED - Processing 2011 users
+[2025-10-02T16:56:47.810Z] ================================================================================
+[2025-10-02T16:56:47.812Z] 🚀 STARTED processing user 571 (Autowelt von Rotz AG) - 1/2011 - URL: https://www.autoscout24.ch/de/s/seller-1153
+[2025-10-02T17:01:54.690Z] ✅ COMPLETED user 571 (Autowelt von Rotz AG) - 1/2011 - Duration: 5m 6s - New: 14, Existing: 565, Total: 579
+[2025-10-02T17:01:57.974Z] 🚀 STARTED processing user 570 (Autowelt von Rotz AG) - 2/2011 - URL: https://www.autoscout24.ch/de/s/seller-1153
+[2025-10-02T17:07:29.147Z] ✅ COMPLETED user 570 (Autowelt von Rotz AG) - 2/2011 - Duration: 5m 31s - New: 15, Existing: 587, Total: 602
+[2025-10-02T17:07:32.409Z] 🚀 STARTED processing user 2012 (Toker Company) - 3/2011 - URL: https://www.autoscout24.ch/de/s/seller-1153
+[2025-10-02T17:14:07.785Z] ✅ COMPLETED user 2012 (Toker Company) - 3/2011 - Duration: 6m 35s - New: 16, Existing: 572, Total: 588
+[2025-10-02T17:14:11.054Z] 🚀 STARTED processing user 356 (Auto-Center Grenchen AG) - 4/2011 - URL: https://www.autoscout24.ch/de/s/seller-66030
+[2025-10-02T17:17:02.896Z] ✅ COMPLETED user 356 (Auto-Center Grenchen AG) - 4/2011 - Duration: 2m 51s - New: 9, Existing: 264, Total: 273
+[2025-10-02T17:17:06.164Z] 🚀 STARTED processing user 355 (Auto-Center Grenchen AG) - 5/2011 - URL: https://www.autoscout24.ch/de/s/seller-66030
+[2025-10-02T17:19:20.424Z] ✅ COMPLETED user 355 (Auto-Center Grenchen AG) - 5/2011 - Duration: 2m 14s - New: 9, Existing: 252, Total: 261
+[2025-10-02T17:19:23.669Z] 🚀 STARTED processing user 476 (Autohaus Schiess AG) - 6/2011 - URL: https://www.autoscout24.ch/de/s/seller-1458197
+[2025-10-02T17:21:46.349Z] ✅ COMPLETED user 476 (Autohaus Schiess AG) - 6/2011 - Duration: 2m 22s - New: 3, Existing: 279, Total: 282
+[2025-10-02T17:21:49.616Z] 🚀 STARTED processing user 475 (Autohaus Schiess AG) - 7/2011 - URL: https://www.autoscout24.ch/de/s/seller-1458197
+[2025-10-02T17:24:11.111Z] ✅ COMPLETED user 475 (Autohaus Schiess AG) - 7/2011 - Duration: 2m 21s - New: 3, Existing: 278, Total: 281
+[2025-10-02T17:24:14.388Z] 🚀 STARTED processing user 1844 (AutoHero Belgium Pro) - 8/2011 - URL: https://www.autoscout24.be/nl/verkopers/autohero-belgium-pro
+[2025-10-02T17:28:04.545Z] ✅ COMPLETED user 1844 (AutoHero Belgium Pro) - 8/2011 - Duration: 3m 50s - New: 0, Existing: 364, Total: 364
+[2025-10-02T17:28:07.812Z] 🚀 STARTED processing user 1656 (DEX - Easy Car Shopping) - 9/2011 - URL: https://www.autoscout24.be/nl/verkopers/dex-easy-car-shopping
+[2025-10-02T17:42:36.380Z] ✅ COMPLETED user 1656 (DEX - Easy Car Shopping) - 9/2011 - Duration: 14m 28s - New: 224, Existing: 300, Total: 524
+[2025-10-02T17:42:39.659Z] 🚀 STARTED processing user 194 (Albini Auto GmbH) - 10/2011 - URL: https://www.autoscout24.ch/de/s/seller-67063
+[2025-10-02T17:45:10.393Z] ✅ COMPLETED user 194 (Albini Auto GmbH) - 10/2011 - Duration: 2m 30s - New: 3, Existing: 258, Total: 261
+[2025-10-02T17:45:13.662Z] 🚀 STARTED processing user 1392 (Garage Gautschi AG Langenthal) - 11/2011 - URL: https://www.autoscout24.ch/de/s/seller-63779
+[2025-10-02T17:47:19.367Z] ✅ COMPLETED user 1392 (Garage Gautschi AG Langenthal) - 11/2011 - Duration: 2m 5s - New: 0, Existing: 251, Total: 251
+[2025-10-02T17:47:22.647Z] 🚀 STARTED processing user 1393 (Garage Gautschi AG Langenthal) - 12/2011 - URL: https://www.autoscout24.ch/de/s/seller-63779
+[2025-10-02T17:49:31.155Z] ✅ COMPLETED user 1393 (Garage Gautschi AG Langenthal) - 12/2011 - Duration: 2m 8s - New: 0, Existing: 256, Total: 256
+[2025-10-02T17:49:34.452Z] 🚀 STARTED processing user 242 (Auto Lang AG Kreuzlingen, Frauenfeld und Amriswil) - 13/2011 - URL: https://www.autoscout24.ch/de/s/seller-61504
+[2025-10-02T17:51:31.071Z] ✅ COMPLETED user 242 (Auto Lang AG Kreuzlingen, Frauenfeld und Amriswil) - 13/2011 - Duration: 1m 56s - New: 3, Existing: 225, Total: 228
+[2025-10-02T17:51:34.334Z] 🚀 STARTED processing user 1811 (Nextcar) - 14/2011 - URL: https://www.autoscout24.be/fr/professional/nextcar
+[2025-10-02T17:55:00.076Z] ✅ COMPLETED user 1811 (Nextcar) - 14/2011 - Duration: 3m 25s - New: 11, Existing: 283, Total: 294
+[2025-10-02T17:55:03.362Z] 🚀 STARTED processing user 597 (BELWAG AG BERN) - 15/2011 - URL: https://www.autoscout24.ch/de/s/seller-9593/vc-utility
+[2025-10-02T17:57:00.609Z] ✅ COMPLETED user 597 (BELWAG AG BERN) - 15/2011 - Duration: 1m 57s - New: 0, Existing: 214, Total: 214
+[2025-10-02T17:57:03.874Z] 🚀 STARTED processing user 164 (AUTOSHOW AATHAL AG) - 16/2011 - URL: https://www.autoscout24.ch/de/s/seller-61696
+[2025-10-02T17:58:33.528Z] ✅ COMPLETED user 164 (AUTOSHOW AATHAL AG) - 16/2011 - Duration: 1m 29s - New: 3, Existing: 171, Total: 174
+[2025-10-02T17:58:36.800Z] 🚀 STARTED processing user 1391 (Garage Galliker Nidfeld AG) - 17/2011 - URL: https://www.autoscout24.ch/de/s/seller-61333
+[2025-10-02T18:00:17.394Z] ✅ COMPLETED user 1391 (Garage Galliker Nidfeld AG) - 17/2011 - Duration: 1m 40s - New: 0, Existing: 199, Total: 199
+[2025-10-02T18:00:20.658Z] 🚀 STARTED processing user 232 (Auto Kunz) - 18/2011 - URL: https://www.autoscout24.ch/de/s/seller-6007
+[2025-10-02T18:02:03.594Z] ✅ COMPLETED user 232 (Auto Kunz) - 18/2011 - Duration: 1m 42s - New: 10, Existing: 177, Total: 187
+[2025-10-02T18:02:06.881Z] 🚀 STARTED processing user 233 (Auto Kunz) - 19/2011 - URL: https://www.autoscout24.ch/de/s/seller-6007
+[2025-10-02T18:03:41.180Z] ✅ COMPLETED user 233 (Auto Kunz) - 19/2011 - Duration: 1m 34s - New: 15, Existing: 162, Total: 177
+[2025-10-02T18:03:44.456Z] 🚀 STARTED processing user 234 (Auto Kunz) - 20/2011 - URL: https://www.autoscout24.ch/de/s/seller-6007
+[2025-10-02T18:05:25.935Z] ✅ COMPLETED user 234 (Auto Kunz) - 20/2011 - Duration: 1m 41s - New: 10, Existing: 184, Total: 194
+[2025-10-02T18:05:29.191Z] 🚀 STARTED processing user 1182 (Garage Andermatt AG Baar) - 21/2011 - URL: https://www.autoscout24.ch/de/s/seller-66707
+[2025-10-02T18:07:00.980Z] ✅ COMPLETED user 1182 (Garage Andermatt AG Baar) - 21/2011 - Duration: 1m 31s - New: 3, Existing: 172, Total: 175
+[2025-10-02T18:07:04.243Z] 🚀 STARTED processing user 840 (City Garage AG) - 22/2011 - URL: https://www.autoscout24.ch/it/s/seller-64254
+[2025-10-02T18:08:26.404Z] ✅ COMPLETED user 840 (City Garage AG) - 22/2011 - Duration: 1m 22s - New: 0, Existing: 162, Total: 162
+[2025-10-02T18:08:29.665Z] 🚀 STARTED processing user 844 (City-Garage AG St. Gallen) - 23/2011 - URL: https://www.autoscout24.ch/de/s/seller-64254
+[2025-10-02T18:09:54.302Z] ✅ COMPLETED user 844 (City-Garage AG St. Gallen) - 23/2011 - Duration: 1m 24s - New: 0, Existing: 167, Total: 167
+[2025-10-02T18:09:57.575Z] 🚀 STARTED processing user 841 (City Garage AG) - 24/2011 - URL: https://www.autoscout24.ch/it/s/seller-64254
+[2025-10-02T18:11:26.171Z] ✅ COMPLETED user 841 (City Garage AG) - 24/2011 - Duration: 1m 28s - New: 0, Existing: 165, Total: 165
+[2025-10-02T18:11:29.436Z] 🚀 STARTED processing user 1691 (Eurekar.be) - 25/2011 - URL: https://www.autoscout24.be/fr/professional/eurekar-be
+[2025-10-02T18:14:02.098Z] ✅ COMPLETED user 1691 (Eurekar.be) - 25/2011 - Duration: 2m 32s - New: 0, Existing: 220, Total: 220
+[2025-10-02T18:14:05.363Z] 🚀 STARTED processing user 1726 (Garage Carrera Cars) - 26/2011 - URL: https://www.autoscout24.be/fr/professional/garage-carrera-cars
+[2025-10-02T18:16:59.349Z] ✅ COMPLETED user 1726 (Garage Carrera Cars) - 26/2011 - Duration: 2m 53s - New: 0, Existing: 237, Total: 237
+[2025-10-02T18:17:02.621Z] 🚀 STARTED processing user 296 (Auto RiKu AG) - 27/2011 - URL: https://www.autoscout24.ch/de/s/seller-2051688
+[2025-10-02T18:18:33.729Z] ✅ COMPLETED user 296 (Auto RiKu AG) - 27/2011 - Duration: 1m 31s - New: 0, Existing: 180, Total: 180
+[2025-10-02T18:18:37.003Z] 🚀 STARTED processing user 161 (AUTOPARK UZNACH AG) - 28/2011 - URL: https://www.autoscout24.ch/de/s/seller-62941
+[2025-10-02T18:19:56.668Z] ✅ COMPLETED user 161 (AUTOPARK UZNACH AG) - 28/2011 - Duration: 1m 19s - New: 0, Existing: 159, Total: 159
+[2025-10-02T18:19:59.953Z] 🚀 STARTED processing user 872 (DIMAB Rossens - Concessionnaire BMW, MINI et ALPINA) - 29/2011 - URL: https://www.autoscout24.ch/de/s/seller-2503576
+[2025-10-02T18:21:29.047Z] ✅ COMPLETED user 872 (DIMAB Rossens - Concessionnaire BMW, MINI et ALPINA) - 29/2011 - Duration: 1m 29s - New: 0, Existing: 177, Total: 177
+[2025-10-02T18:21:32.308Z] 🚀 STARTED processing user 873 (DIMAB Rossens - Concessionnaire BMW, MINI et ALPINA) - 30/2011 - URL: https://www.autoscout24.ch/de/s/seller-2503576
+[2025-10-02T18:22:52.953Z] ✅ COMPLETED user 873 (DIMAB Rossens - Concessionnaire BMW, MINI et ALPINA) - 30/2011 - Duration: 1m 20s - New: 0, Existing: 160, Total: 160
+[2025-10-02T18:22:56.227Z] 🚀 STARTED processing user 57 (AMAG Autowelt Zürich) - 31/2011 - URL: https://www.autoscout24.ch/de/s/seller-61714
+[2025-10-02T18:24:14.977Z] ✅ COMPLETED user 57 (AMAG Autowelt Zürich) - 31/2011 - Duration: 1m 18s - New: 1, Existing: 155, Total: 156
+[2025-10-02T18:24:18.255Z] 🚀 STARTED processing user 1381 (Garage Galliker AG Aarburg) - 32/2011 - URL: https://www.autoscout24.ch/de/s/seller-60397
+[2025-10-02T18:25:37.195Z] ✅ COMPLETED user 1381 (Garage Galliker AG Aarburg) - 32/2011 - Duration: 1m 18s - New: 0, Existing: 159, Total: 159
+[2025-10-02T18:25:40.458Z] 🚀 STARTED processing user 62 (AMAG Biel/Bienne) - 33/2011 - URL: https://www.autoscout24.ch/de/s/seller-63987
+[2025-10-02T18:26:53.777Z] ✅ COMPLETED user 62 (AMAG Biel/Bienne) - 33/2011 - Duration: 1m 13s - New: 2, Existing: 139, Total: 141
+[2025-10-02T18:26:57.049Z] 🚀 STARTED processing user 166 (AUTOVISION SCHWEIZ AG) - 34/2011 - URL: https://www.autoscout24.ch/de/s/seller-65466
+[2025-10-02T18:28:05.457Z] ✅ COMPLETED user 166 (AUTOVISION SCHWEIZ AG) - 34/2011 - Duration: 1m 8s - New: 0, Existing: 135, Total: 135
+[2025-10-02T18:28:08.709Z] 🚀 STARTED processing user 245 (Auto Linher Anstalt) - 35/2011 - URL: https://www.autoscout24.ch/de/s/seller-65699
+[2025-10-02T18:29:25.165Z] ✅ COMPLETED user 245 (Auto Linher Anstalt) - 35/2011 - Duration: 1m 16s - New: 4, Existing: 134, Total: 138
+[2025-10-02T18:29:28.427Z] 🚀 STARTED processing user 246 (Auto Linher Anstalt) - 36/2011 - URL: https://www.autoscout24.ch/de/s/seller-65699
+[2025-10-02T18:30:47.618Z] ✅ COMPLETED user 246 (Auto Linher Anstalt) - 36/2011 - Duration: 1m 19s - New: 4, Existing: 152, Total: 156
+[2025-10-02T18:30:50.896Z] 🚀 STARTED processing user 54 (AMAG Audi Center Luzern) - 37/2011 - URL: https://www.autoscout24.ch/de/s/seller-65108
+[2025-10-02T18:31:54.079Z] ✅ COMPLETED user 54 (AMAG Audi Center Luzern) - 37/2011 - Duration: 1m 3s - New: 0, Existing: 127, Total: 127
+[2025-10-02T18:31:57.362Z] 🚀 STARTED processing user 99 (AMAG Schinznach Bad) - 38/2011 - URL: https://www.autoscout24.ch/de/s/seller-61551
+[2025-10-02T18:33:06.143Z] ✅ COMPLETED user 99 (AMAG Schinznach Bad) - 38/2011 - Duration: 1m 8s - New: 2, Existing: 135, Total: 137
+[2025-10-02T18:33:09.406Z] 🚀 STARTED processing user 150 (AUTO SCHMERIKON 200 TOP GARANTIE OCCASIONEN) - 39/2011 - URL: https://www.autoscout24.ch/de/s/seller-61699
+[2025-10-02T18:34:14.093Z] ✅ COMPLETED user 150 (AUTO SCHMERIKON 200 TOP GARANTIE OCCASIONEN) - 39/2011 - Duration: 1m 4s - New: 3, Existing: 126, Total: 129
+[2025-10-02T18:34:17.350Z] 🚀 STARTED processing user 805 (Castellana Automobile AG) - 40/2011 - URL: https://www.autoscout24.ch/de/s/seller-60849
+[2025-10-02T18:35:25.395Z] ✅ COMPLETED user 805 (Castellana Automobile AG) - 40/2011 - Duration: 1m 8s - New: 1, Existing: 128, Total: 129
+[2025-10-02T18:35:28.667Z] 🚀 STARTED processing user 60 (AMAG Bern) - 41/2011 - URL: https://www.autoscout24.ch/de/s/seller-68269
+[2025-10-02T18:36:36.251Z] ✅ COMPLETED user 60 (AMAG Bern) - 41/2011 - Duration: 1m 7s - New: 0, Existing: 136, Total: 136
+[2025-10-02T18:36:39.529Z] 🚀 STARTED processing user 251 (Auto Macchi GmbH) - 42/2011 - URL: https://www.autoscout24.ch/de/s/seller-61824
+[2025-10-02T18:37:45.437Z] ✅ COMPLETED user 251 (Auto Macchi GmbH) - 42/2011 - Duration: 1m 5s - New: 1, Existing: 125, Total: 126
+[2025-10-02T18:37:48.704Z] 🚀 STARTED processing user 993 (Etoile Automobile Succursale de Groupe Leuba SA) - 43/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67581
+[2025-10-02T18:39:19.724Z] ✅ COMPLETED user 993 (Etoile Automobile Succursale de Groupe Leuba SA) - 43/2011 - Duration: 1m 31s - New: 20, Existing: 125, Total: 145
+[2025-10-02T18:39:23.006Z] 🚀 STARTED processing user 994 (Etoile Automobile Succursale de Groupe Leuba SA) - 44/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67581
+[2025-10-02T18:40:35.256Z] ✅ COMPLETED user 994 (Etoile Automobile Succursale de Groupe Leuba SA) - 44/2011 - Duration: 1m 12s - New: 21, Existing: 101, Total: 122
+[2025-10-02T18:40:38.504Z] 🚀 STARTED processing user 488 (Autoland Reust AG) - 45/2011 - URL: https://www.autoscout24.ch/de/s/seller-61930
+[2025-10-02T18:41:41.688Z] ✅ COMPLETED user 488 (Autoland Reust AG) - 45/2011 - Duration: 1m 3s - New: 0, Existing: 116, Total: 116
+[2025-10-02T18:41:44.980Z] 🚀 STARTED processing user 1741 (Groupe Michael Mazuin) - 46/2011 - URL: https://www.autoscout24.be/fr/professional/groupe-michael-mazuin
+[2025-10-02T18:43:32.523Z] ✅ COMPLETED user 1741 (Groupe Michael Mazuin) - 46/2011 - Duration: 1m 47s - New: 7, Existing: 163, Total: 170
+[2025-10-02T18:43:35.804Z] 🚀 STARTED processing user 1563 (Garage Marti AG) - 47/2011 - URL: https://www.autoscout24.ch/de/s/seller-60018
+[2025-10-02T18:44:39.936Z] ✅ COMPLETED user 1563 (Garage Marti AG) - 47/2011 - Duration: 1m 4s - New: 0, Existing: 127, Total: 127
+[2025-10-02T18:44:43.196Z] 🚀 STARTED processing user 1564 (Garage Marti AG) - 48/2011 - URL: https://www.autoscout24.ch/de/s/seller-60018
+[2025-10-02T18:45:47.735Z] ✅ COMPLETED user 1564 (Garage Marti AG) - 48/2011 - Duration: 1m 4s - New: 0, Existing: 128, Total: 128
+[2025-10-02T18:45:51.003Z] 🚀 STARTED processing user 1569 (Garage Marty) - 49/2011 - URL: https://www.autoscout24.ch/de/s/seller-60018
+[2025-10-02T18:46:51.711Z] ✅ COMPLETED user 1569 (Garage Marty) - 49/2011 - Duration: 1m 0s - New: 0, Existing: 119, Total: 119
+[2025-10-02T18:46:54.989Z] 🚀 STARTED processing user 1570 (Garage Marty) - 50/2011 - URL: https://www.autoscout24.ch/de/s/seller-60018
+[2025-10-02T18:47:54.900Z] ✅ COMPLETED user 1570 (Garage Marty) - 50/2011 - Duration: 0m 59s - New: 0, Existing: 116, Total: 116
+[2025-10-02T18:47:58.165Z] 🚀 STARTED processing user 1605 (AECARS BV) - 51/2011 - URL: https://www.autoscout24.be/nl/verkopers/aecars-bv
+[2025-10-02T18:50:22.195Z] ✅ COMPLETED user 1605 (AECARS BV) - 51/2011 - Duration: 2m 24s - New: 0, Existing: 168, Total: 168
+[2025-10-02T18:50:25.454Z] 🚀 STARTED processing user 499 (Automobile Egerkingen AG) - 52/2011 - URL: https://www.autoscout24.ch/de/s/seller-1634296
+[2025-10-02T18:51:27.929Z] ✅ COMPLETED user 499 (Automobile Egerkingen AG) - 52/2011 - Duration: 1m 2s - New: 0, Existing: 123, Total: 123
+[2025-10-02T18:51:31.230Z] 🚀 STARTED processing user 116 (AMAG Zug) - 53/2011 - URL: https://www.autoscout24.ch/de/s/seller-61552
+[2025-10-02T18:52:37.013Z] ✅ COMPLETED user 116 (AMAG Zug) - 53/2011 - Duration: 1m 5s - New: 1, Existing: 126, Total: 127
+[2025-10-02T18:52:40.267Z] 🚀 STARTED processing user 652 (Binelli Automobile AG Gebrauchtwagencenter) - 54/2011 - URL: https://www.autoscout24.ch/de/s/seller-64710
+[2025-10-02T18:53:38.826Z] ✅ COMPLETED user 652 (Binelli Automobile AG Gebrauchtwagencenter) - 54/2011 - Duration: 0m 58s - New: 0, Existing: 115, Total: 115
+[2025-10-02T18:53:42.090Z] 🚀 STARTED processing user 871 (DIMAB Payerne - Concessionnaire BMW, ALPINA et Point Service MINI) - 55/2011 - URL: https://www.autoscout24.ch/fr/s/seller-46034
+[2025-10-02T18:54:43.077Z] ✅ COMPLETED user 871 (DIMAB Payerne - Concessionnaire BMW, ALPINA et Point Service MINI) - 55/2011 - Duration: 1m 0s - New: 0, Existing: 121, Total: 121
+[2025-10-02T18:54:46.334Z] 🚀 STARTED processing user 42 (AHG-Cars - www.ahg-cars.ch) - 56/2011 - URL: https://www.autoscout24.ch/de/s/seller-60961
+[2025-10-02T18:55:45.286Z] ✅ COMPLETED user 42 (AHG-Cars - www.ahg-cars.ch) - 56/2011 - Duration: 0m 58s - New: 0, Existing: 116, Total: 116
+[2025-10-02T18:55:48.566Z] 🚀 STARTED processing user 92 (AMAG Occasions Center) - 57/2011 - URL: https://www.autoscout24.ch/de/s/seller-61734
+[2025-10-02T18:56:46.272Z] ✅ COMPLETED user 92 (AMAG Occasions Center) - 57/2011 - Duration: 0m 57s - New: 1, Existing: 110, Total: 111
+[2025-10-02T18:56:49.537Z] 🚀 STARTED processing user 112 (AMAG Wettswil) - 58/2011 - URL: https://www.autoscout24.ch/de/s/seller-60943
+[2025-10-02T18:57:52.145Z] ✅ COMPLETED user 112 (AMAG Wettswil) - 58/2011 - Duration: 1m 2s - New: 1, Existing: 122, Total: 123
+[2025-10-02T18:57:55.426Z] 🚀 STARTED processing user 1721 (Garage Auto-Elektro Peeters) - 59/2011 - URL: https://www.autoscout24.be/nl/verkopers/garage-auto-elektro-peeters
+[2025-10-02T19:00:26.789Z] ✅ COMPLETED user 1721 (Garage Auto-Elektro Peeters) - 59/2011 - Duration: 2m 31s - New: 5, Existing: 155, Total: 160
+[2025-10-02T19:00:30.063Z] 🚀 STARTED processing user 1132 (GNG AG) - 60/2011 - URL: https://www.autoscout24.ch/de/s/seller-61338
+[2025-10-02T19:01:29.529Z] ✅ COMPLETED user 1132 (GNG AG) - 60/2011 - Duration: 0m 59s - New: 0, Existing: 118, Total: 118
+[2025-10-02T19:01:32.785Z] 🚀 STARTED processing user 199 (Auto - Germann AG) - 61/2011 - URL: https://www.autoscout24.ch/de/s/seller-60509
+[2025-10-02T19:02:08.638Z] ✅ COMPLETED user 199 (Auto - Germann AG) - 61/2011 - Duration: 0m 35s - New: 4, Existing: 60, Total: 64
+[2025-10-02T19:02:11.909Z] 🚀 STARTED processing user 76 (AMAG Etoy) - 62/2011 - URL: https://www.autoscout24.ch/fr/s/seller-64740/mo-q8/mk-audi
+[2025-10-02T19:03:06.130Z] ✅ COMPLETED user 76 (AMAG Etoy) - 62/2011 - Duration: 0m 54s - New: 0, Existing: 108, Total: 108
+[2025-10-02T19:03:09.391Z] 🚀 STARTED processing user 1675 (Devisch) - 63/2011 - URL: https://www.autoscout24.be/nl/verkopers/devisch
+[2025-10-02T19:05:18.109Z] ✅ COMPLETED user 1675 (Devisch) - 63/2011 - Duration: 2m 8s - New: 7, Existing: 132, Total: 139
+[2025-10-02T19:05:21.366Z] 🚀 STARTED processing user 1744 (Hyundai - L'Universelle) - 64/2011 - URL: https://www.autoscout24.be/fr/professional/hyundai-l-universelle
+[2025-10-02T19:07:45.097Z] ✅ COMPLETED user 1744 (Hyundai - L'Universelle) - 64/2011 - Duration: 2m 23s - New: 3, Existing: 149, Total: 152
+[2025-10-02T19:07:48.367Z] 🚀 STARTED processing user 64 (AMAG Buchrain) - 65/2011 - URL: https://www.autoscout24.ch/de/s/seller-61550
+[2025-10-02T19:08:47.542Z] ✅ COMPLETED user 64 (AMAG Buchrain) - 65/2011 - Duration: 0m 59s - New: 3, Existing: 111, Total: 114
+[2025-10-02T19:08:50.795Z] 🚀 STARTED processing user 376 (Auto-Rives, succursale de Groupe Leuba SA) - 66/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67579
+[2025-10-02T19:09:44.536Z] ✅ COMPLETED user 376 (Auto-Rives, succursale de Groupe Leuba SA) - 66/2011 - Duration: 0m 53s - New: 0, Existing: 107, Total: 107
+[2025-10-02T19:09:47.790Z] 🚀 STARTED processing user 307 (Auto Rüger AG) - 67/2011 - URL: https://www.autoscout24.ch/de/s/seller-63903
+[2025-10-02T19:10:50.662Z] ✅ COMPLETED user 307 (Auto Rüger AG) - 67/2011 - Duration: 1m 2s - New: 0, Existing: 126, Total: 126
+[2025-10-02T19:10:53.918Z] 🚀 STARTED processing user 308 (Auto Rüger AG) - 68/2011 - URL: https://www.autoscout24.ch/de/s/seller-63903
+[2025-10-02T19:11:50.666Z] ✅ COMPLETED user 308 (Auto Rüger AG) - 68/2011 - Duration: 0m 56s - New: 1, Existing: 111, Total: 112
+[2025-10-02T19:11:53.924Z] 🚀 STARTED processing user 83 (AMAG Jona) - 69/2011 - URL: https://www.autoscout24.ch/de/s/seller-61713
+[2025-10-02T19:12:56.120Z] ✅ COMPLETED user 83 (AMAG Jona) - 69/2011 - Duration: 1m 2s - New: 12, Existing: 99, Total: 111
+[2025-10-02T19:12:59.397Z] 🚀 STARTED processing user 1929 (Garage Teirlynck bvba) - 70/2011 - URL: https://www.autoscout24.be/nl/verkopers/garage-teirlynck-bvba
+[2025-10-02T19:15:03.154Z] ✅ COMPLETED user 1929 (Garage Teirlynck bvba) - 70/2011 - Duration: 2m 3s - New: 7, Existing: 145, Total: 152
+[2025-10-02T19:15:06.427Z] 🚀 STARTED processing user 1910 (Garage Herman Noyens) - 71/2011 - URL: https://www.autoscout24.be/nl/verkopers/garage-herman-noyens
+[2025-10-02T19:17:16.962Z] ✅ COMPLETED user 1910 (Garage Herman Noyens) - 71/2011 - Duration: 2m 10s - New: 19, Existing: 138, Total: 157
+[2025-10-02T19:17:20.221Z] 🚀 STARTED processing user 297 (Auto Richner AG) - 72/2011 - URL: https://www.autoscout24.ch/de/s/seller-62416
+[2025-10-02T19:18:26.425Z] ✅ COMPLETED user 297 (Auto Richner AG) - 72/2011 - Duration: 1m 6s - New: 2, Existing: 127, Total: 129
+[2025-10-02T19:18:29.692Z] 🚀 STARTED processing user 201 (Auto A4 Bührer AG) - 73/2011 - URL: https://www.autoscout24.ch/de/s/seller-60656
+[2025-10-02T19:19:43.709Z] ✅ COMPLETED user 201 (Auto A4 Bührer AG) - 73/2011 - Duration: 1m 14s - New: 4, Existing: 124, Total: 128
+[2025-10-02T19:19:46.985Z] 🚀 STARTED processing user 991 (Espace Auto Chablais succursale Groupe Leuba SA) - 74/2011 - URL: https://www.autoscout24.ch/fr/s/seller-1414033
+[2025-10-02T19:20:41.854Z] ✅ COMPLETED user 991 (Espace Auto Chablais succursale Groupe Leuba SA) - 74/2011 - Duration: 0m 54s - New: 2, Existing: 108, Total: 110
+[2025-10-02T19:20:45.120Z] 🚀 STARTED processing user 1104 (GARAGE DE LA PLAINE, succursale de Groupe-Leuba SA) - 75/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67576
+[2025-10-02T19:21:35.780Z] ✅ COMPLETED user 1104 (GARAGE DE LA PLAINE, succursale de Groupe-Leuba SA) - 75/2011 - Duration: 0m 50s - New: 0, Existing: 102, Total: 102
+[2025-10-02T19:21:39.054Z] 🚀 STARTED processing user 224 (Auto Center Fetahaj AG) - 76/2011 - URL: https://www.autoscout24.ch/de/s/seller-62471
+[2025-10-02T19:22:38.480Z] ✅ COMPLETED user 224 (Auto Center Fetahaj AG) - 76/2011 - Duration: 0m 59s - New: 2, Existing: 99, Total: 101
+[2025-10-02T19:22:41.751Z] 🚀 STARTED processing user 566 (Autowelt GmbH) - 77/2011 - URL: https://www.autoscout24.ch/de/s/seller-2009249
+[2025-10-02T19:23:42.972Z] ✅ COMPLETED user 566 (Autowelt GmbH) - 77/2011 - Duration: 1m 1s - New: 1, Existing: 122, Total: 123
+[2025-10-02T19:23:46.251Z] 🚀 STARTED processing user 61 (AMAG Beromünster) - 78/2011 - URL: https://www.autoscout24.ch/de/s/seller-1883785
+[2025-10-02T19:24:38.666Z] ✅ COMPLETED user 61 (AMAG Beromünster) - 78/2011 - Duration: 0m 52s - New: 4, Existing: 97, Total: 101
+[2025-10-02T19:24:41.931Z] 🚀 STARTED processing user 223 (Auto Center Fetahaj AG) - 79/2011 - URL: https://www.autoscout24.ch/de/s/seller-62471
+[2025-10-02T19:25:39.751Z] ✅ COMPLETED user 223 (Auto Center Fetahaj AG) - 79/2011 - Duration: 0m 57s - New: 2, Existing: 102, Total: 104
+[2025-10-02T19:25:43.011Z] 🚀 STARTED processing user 1773 (Le Centre Automobile Audi) - 80/2011 - URL: https://www.autoscout24.be/fr/professional/le-centre-automobile-audi
+[2025-10-02T19:26:59.108Z] ✅ COMPLETED user 1773 (Le Centre Automobile Audi) - 80/2011 - Duration: 1m 16s - New: 2, Existing: 136, Total: 138
+[2025-10-02T19:27:02.346Z] 🚀 STARTED processing user 1791 (MIG Motors Aalter) - 81/2011 - URL: https://www.autoscout24.be/nl/verkopers/mig-motors-aalter
+[2025-10-02T19:28:59.282Z] ✅ COMPLETED user 1791 (MIG Motors Aalter) - 81/2011 - Duration: 1m 56s - New: 20, Existing: 129, Total: 149
+[2025-10-02T19:29:02.558Z] 🚀 STARTED processing user 1054 (Felix Emmenegger AG) - 82/2011 - URL: https://www.autoscout24.ch/de/s/seller-63664
+[2025-10-02T19:29:52.490Z] ✅ COMPLETED user 1054 (Felix Emmenegger AG) - 82/2011 - Duration: 0m 49s - New: 0, Existing: 100, Total: 100
+[2025-10-02T19:29:55.746Z] 🚀 STARTED processing user 415 (Autocenter Bern GmbH) - 83/2011 - URL: https://www.autoscout24.ch/de/s/seller-1299587
+[2025-10-02T19:30:44.021Z] ✅ COMPLETED user 415 (Autocenter Bern GmbH) - 83/2011 - Duration: 0m 48s - New: 0, Existing: 97, Total: 97
+[2025-10-02T19:30:47.297Z] 🚀 STARTED processing user 1576 (Garage Meier Egnach AG) - 84/2011 - URL: https://www.autoscout24.ch/de/s/seller-60548
+[2025-10-02T19:31:41.961Z] ✅ COMPLETED user 1576 (Garage Meier Egnach AG) - 84/2011 - Duration: 0m 54s - New: 2, Existing: 97, Total: 99
+[2025-10-02T19:31:45.234Z] 🚀 STARTED processing user 1577 (Garage Meier Egnach AG) - 85/2011 - URL: https://www.autoscout24.ch/de/s/seller-60548
+[2025-10-02T19:32:54.948Z] ✅ COMPLETED user 1577 (Garage Meier Egnach AG) - 85/2011 - Duration: 1m 9s - New: 3, Existing: 134, Total: 137
+[2025-10-02T19:32:58.209Z] 🚀 STARTED processing user 1638 (Autokruispunt (Filiaal Tielt Winge)) - 86/2011 - URL: https://www.autoscout24.be/nl/verkopers/autokruispunt-filiaal-tielt-winge
+[2025-10-02T19:34:53.667Z] ✅ COMPLETED user 1638 (Autokruispunt (Filiaal Tielt Winge)) - 86/2011 - Duration: 1m 55s - New: 3, Existing: 116, Total: 119
+[2025-10-02T19:34:56.971Z] 🚀 STARTED processing user 247 (Auto Luz Ag) - 87/2011 - URL: https://www.autoscout24.ch/de/s/seller-1075512
+[2025-10-02T19:35:45.012Z] ✅ COMPLETED user 247 (Auto Luz Ag) - 87/2011 - Duration: 0m 48s - New: 0, Existing: 96, Total: 96
+[2025-10-02T19:35:48.280Z] 🚀 STARTED processing user 1032 (FS Car-Point GmbH) - 88/2011 - URL: https://www.autoscout24.ch/de/s/seller-1781732
+[2025-10-02T19:36:36.232Z] ✅ COMPLETED user 1032 (FS Car-Point GmbH) - 88/2011 - Duration: 0m 47s - New: 0, Existing: 96, Total: 96
+[2025-10-02T19:36:39.499Z] 🚀 STARTED processing user 1748 (Iris Auto Center) - 89/2011 - URL: https://www.autoscout24.be/fr/professional/iris-auto-center
+[2025-10-02T19:38:48.584Z] ✅ COMPLETED user 1748 (Iris Auto Center) - 89/2011 - Duration: 2m 9s - New: 0, Existing: 125, Total: 125
+[2025-10-02T19:38:51.879Z] 🚀 STARTED processing user 1565 (Garage Marti Kehrsatz AG) - 90/2011 - URL: https://www.autoscout24.ch/de/s/seller-60036
+[2025-10-02T19:39:43.191Z] ✅ COMPLETED user 1565 (Garage Marti Kehrsatz AG) - 90/2011 - Duration: 0m 51s - New: 0, Existing: 103, Total: 103
+[2025-10-02T19:39:46.487Z] 🚀 STARTED processing user 1566 (Garage Marti Kehrsatz AG) - 91/2011 - URL: https://www.autoscout24.ch/de/s/seller-60036
+[2025-10-02T19:40:35.462Z] ✅ COMPLETED user 1566 (Garage Marti Kehrsatz AG) - 91/2011 - Duration: 0m 48s - New: 0, Existing: 99, Total: 99
+[2025-10-02T19:40:38.728Z] 🚀 STARTED processing user 1750 (KDW) - 92/2011 - URL: https://www.autoscout24.be/nl/verkopers/bvba-k-d-w-motors
+[2025-10-02T19:42:48.198Z] ✅ COMPLETED user 1750 (KDW) - 92/2011 - Duration: 2m 9s - New: 0, Existing: 119, Total: 119
+[2025-10-02T19:42:51.494Z] 🚀 STARTED processing user 2 ((Hoffmann) Adank AUTO l MOTO l ZENTRUM Graubünden) - 93/2011 - URL: https://www.autoscout24.ch/de/s/seller-64459
+[2025-10-02T19:43:42.798Z] ✅ COMPLETED user 2 ((Hoffmann) Adank AUTO l MOTO l ZENTRUM Graubünden) - 93/2011 - Duration: 0m 51s - New: 2, Existing: 94, Total: 96
+[2025-10-02T19:43:46.058Z] 🚀 STARTED processing user 181 (Abt Automobile AG in Muttenz) - 94/2011 - URL: https://www.autoscout24.ch/de/s/seller-2165980
+[2025-10-02T19:44:39.244Z] ✅ COMPLETED user 181 (Abt Automobile AG in Muttenz) - 94/2011 - Duration: 0m 53s - New: 7, Existing: 92, Total: 99
+[2025-10-02T19:44:42.492Z] 🚀 STARTED processing user 3 (*** GARAGE REUSSER AG ***) - 95/2011 - URL: https://www.autoscout24.ch/de/s/seller-62970
+[2025-10-02T19:45:31.007Z] ✅ COMPLETED user 3 (*** GARAGE REUSSER AG ***) - 95/2011 - Duration: 0m 48s - New: 3, Existing: 95, Total: 98
+[2025-10-02T19:45:34.263Z] 🚀 STARTED processing user 1252 (Garage Bosshardt AG) - 96/2011 - URL: https://www.autoscout24.ch/de/s/seller-853
+[2025-10-02T19:46:25.394Z] ✅ COMPLETED user 1252 (Garage Bosshardt AG) - 96/2011 - Duration: 0m 51s - New: 0, Existing: 100, Total: 100
+[2025-10-02T19:46:28.642Z] 🚀 STARTED processing user 1253 (Garage Bosshardt AG) - 97/2011 - URL: https://www.autoscout24.ch/de/s/seller-853
+[2025-10-02T19:47:23.532Z] ✅ COMPLETED user 1253 (Garage Bosshardt AG) - 97/2011 - Duration: 0m 54s - New: 6, Existing: 96, Total: 102
+[2025-10-02T19:47:26.808Z] 🚀 STARTED processing user 428 (Autocenter Limmattal B. Strebel AG) - 98/2011 - URL: https://www.autoscout24.ch/de/s/seller-63417
+[2025-10-02T19:48:15.358Z] ✅ COMPLETED user 428 (Autocenter Limmattal B. Strebel AG) - 98/2011 - Duration: 0m 48s - New: 1, Existing: 95, Total: 96
+[2025-10-02T19:48:18.611Z] 🚀 STARTED processing user 611 (BaSe Automobile AG) - 99/2011 - URL: https://www.autoscout24.ch/de/s/seller-1624491
+[2025-10-02T19:49:17.209Z] ✅ COMPLETED user 611 (BaSe Automobile AG) - 99/2011 - Duration: 0m 58s - New: 3, Existing: 91, Total: 94
+[2025-10-02T19:49:20.479Z] 🚀 STARTED processing user 968 (Egeland Automobile AG) - 100/2011 - URL: https://www.autoscout24.ch/de/s/seller-62551
+[2025-10-02T19:50:13.948Z] ✅ COMPLETED user 968 (Egeland Automobile AG) - 100/2011 - Duration: 0m 53s - New: 1, Existing: 108, Total: 109
+[2025-10-02T19:50:17.203Z] 🚀 STARTED processing user 434 (Autocenter Sevi Swiss) - 101/2011 - URL: https://www.autoscout24.ch/de/s/seller-67803
+[2025-10-02T19:51:01.068Z] ✅ COMPLETED user 434 (Autocenter Sevi Swiss) - 101/2011 - Duration: 0m 43s - New: 0, Existing: 89, Total: 89
+[2025-10-02T19:51:04.317Z] 🚀 STARTED processing user 1862 (BOUVY SELECT) - 102/2011 - URL: https://www.autoscout24.be/fr/professional/bouvy-select
+[2025-10-02T19:53:01.765Z] ✅ COMPLETED user 1862 (BOUVY SELECT) - 102/2011 - Duration: 1m 57s - New: 0, Existing: 117, Total: 117
+[2025-10-02T19:53:05.027Z] 🚀 STARTED processing user 1868 (Beerens B2cars Store North) - 103/2011 - URL: https://www.autoscout24.be/nl/verkopers/beerens-b2cars-store-north
+[2025-10-02T19:54:56.756Z] ✅ COMPLETED user 1868 (Beerens B2cars Store North) - 103/2011 - Duration: 1m 51s - New: 2, Existing: 118, Total: 120
+[2025-10-02T19:55:00.021Z] 🚀 STARTED processing user 1841 (Auto's Verschueren NV) - 104/2011 - URL: https://www.autoscout24.be/nl/verkopers/auto-s-verschueren-nv
+[2025-10-02T19:57:30.798Z] ✅ COMPLETED user 1841 (Auto's Verschueren NV) - 104/2011 - Duration: 2m 30s - New: 11, Existing: 110, Total: 121
+[2025-10-02T19:57:34.058Z] 🚀 STARTED processing user 811 (Central-Garage H. Böckmann AG) - 105/2011 - URL: https://www.autoscout24.ch/de/s/seller-65165
+[2025-10-02T19:58:24.303Z] ✅ COMPLETED user 811 (Central-Garage H. Böckmann AG) - 105/2011 - Duration: 0m 50s - New: 0, Existing: 88, Total: 88
+[2025-10-02T19:58:27.558Z] 🚀 STARTED processing user 1481 (Garage Karpf SA) - 106/2011 - URL: https://www.autoscout24.ch/de/s/seller-64651
+[2025-10-02T19:59:18.428Z] ✅ COMPLETED user 1481 (Garage Karpf SA) - 106/2011 - Duration: 0m 50s - New: 0, Existing: 104, Total: 104
+[2025-10-02T19:59:21.674Z] 🚀 STARTED processing user 1482 (Garage Karpf SA) - 107/2011 - URL: https://www.autoscout24.ch/de/s/seller-64651
+[2025-10-02T20:00:03.818Z] ✅ COMPLETED user 1482 (Garage Karpf SA) - 107/2011 - Duration: 0m 42s - New: 0, Existing: 84, Total: 84
+[2025-10-02T20:00:07.068Z] 🚀 STARTED processing user 1483 (Garage Kaufmann AG) - 108/2011 - URL: https://www.autoscout24.ch/de/s/seller-63932
+[2025-10-02T20:00:49.104Z] ✅ COMPLETED user 1483 (Garage Kaufmann AG) - 108/2011 - Duration: 0m 42s - New: 0, Existing: 85, Total: 85
+[2025-10-02T20:00:52.370Z] 🚀 STARTED processing user 1484 (Garage Kaufmann AG) - 109/2011 - URL: https://www.autoscout24.ch/de/s/seller-63932
+[2025-10-02T20:01:42.330Z] ✅ COMPLETED user 1484 (Garage Kaufmann AG) - 109/2011 - Duration: 0m 49s - New: 0, Existing: 102, Total: 102
+[2025-10-02T20:01:45.606Z] 🚀 STARTED processing user 1739 (Group Pashuysen Occasies (Renault Selection)) - 110/2011 - URL: https://www.autoscout24.be/nl/verkopers/group-pashuysen-occasies-renault-selection
+[2025-10-02T20:03:39.198Z] ✅ COMPLETED user 1739 (Group Pashuysen Occasies (Renault Selection)) - 110/2011 - Duration: 1m 53s - New: 2, Existing: 116, Total: 118
+[2025-10-02T20:03:42.462Z] 🚀 STARTED processing user 731 (CM Automobile AG) - 111/2011 - URL: https://www.autoscout24.ch/de/s/seller-1752594
+[2025-10-02T20:04:27.328Z] ✅ COMPLETED user 731 (CM Automobile AG) - 111/2011 - Duration: 0m 44s - New: 0, Existing: 91, Total: 91
+[2025-10-02T20:04:30.597Z] 🚀 STARTED processing user 78 (AMAG Frauenfeld (Occasionen / SKODA)) - 112/2011 - URL: https://www.autoscout24.ch/de/s/seller-12124
+[2025-10-02T20:05:09.500Z] ✅ COMPLETED user 78 (AMAG Frauenfeld (Occasionen / SKODA)) - 112/2011 - Duration: 0m 38s - New: 1, Existing: 75, Total: 76
+[2025-10-02T20:05:12.785Z] 🚀 STARTED processing user 98 (AMAG Schaffhausen) - 113/2011 - URL: https://www.autoscout24.ch/de/s/seller-61575
+[2025-10-02T20:06:01.005Z] ✅ COMPLETED user 98 (AMAG Schaffhausen) - 113/2011 - Duration: 0m 48s - New: 0, Existing: 98, Total: 98
+[2025-10-02T20:06:04.262Z] 🚀 STARTED processing user 118 (AML Auto Markt Liestal AG) - 114/2011 - URL: https://www.autoscout24.ch/de/s/seller-60628
+[2025-10-02T20:06:56.164Z] ✅ COMPLETED user 118 (AML Auto Markt Liestal AG) - 114/2011 - Duration: 0m 51s - New: 2, Existing: 85, Total: 87
+[2025-10-02T20:06:59.416Z] 🚀 STARTED processing user 1990 (Van Mossel My Way Approved Plus Sint-Niklaas) - 115/2011 - URL: https://www.autoscout24.be/nl/verkopers/van-mossel-my-way-approved-plus-sint-niklaas
+[2025-10-02T20:07:59.154Z] ✅ COMPLETED user 1990 (Van Mossel My Way Approved Plus Sint-Niklaas) - 115/2011 - Duration: 0m 59s - New: 0, Existing: 111, Total: 111
+[2025-10-02T20:08:02.418Z] 🚀 STARTED processing user 402 (Autobritt Automobiles SA) - 116/2011 - URL: https://www.autoscout24.ch/fr/s/seller-63588
+[2025-10-02T20:08:51.031Z] ✅ COMPLETED user 402 (Autobritt Automobiles SA) - 116/2011 - Duration: 0m 48s - New: 2, Existing: 91, Total: 93
+[2025-10-02T20:08:54.298Z] 🚀 STARTED processing user 533 (Autopark Münchwilen GmbH) - 117/2011 - URL: https://www.autoscout24.ch/de/s/seller-2055691
+[2025-10-02T20:09:40.376Z] ✅ COMPLETED user 533 (Autopark Münchwilen GmbH) - 117/2011 - Duration: 0m 46s - New: 0, Existing: 94, Total: 94
+[2025-10-02T20:09:43.630Z] 🚀 STARTED processing user 741 (Car Center Wori AG) - 118/2011 - URL: https://www.autoscout24.ch/de/s/seller-63407
+[2025-10-02T20:10:18.152Z] ✅ COMPLETED user 741 (Car Center Wori AG) - 118/2011 - Duration: 0m 34s - New: 0, Existing: 70, Total: 70
+[2025-10-02T20:10:21.401Z] 🚀 STARTED processing user 1474 (Garage Jörg AG) - 119/2011 - URL: https://www.autoscout24.ch/de/s/seller-61444
+[2025-10-02T20:11:07.552Z] ✅ COMPLETED user 1474 (Garage Jörg AG) - 119/2011 - Duration: 0m 46s - New: 0, Existing: 93, Total: 93
+[2025-10-02T20:11:10.848Z] 🚀 STARTED processing user 1475 (Garage Jörg AG) - 120/2011 - URL: https://www.autoscout24.ch/de/s/seller-61444
+[2025-10-02T20:11:56.418Z] ✅ COMPLETED user 1475 (Garage Jörg AG) - 120/2011 - Duration: 0m 45s - New: 0, Existing: 93, Total: 93
+[2025-10-02T20:11:59.663Z] 🚀 STARTED processing user 1989 (Van Mossel My Way Approved Plus Lokeren) - 121/2011 - URL: https://www.autoscout24.be/nl/verkopers/van-mossel-my-way-approved-plus-lokeren
+[2025-10-02T20:13:01.297Z] ✅ COMPLETED user 1989 (Van Mossel My Way Approved Plus Lokeren) - 121/2011 - Duration: 1m 1s - New: 0, Existing: 104, Total: 104
+[2025-10-02T20:13:04.558Z] 🚀 STARTED processing user 726 (CG automobiles SA) - 122/2011 - URL: https://www.autoscout24.ch/fr/s/seller-62497
+[2025-10-02T20:13:41.540Z] ✅ COMPLETED user 726 (CG automobiles SA) - 122/2011 - Duration: 0m 36s - New: 0, Existing: 74, Total: 74
+[2025-10-02T20:13:44.803Z] 🚀 STARTED processing user 1597 (A&M Halen - BMW en MINI) - 123/2011 - URL: https://www.autoscout24.be/nl/verkopers/a-en-m-halen-bmw-en-mini
+[2025-10-02T20:15:12.914Z] ✅ COMPLETED user 1597 (A&M Halen - BMW en MINI) - 123/2011 - Duration: 1m 28s - New: 14, Existing: 103, Total: 117
+[2025-10-02T20:15:16.203Z] 🚀 STARTED processing user 1756 (Kubika-Cars) - 124/2011 - URL: https://www.autoscout24.be/nl/verkopers/kubika-cars
+[2025-10-02T20:17:09.879Z] ✅ COMPLETED user 1756 (Kubika-Cars) - 124/2011 - Duration: 1m 53s - New: 3, Existing: 98, Total: 101
+[2025-10-02T20:17:13.143Z] 🚀 STARTED processing user 1991 (Van Mossel My Way Dendermonde) - 125/2011 - URL: https://www.autoscout24.be/nl/verkopers/van-mossel-my-way-dendermonde
+[2025-10-02T20:18:20.396Z] ✅ COMPLETED user 1991 (Van Mossel My Way Dendermonde) - 125/2011 - Duration: 1m 7s - New: 2, Existing: 108, Total: 110
+[2025-10-02T20:18:23.657Z] 🚀 STARTED processing user 545 (Autos Carrefour Dorigny, Succursale de Groupe Leuba SA) - 126/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67578
+[2025-10-02T20:19:13.714Z] ✅ COMPLETED user 545 (Autos Carrefour Dorigny, Succursale de Groupe Leuba SA) - 126/2011 - Duration: 0m 50s - New: 3, Existing: 93, Total: 96
+[2025-10-02T20:19:16.990Z] 🚀 STARTED processing user 801 (Carvolution Outlet) - 127/2011 - URL: https://www.autoscout24.ch/de/s/seller-2471552
+[2025-10-02T20:20:01.177Z] ✅ COMPLETED user 801 (Carvolution Outlet) - 127/2011 - Duration: 0m 44s - New: 1, Existing: 77, Total: 78
+[2025-10-02T20:20:04.441Z] 🚀 STARTED processing user 1601 (A.B Cars) - 128/2011 - URL: https://www.autoscout24.be/fr/professional/ab-cars-herstal-4040
+[2025-10-02T20:22:17.999Z] ✅ COMPLETED user 1601 (A.B Cars) - 128/2011 - Duration: 2m 13s - New: 9, Existing: 100, Total: 109
+[2025-10-02T20:22:21.258Z] 🚀 STARTED processing user 1114 (GARAGE MARIO GMBH) - 129/2011 - URL: https://www.autoscout24.ch/de/s/seller-65593
+[2025-10-02T20:23:05.700Z] ✅ COMPLETED user 1114 (GARAGE MARIO GMBH) - 129/2011 - Duration: 0m 44s - New: 4, Existing: 79, Total: 83
+[2025-10-02T20:23:08.970Z] 🚀 STARTED processing user 1650 (D'Haene Group) - 130/2011 - URL: https://www.autoscout24.be/fr/professional/d-haene-group
+[2025-10-02T20:24:08.516Z] ✅ COMPLETED user 1650 (D'Haene Group) - 130/2011 - Duration: 0m 59s - New: 0, Existing: 107, Total: 107
+[2025-10-02T20:24:11.792Z] 🚀 STARTED processing user 1933 (Garage Vanderborght bvba) - 131/2011 - URL: https://www.autoscout24.be/nl/verkopers/garage-vanderborght-bvba
+[2025-10-02T20:25:05.535Z] ✅ COMPLETED user 1933 (Garage Vanderborght bvba) - 131/2011 - Duration: 0m 53s - New: 0, Existing: 104, Total: 104
+[2025-10-02T20:25:08.826Z] 🚀 STARTED processing user 933 (Dr1ve GmbH) - 132/2011 - URL: https://www.autoscout24.ch/de/s/seller-1713106
+[2025-10-02T20:25:43.107Z] ✅ COMPLETED user 933 (Dr1ve GmbH) - 132/2011 - Duration: 0m 34s - New: 0, Existing: 69, Total: 69
+[2025-10-02T20:25:46.371Z] 🚀 STARTED processing user 934 (Dr1ve GmbH) - 133/2011 - URL: https://www.autoscout24.ch/de/s/seller-1713106
+[2025-10-02T20:26:23.684Z] ✅ COMPLETED user 934 (Dr1ve GmbH) - 133/2011 - Duration: 0m 37s - New: 0, Existing: 76, Total: 76
+[2025-10-02T20:26:26.973Z] 🚀 STARTED processing user 113 (AMAG Winterthur) - 134/2011 - URL: https://www.autoscout24.ch/de/s/seller-61762
+[2025-10-02T20:27:08.558Z] ✅ COMPLETED user 113 (AMAG Winterthur) - 134/2011 - Duration: 0m 41s - New: 1, Existing: 83, Total: 84
+[2025-10-02T20:27:11.810Z] 🚀 STARTED processing user 115 (AMAG Zuchwil) - 135/2011 - URL: https://www.autoscout24.ch/de/s/seller-1100688
+[2025-10-02T20:28:00.554Z] ✅ COMPLETED user 115 (AMAG Zuchwil) - 135/2011 - Duration: 0m 48s - New: 1, Existing: 97, Total: 98
+[2025-10-02T20:28:03.830Z] 🚀 STARTED processing user 896 (Deals on Wheels GmbH) - 136/2011 - URL: https://www.autoscout24.ch/de/s/seller-1887136
+[2025-10-02T20:28:46.357Z] ✅ COMPLETED user 896 (Deals on Wheels GmbH) - 136/2011 - Duration: 0m 42s - New: 0, Existing: 87, Total: 87
+[2025-10-02T20:28:49.630Z] 🚀 STARTED processing user 947 (E. Geissmann AG) - 137/2011 - URL: https://www.autoscout24.ch/de/s/seller-63150
+[2025-10-02T20:29:29.506Z] ✅ COMPLETED user 947 (E. Geissmann AG) - 137/2011 - Duration: 0m 39s - New: 1, Existing: 78, Total: 79
+[2025-10-02T20:29:32.782Z] 🚀 STARTED processing user 1872 (Bilia Verstraeten) - 138/2011 - URL: https://www.autoscout24.be/nl/verkopers/bilia-verstraeten
+[2025-10-02T20:30:51.588Z] ✅ COMPLETED user 1872 (Bilia Verstraeten) - 138/2011 - Duration: 1m 18s - New: 11, Existing: 102, Total: 113
+[2025-10-02T20:30:54.872Z] 🚀 STARTED processing user 1012 (F. + M. Konstantin Logistik AG) - 139/2011 - URL: https://www.autoscout24.ch/de/s/seller-60507
+[2025-10-02T20:31:25.513Z] ✅ COMPLETED user 1012 (F. + M. Konstantin Logistik AG) - 139/2011 - Duration: 0m 30s - New: 0, Existing: 61, Total: 61
+[2025-10-02T20:31:28.778Z] 🚀 STARTED processing user 79 (AMAG Fribourg) - 140/2011 - URL: https://www.autoscout24.ch/fr/s/seller-60819
+[2025-10-02T20:32:09.418Z] ✅ COMPLETED user 79 (AMAG Fribourg) - 140/2011 - Duration: 0m 40s - New: 2, Existing: 78, Total: 80
+[2025-10-02T20:32:12.707Z] 🚀 STARTED processing user 365 (Auto-Graf AG BMW & MINI - Kompetenz und Nähe) - 141/2011 - URL: https://www.autoscout24.ch/de/s/seller-61675
+[2025-10-02T20:32:56.334Z] ✅ COMPLETED user 365 (Auto-Graf AG BMW & MINI - Kompetenz und Nähe) - 141/2011 - Duration: 0m 43s - New: 1, Existing: 85, Total: 86
+[2025-10-02T20:32:59.588Z] 🚀 STARTED processing user 1434 (Garage H.R. Baumgartner AG) - 142/2011 - URL: https://www.autoscout24.ch/it/s/seller-65993
+[2025-10-02T20:33:43.182Z] ✅ COMPLETED user 1434 (Garage H.R. Baumgartner AG) - 142/2011 - Duration: 0m 43s - New: 0, Existing: 90, Total: 90
+[2025-10-02T20:33:46.457Z] 🚀 STARTED processing user 1435 (Garage H.R. Baumgartner AG) - 143/2011 - URL: https://www.autoscout24.ch/it/s/seller-65993
+[2025-10-02T20:34:23.996Z] ✅ COMPLETED user 1435 (Garage H.R. Baumgartner AG) - 143/2011 - Duration: 0m 37s - New: 0, Existing: 77, Total: 77
+[2025-10-02T20:34:27.266Z] 🚀 STARTED processing user 513 (Automobile Wohlensee AG) - 144/2011 - URL: https://www.autoscout24.ch/de/s/seller-1501520
+[2025-10-02T20:35:09.037Z] ✅ COMPLETED user 513 (Automobile Wohlensee AG) - 144/2011 - Duration: 0m 41s - New: 0, Existing: 86, Total: 86
+[2025-10-02T20:35:12.311Z] 🚀 STARTED processing user 1591 (Garage Pieren AG) - 145/2011 - URL: https://www.autoscout24.ch/de/s/seller-1071
+[2025-10-02T20:36:01.570Z] ✅ COMPLETED user 1591 (Garage Pieren AG) - 145/2011 - Duration: 0m 49s - New: 1, Existing: 82, Total: 83
+[2025-10-02T20:36:04.832Z] 🚀 STARTED processing user 1592 (Garage Pieren AG) - 146/2011 - URL: https://www.autoscout24.ch/de/s/seller-1071
+[2025-10-02T20:36:58.071Z] ✅ COMPLETED user 1592 (Garage Pieren AG) - 146/2011 - Duration: 0m 53s - New: 1, Existing: 98, Total: 99
+[2025-10-02T20:37:01.319Z] 🚀 STARTED processing user 4 (Langacker Garage AG) - 147/2011 - URL: https://www.autoscout24.ch/it/s/seller-61488
+[2025-10-02T20:37:39.775Z] ✅ COMPLETED user 4 (Langacker Garage AG) - 147/2011 - Duration: 0m 38s - New: 0, Existing: 79, Total: 79
+[2025-10-02T20:37:43.047Z] 🚀 STARTED processing user 94 (AMAG Occasions Center Oftringen) - 148/2011 - URL: https://www.autoscout24.ch/de/s/seller-68064
+[2025-10-02T20:38:18.587Z] ✅ COMPLETED user 94 (AMAG Occasions Center Oftringen) - 148/2011 - Duration: 0m 35s - New: 1, Existing: 69, Total: 70
+[2025-10-02T20:38:21.853Z] 🚀 STARTED processing user 564 (Autoviva AG) - 149/2011 - URL: https://www.autoscout24.ch/de/s/seller-62445
+[2025-10-02T20:39:00.131Z] ✅ COMPLETED user 564 (Autoviva AG) - 149/2011 - Duration: 0m 38s - New: 1, Existing: 76, Total: 77
+[2025-10-02T20:39:03.391Z] 🚀 STARTED processing user 565 (Autoviva AG) - 150/2011 - URL: https://www.autoscout24.ch/de/s/seller-62445
+[2025-10-02T20:39:45.273Z] ✅ COMPLETED user 565 (Autoviva AG) - 150/2011 - Duration: 0m 41s - New: 1, Existing: 85, Total: 86
+[2025-10-02T20:39:48.542Z] 🚀 STARTED processing user 771 (Carmotion AG) - 151/2011 - URL: https://www.autoscout24.ch/de/s/seller-2606568
+[2025-10-02T20:40:17.111Z] ✅ COMPLETED user 771 (Carmotion AG) - 151/2011 - Duration: 0m 28s - New: 0, Existing: 57, Total: 57
+[2025-10-02T20:40:20.397Z] 🚀 STARTED processing user 1666 (Decaigny Selected Cars & Vans) - 152/2011 - URL: https://www.autoscout24.be/nl/verkopers/decaigny-selected-cars-en-vans
+[2025-10-02T20:42:19.475Z] ✅ COMPLETED user 1666 (Decaigny Selected Cars & Vans) - 152/2011 - Duration: 1m 59s - New: 11, Existing: 94, Total: 105
+[2025-10-02T20:42:22.750Z] 🚀 STARTED processing user 1900 (Classic & Sportscars) - 153/2011 - URL: https://www.autoscout24.be/fr/professional/classic-et-sportscars
+[2025-10-02T20:43:40.871Z] ✅ COMPLETED user 1900 (Classic & Sportscars) - 153/2011 - Duration: 1m 18s - New: 0, Existing: 95, Total: 95
+[2025-10-02T20:43:44.141Z] 🚀 STARTED processing user 1993 (Van Mossel Used Cars Center Antwerpen) - 154/2011 - URL: https://www.autoscout24.be/nl/verkopers/van-mossel-used-cars-center-antwerpen
+[2025-10-02T20:45:16.041Z] ✅ COMPLETED user 1993 (Van Mossel Used Cars Center Antwerpen) - 154/2011 - Duration: 1m 31s - New: 2, Existing: 99, Total: 101
+[2025-10-02T20:45:19.291Z] 🚀 STARTED processing user 82 (AMAG Horgen) - 155/2011 - URL: https://www.autoscout24.ch/de/s/seller-63136
+[2025-10-02T20:45:59.874Z] ✅ COMPLETED user 82 (AMAG Horgen) - 155/2011 - Duration: 0m 40s - New: 0, Existing: 83, Total: 83
+[2025-10-02T20:46:03.131Z] 🚀 STARTED processing user 1057 (Fila Groupe SA) - 156/2011 - URL: https://www.autoscout24.ch/fr/s/seller-61801
+[2025-10-02T20:46:42.668Z] ✅ COMPLETED user 1057 (Fila Groupe SA) - 156/2011 - Duration: 0m 39s - New: 0, Existing: 82, Total: 82
+[2025-10-02T20:46:45.934Z] 🚀 STARTED processing user 1524 (Garage Lanthemann SA Cortaillod & Champagne) - 157/2011 - URL: https://www.autoscout24.ch/fr/s/seller-60574
+[2025-10-02T20:47:26.394Z] ✅ COMPLETED user 1524 (Garage Lanthemann SA Cortaillod & Champagne) - 157/2011 - Duration: 0m 40s - New: 1, Existing: 79, Total: 80
+[2025-10-02T20:47:29.666Z] 🚀 STARTED processing user 88 (AMAG Letzigrund) - 158/2011 - URL: https://www.autoscout24.ch/de/s/seller-62288
+[2025-10-02T20:48:08.912Z] ✅ COMPLETED user 88 (AMAG Letzigrund) - 158/2011 - Duration: 0m 39s - New: 1, Existing: 77, Total: 78
+[2025-10-02T20:48:12.183Z] 🚀 STARTED processing user 389 (AutoHaus Schweiz GmbH) - 159/2011 - URL: https://www.autoscout24.ch/de/s/seller-1495816
+[2025-10-02T20:48:49.365Z] ✅ COMPLETED user 389 (AutoHaus Schweiz GmbH) - 159/2011 - Duration: 0m 37s - New: 0, Existing: 76, Total: 76
+[2025-10-02T20:48:52.629Z] 🚀 STARTED processing user 568 (Autowelt Schweiz AG) - 160/2011 - URL: https://www.autoscout24.ch/de/s/seller-1495816
+[2025-10-02T20:49:26.556Z] ✅ COMPLETED user 568 (Autowelt Schweiz AG) - 160/2011 - Duration: 0m 33s - New: 0, Existing: 69, Total: 69
+[2025-10-02T20:49:29.800Z] 🚀 STARTED processing user 1016 (FAUST AUTO AG) - 161/2011 - URL: https://www.autoscout24.ch/de/s/seller-61410
+[2025-10-02T20:50:01.780Z] ✅ COMPLETED user 1016 (FAUST AUTO AG) - 161/2011 - Duration: 0m 31s - New: 0, Existing: 65, Total: 65
+[2025-10-02T20:50:05.051Z] 🚀 STARTED processing user 332 (Auto Walser AG) - 162/2011 - URL: https://www.autoscout24.ch/de/s/seller-61731
+[2025-10-02T20:50:47.014Z] ✅ COMPLETED user 332 (Auto Walser AG) - 162/2011 - Duration: 0m 41s - New: 2, Existing: 82, Total: 84
+[2025-10-02T20:50:50.273Z] 🚀 STARTED processing user 333 (Auto Walser AG) - 163/2011 - URL: https://www.autoscout24.ch/de/s/seller-61731
+[2025-10-02T20:51:30.016Z] ✅ COMPLETED user 333 (Auto Walser AG) - 163/2011 - Duration: 0m 39s - New: 2, Existing: 78, Total: 80
+[2025-10-02T20:51:33.304Z] 🚀 STARTED processing user 1141 (GROSS GARAGE BADEN UND WETTINGEN) - 164/2011 - URL: https://www.autoscout24.ch/de/s/seller-63364
+[2025-10-02T20:52:12.233Z] ✅ COMPLETED user 1141 (GROSS GARAGE BADEN UND WETTINGEN) - 164/2011 - Duration: 0m 38s - New: 0, Existing: 80, Total: 80
+[2025-10-02T20:52:15.494Z] 🚀 STARTED processing user 55 (AMAG Audi Center Zug) - 165/2011 - URL: https://www.autoscout24.ch/de/s/seller-1159938
+[2025-10-02T20:52:50.276Z] ✅ COMPLETED user 55 (AMAG Audi Center Zug) - 165/2011 - Duration: 0m 34s - New: 0, Existing: 71, Total: 71
+[2025-10-02T20:52:53.546Z] 🚀 STARTED processing user 485 (Autohaus Zürichsee GmbH) - 166/2011 - URL: https://www.autoscout24.ch/de/s/seller-67831
+[2025-10-02T20:53:35.847Z] ✅ COMPLETED user 485 (Autohaus Zürichsee GmbH) - 166/2011 - Duration: 0m 42s - New: 1, Existing: 85, Total: 86
+[2025-10-02T20:53:39.116Z] 🚀 STARTED processing user 821 (Centre Porsche Lausanne) - 167/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67191
+[2025-10-02T20:54:37.349Z] ✅ COMPLETED user 821 (Centre Porsche Lausanne) - 167/2011 - Duration: 0m 58s - New: 4, Existing: 66, Total: 70
+[2025-10-02T20:54:40.617Z] 🚀 STARTED processing user 1133 (GNG Occasions Center) - 168/2011 - URL: https://www.autoscout24.ch/de/s/seller-2359677
+[2025-10-02T20:55:17.775Z] ✅ COMPLETED user 1133 (GNG Occasions Center) - 168/2011 - Duration: 0m 37s - New: 1, Existing: 73, Total: 74
+[2025-10-02T20:55:21.037Z] 🚀 STARTED processing user 103 (AMAG Sursee) - 169/2011 - URL: https://www.autoscout24.ch/de/s/seller-61915
+[2025-10-02T20:55:56.002Z] ✅ COMPLETED user 103 (AMAG Sursee) - 169/2011 - Duration: 0m 34s - New: 1, Existing: 70, Total: 71
+[2025-10-02T20:55:59.268Z] 🚀 STARTED processing user 380 (Auto-Steiner AG) - 170/2011 - URL: https://www.autoscout24.ch/de/s/seller-64389
+[2025-10-02T20:56:36.578Z] ✅ COMPLETED user 380 (Auto-Steiner AG) - 170/2011 - Duration: 0m 37s - New: 0, Existing: 76, Total: 76
+[2025-10-02T20:56:39.840Z] 🚀 STARTED processing user 603 (BRAND AUTOMOBILE AG) - 171/2011 - URL: https://www.autoscout24.ch/de/s/seller-62333
+[2025-10-02T20:57:20.389Z] ✅ COMPLETED user 603 (BRAND AUTOMOBILE AG) - 171/2011 - Duration: 0m 40s - New: 2, Existing: 81, Total: 83
+[2025-10-02T20:57:23.648Z] 🚀 STARTED processing user 1624 (Autodirect) - 172/2011 - URL: https://www.autoscout24.be/fr/professional/autodirect
+[2025-10-02T20:59:07.112Z] ✅ COMPLETED user 1624 (Autodirect) - 172/2011 - Duration: 1m 43s - New: 0, Existing: 87, Total: 87
+[2025-10-02T20:59:10.377Z] 🚀 STARTED processing user 1682 (D’Hondt nv – Reynaert) - 173/2011 - URL: https://www.autoscout24.be/nl/verkopers/d-hondt-nv-reynaert
+[2025-10-02T21:00:09.846Z] ✅ COMPLETED user 1682 (D’Hondt nv – Reynaert) - 173/2011 - Duration: 0m 59s - New: 2, Existing: 93, Total: 95
+[2025-10-02T21:00:13.124Z] 🚀 STARTED processing user 1734 (Geurts Car Center NV) - 174/2011 - URL: https://www.autoscout24.be/nl/verkopers/geurts-car-center-nv
+[2025-10-02T21:02:42.924Z] ✅ COMPLETED user 1734 (Geurts Car Center NV) - 174/2011 - Duration: 2m 29s - New: 11, Existing: 84, Total: 95
+[2025-10-02T21:02:46.187Z] 🚀 STARTED processing user 163 (AUTORS SA & AL PONTE SA) - 175/2011 - URL: https://www.autoscout24.ch/fr/s/seller-67224
+[2025-10-02T21:03:27.426Z] ✅ COMPLETED user 163 (AUTORS SA & AL PONTE SA) - 175/2011 - Duration: 0m 41s - New: 1, Existing: 82, Total: 83
+[2025-10-02T21:03:30.695Z] 🚀 STARTED processing user 309 (Auto Salon Volketswil AG) - 176/2011 - URL: https://www.autoscout24.ch/de/s/seller-2606197
+[2025-10-02T21:04:09.806Z] ✅ COMPLETED user 309 (Auto Salon Volketswil AG) - 176/2011 - Duration: 0m 39s - New: 3, Existing: 71, Total: 74
+[2025-10-02T21:04:13.072Z] 🚀 STARTED processing user 369 (Auto-Härti AG) - 177/2011 - URL: https://www.autoscout24.ch/de/s/seller-62929
+[2025-10-02T21:04:45.415Z] ✅ COMPLETED user 369 (Auto-Härti AG) - 177/2011 - Duration: 0m 32s - New: 0, Existing: 65, Total: 65
+[2025-10-02T21:04:48.656Z] 🚀 STARTED processing user 85 (AMAG Kreuzlingen) - 178/2011 - URL: https://www.autoscout24.ch/de/s/seller-61558
+[2025-10-02T21:05:25.841Z] ✅ COMPLETED user 85 (AMAG Kreuzlingen) - 178/2011 - Duration: 0m 37s - New: 1, Existing: 74, Total: 75
+[2025-10-02T21:05:29.100Z] 🚀 STARTED processing user 1158 (Garage + Carrosserie Rüfenacht AG) - 179/2011 - URL: https://www.autoscout24.ch/de/s/seller-2126
+[2025-10-02T21:06:05.285Z] ✅ COMPLETED user 1158 (Garage + Carrosserie Rüfenacht AG) - 179/2011 - Duration: 0m 36s - New: 1, Existing: 69, Total: 70
+[2025-10-02T21:06:08.551Z] 🚀 STARTED processing user 1652 (DCT Wielsbeke Maldegem Brussels) - 180/2011 - URL: https://www.autoscout24.fr/garages/dct-wielsbeke-maldegem-mechelen-belgique?srsltid=AfmBOor05nJhQMFK_YzYhPbkdJpElxHbeZocZK4HP1NJlHppAL-lRsqk
+[2025-10-02T21:07:43.787Z] ✅ COMPLETED user 1652 (DCT Wielsbeke Maldegem Brussels) - 180/2011 - Duration: 1m 35s - New: 2, Existing: 80, Total: 82
+[2025-10-02T21:07:47.028Z] 🚀 STARTED processing user 1698 (Faz Cars) - 181/2011 - URL: https://www.autoscout24.be/fr/professional/faz-cars
+[2025-10-02T21:09:24.835Z] ✅ COMPLETED user 1698 (Faz Cars) - 181/2011 - Duration: 1m 37s - New: 0, Existing: 87, Total: 87
+[2025-10-02T21:09:28.093Z] 🚀 STARTED processing user 1925 (Garage Sadi-Car) - 182/2011 - URL: https://www.autoscout24.be/fr/professional/garage-sadi-car
+[2025-10-02T21:11:51.266Z] ✅ COMPLETED user 1925 (Garage Sadi-Car) - 182/2011 - Duration: 2m 23s - New: 20, Existing: 78, Total: 98
+[2025-10-02T21:11:54.564Z] 🚀 STARTED processing user 81 (AMAG Gümligen) - 183/2011 - URL: https://www.autoscout24.ch/de/s/seller-61249
+[2025-10-02T21:12:27.623Z] ✅ COMPLETED user 81 (AMAG Gümligen) - 183/2011 - Duration: 0m 33s - New: 2, Existing: 61, Total: 63
+[2025-10-02T21:12:30.884Z] 🚀 STARTED processing user 1382 (Garage Galliker AG Bellach) - 184/2011 - URL: https://www.autoscout24.ch/de/s/seller-62331
+[2025-10-02T21:13:09.147Z] ✅ COMPLETED user 1382 (Garage Galliker AG Bellach) - 184/2011 - Duration: 0m 38s - New: 0, Existing: 78, Total: 78
+[2025-10-02T21:13:12.444Z] 🚀 STARTED processing user 1383 (Garage Galliker AG Bellach) - 185/2011 - URL: https://www.autoscout24.ch/de/s/seller-62331
+[2025-10-02T21:13:48.861Z] ✅ COMPLETED user 1383 (Garage Galliker AG Bellach) - 185/2011 - Duration: 0m 36s - New: 0, Existing: 73, Total: 73
+[2025-10-02T21:13:52.115Z] 🚀 STARTED processing user 1429 (Garage Gut) - 186/2011 - URL: https://www.autoscout24.ch/de/s/seller-61349
+[2025-10-02T21:14:30.546Z] ✅ COMPLETED user 1429 (Garage Gut) - 186/2011 - Duration: 0m 38s - New: 0, Existing: 78, Total: 78
+[2025-10-02T21:14:33.823Z] 🚀 STARTED processing user 1430 (Garage Gut) - 187/2011 - URL: https://www.autoscout24.ch/de/s/seller-61349
+[2025-10-02T21:15:10.753Z] ✅ COMPLETED user 1430 (Garage Gut) - 187/2011 - Duration: 0m 36s - New: 0, Existing: 75, Total: 75
+[2025-10-02T21:15:14.024Z] 🚀 STARTED processing user 253 (Auto Margarethen AG) - 188/2011 - URL: https://www.autoscout24.ch/fr/s/seller-61810
+[2025-10-02T21:15:49.322Z] ✅ COMPLETED user 253 (Auto Margarethen AG) - 188/2011 - Duration: 0m 35s - New: 0, Existing: 71, Total: 71
+[2025-10-02T21:15:52.591Z] 🚀 STARTED processing user 254 (Auto Margarethen AG) - 189/2011 - URL: https://www.autoscout24.ch/fr/s/seller-61810
+[2025-10-02T21:16:29.540Z] ✅ COMPLETED user 254 (Auto Margarethen AG) - 189/2011 - Duration: 0m 36s - New: 0, Existing: 75, Total: 75
+[2025-10-02T21:16:32.789Z] 🚀 STARTED processing user 596 (BAMERT AG) - 190/2011 - URL: https://www.autoscout24.ch/de/s/seller-305
+[2025-10-02T21:17:10.192Z] ✅ COMPLETED user 596 (BAMERT AG) - 190/2011 - Duration: 0m 37s - New: 0, Existing: 76, Total: 76
+[2025-10-02T21:17:13.455Z] 🚀 STARTED processing user 820 (Centre Porsche Genève) - 191/2011 - URL: https://www.autoscout24.ch/fr/s/seller-68127
+[2025-10-02T21:17:48.066Z] ✅ COMPLETED user 820 (Centre Porsche Genève) - 191/2011 - Duration: 0m 34s - New: 0, Existing: 70, Total: 70
+[2025-10-02T21:17:51.332Z] 🚀 STARTED processing user 1643 (Ayvens Mobility Center Antwerpen) - 192/2011 - URL: https://www.autoscout24.be/nl/verkopers/ayvens-mobility-center-antwerpen
+[2025-10-02T21:19:11.942Z] ✅ COMPLETED user 1643 (Ayvens Mobility Center Antwerpen) - 192/2011 - Duration: 1m 20s - New: 0, Existing: 88, Total: 88
+[2025-10-02T21:19:15.209Z] 🚀 STARTED processing user 86 (AMAG La Tour-de-Trême) - 193/2011 - URL: https://www.autoscout24.ch/de/s/seller-2554458
+[2025-10-02T21:19:49.104Z] ✅ COMPLETED user 86 (AMAG La Tour-de-Trême) - 193/2011 - Duration: 0m 33s - New: 1, Existing: 67, Total: 68
+[2025-10-02T21:19:52.394Z] 🚀 STARTED processing user 97 (AMAG Rheinfelden) - 194/2011 - URL: https://www.autoscout24.ch/de/s/seller-62492
+[2025-10-02T21:20:30.723Z] ✅ COMPLETED user 97 (AMAG Rheinfelden) - 194/2011 - Duration: 0m 38s - New: 0, Existing: 77, Total: 77
+[2025-10-02T21:20:33.993Z] 🚀 STARTED processing user 481 (Autohaus Thun-Nord AG) - 195/2011 - URL: https://www.autoscout24.ch/de/s/seller-35046
+[2025-10-02T21:21:10.941Z] ✅ COMPLETED user 481 (Autohaus Thun-Nord AG) - 195/2011 - Duration: 0m 36s - New: 0, Existing: 75, Total: 75
+[2025-10-02T21:21:14.216Z] 🚀 STARTED processing user 1789 (MBM Car Trade) - 196/2011 - URL: https://www.autoscout24.be/nl/verkopers/mbm-car-trade
+[2025-10-02T21:22:52.835Z] ✅ COMPLETED user 1789 (MBM Car Trade) - 196/2011 - Duration: 1m 38s - New: 2, Existing: 87, Total: 89
+[2025-10-02T21:22:56.113Z] 🚀 STARTED processing user 35 (ACW Group Visp und Brig) - 197/2011 - URL: https://www.autoscout24.ch/de/s/seller-60020
+[2025-10-02T21:23:40.176Z] ✅ COMPLETED user 35 (ACW Group Visp und Brig) - 197/2011 - Duration: 0m 44s - New: 1, Existing: 87, Total: 88
+[2025-10-02T21:23:43.441Z] 🚀 STARTED processing user 157 (AUTOHAUS WANGEN BEI OLTEN AG) - 198/2011 - URL: https://www.autoscout24.ch/de/s/seller-65857
+[2025-10-02T21:24:15.394Z] ✅ COMPLETED user 157 (AUTOHAUS WANGEN BEI OLTEN AG) - 198/2011 - Duration: 0m 31s - New: 0, Existing: 66, Total: 66
+[2025-10-02T21:24:18.666Z] 🚀 STARTED processing user 459 (Autohaus Baar AG) - 199/2011 - URL: https://www.autoscout24.ch/de/s/seller-1759841
+[2025-10-02T21:24:55.090Z] ✅ COMPLETED user 459 (Autohaus Baar AG) - 199/2011 - Duration: 0m 36s - New: 1, Existing: 63, Total: 64
+[2025-10-02T21:24:58.393Z] 🚀 STARTED processing user 465 (Autohaus Küng AG) - 200/2011 - URL: https://www.autoscout24.ch/de/s/seller-1627
+[2025-10-02T21:25:32.845Z] ✅ COMPLETED user 465 (Autohaus Küng AG) - 200/2011 - Duration: 0m 34s - New: 0, Existing: 70, Total: 70
+[2025-10-02T21:25:36.113Z] 🚀 STARTED processing user 5 (**TopCar GmbH**) - 201/2011 - URL: https://www.autoscout24.ch/de/s/seller-2404586
+[2025-10-02T21:26:10.055Z] ✅ COMPLETED user 5 (**TopCar GmbH**) - 201/2011 - Duration: 0m 33s - New: 0, Existing: 69, Total: 69
+[2025-10-02T21:26:13.339Z] 🚀 STARTED processing user 843 (City-Garage AG Goldach) - 202/2011 - URL: https://www.autoscout24.ch/de/s/seller-61965
+[2025-10-02T21:26:44.323Z] ✅ COMPLETED user 843 (City-Garage AG Goldach) - 202/2011 - Duration: 0m 30s - New: 2, Existing: 60, Total: 62
+[2025-10-02T21:26:47.597Z] 🚀 STARTED processing user 1815 (Novicar) - 203/2011 - URL: https://www.autoscout24.be/nl/verkopers/novicar
+[2025-10-02T21:28:29.937Z] ✅ COMPLETED user 1815 (Novicar) - 203/2011 - Duration: 1m 42s - New: 6, Existing: 80, Total: 86
+[2025-10-02T21:28:33.249Z] 🚀 STARTED processing user 746 (Car Trade24) - 204/2011 - URL: https://www.autoscout24.ch/de/s/seller-67956
+[2025-10-02T21:29:14.599Z] ✅ COMPLETED user 746 (Car Trade24) - 204/2011 - Duration: 0m 41s - New: 4, Existing: 73, Total: 77
+[2025-10-02T21:29:17.880Z] 🚀 STARTED processing user 1817 (Oxo Cars) - 205/2011 - URL: https://www.autoscout24.be/fr/professional/oxo-cars
+[2025-10-02T21:31:15.120Z] ✅ COMPLETED user 1817 (Oxo Cars) - 205/2011 - Duration: 1m 57s - New: 15, Existing: 61, Total: 76
+[2025-10-02T21:31:18.396Z] 🚀 STARTED processing user 1940 (Premium Quality Cars Poperinge) - 206/2011 - URL: https://www.autoscout24.be/nl/verkopers/premium-quality-cars-poperinge
+[2025-10-02T21:32:51.038Z] ✅ COMPLETED user 1940 (Premium Quality Cars Poperinge) - 206/2011 - Duration: 1m 32s - New: 2, Existing: 79, Total: 81
+[2025-10-02T21:32:54.288Z] 🚀 STARTED processing user 319 (Auto Suter AG) - 207/2011 - URL: https://www.autoscout24.ch/de/s/seller-64034/vc-utility
+[2025-10-02T21:33:29.461Z] ✅ COMPLETED user 319 (Auto Suter AG) - 207/2011 - Duration: 0m 35s - New: 2, Existing: 69, Total: 71
+[2025-10-02T21:33:32.755Z] 🚀 STARTED processing user 646 (Binelli Automobile AG Filiale Zürich) - 208/2011 - URL: https://www.autoscout24.ch/de/s/seller-62746
+[2025-10-02T21:34:08.924Z] ✅ COMPLETED user 646 (Binelli Automobile AG Filiale Zürich) - 208/2011 - Duration: 0m 36s - New: 5, Existing: 62, Total: 67
+[2025-10-02T21:34:12.188Z] 🚀 STARTED processing user 649 (Binelli Automobile AG Filiale Adliswil) - 209/2011 - URL: https://www.autoscout24.ch/de/s/seller-62746
+[2025-10-02T21:34:52.651Z] ✅ COMPLETED user 649 (Binelli Automobile AG Filiale Adliswil) - 209/2011 - Duration: 0m 40s - New: 8, Existing: 68, Total: 76
+[2025-10-02T21:34:55.904Z] 🚀 STARTED processing user 2004 (XOTO) - 210/2011 - URL: https://www.autoscout24.be/nl/verkopers/xoto
+[2025-10-02T21:36:14.171Z] ✅ COMPLETED user 2004 (XOTO) - 210/2011 - Duration: 1m 18s - New: 2, Existing: 82, Total: 84
+[2025-10-02T21:36:17.455Z] 🚀 STARTED processing user 180 (Abt Automobile AG in Muttenz) - 211/2011 - URL: https://www.autoscout24.ch/de/s/seller-62923
+[2025-10-02T21:36:50.806Z] ✅ COMPLETED user 180 (Abt Automobile AG in Muttenz) - 211/2011 - Duration: 0m 33s - New: 0, Existing: 69, Total: 69
+[2025-10-02T21:36:54.069Z] 🚀 STARTED processing user 352 (Auto-Center Benno Müller AG) - 212/2011 - URL: https://www.autoscout24.ch/de/s/seller-61674
+[2025-10-02T21:37:23.777Z] ✅ COMPLETED user 352 (Auto-Center Benno Müller AG) - 212/2011 - Duration: 0m 29s - New: 1, Existing: 58, Total: 59
+[2025-10-02T21:37:27.049Z] 🚀 STARTED processing user 358 (Auto-Center Küng AG) - 213/2011 - URL: https://www.autoscout24.ch/de/s/seller-61933
+[2025-10-02T21:38:01.432Z] ✅ COMPLETED user 358 (Auto-Center Küng AG) - 213/2011 - Duration: 0m 34s - New: 0, Existing: 70, Total: 70
+[2025-10-02T21:38:04.687Z] 🚀 STARTED processing user 817 (Centre Audi Collonge-Bellerive) - 214/2011 - URL: https://www.autoscout24.ch/de/s/seller-60283
+[2025-10-02T21:38:40.707Z] ✅ COMPLETED user 817 (Centre Audi Collonge-Bellerive) - 214/2011 - Duration: 0m 36s - New: 1, Existing: 73, Total: 74
+[2025-10-02T21:38:43.970Z] 🚀 STARTED processing user 1299 (Garage Carrozzeria Maffeis SA) - 215/2011 - URL: https://www.autoscout24.ch/it/s/seller-65171
+[2025-10-02T21:39:16.896Z] ✅ COMPLETED user 1299 (Garage Carrozzeria Maffeis SA) - 215/2011 - Duration: 0m 32s - New: 0, Existing: 68, Total: 68
+[2025-10-02T21:39:20.176Z] 🚀 STARTED processing user 1752 (Kabakci Car - Ville-Pommeroeul) - 216/2011 - URL: https://www.autoscout24.be/fr/professional/kabakci-car-ville-pommeroeul
+[2025-10-02T21:40:55.393Z] ✅ COMPLETED user 1752 (Kabakci Car - Ville-Pommeroeul) - 216/2011 - Duration: 1m 35s - New: 0, Existing: 82, Total: 82
+[2025-10-02T21:40:58.663Z] 🚀 STARTED processing user 52 (AMAG Aarau) - 217/2011 - URL: https://www.autoscout24.ch/de/s/seller-63467
+[2025-10-02T21:41:29.147Z] ✅ COMPLETED user 52 (AMAG Aarau) - 217/2011 - Duration: 0m 30s - New: 0, Existing: 63, Total: 63
+[2025-10-02T21:41:32.421Z] 🚀 STARTED processing user 74 (AMAG Dulliken) - 218/2011 - URL: https://www.autoscout24.ch/de/s/seller-60024
+[2025-10-02T21:42:07.000Z] ✅ COMPLETED user 74 (AMAG Dulliken) - 218/2011 - Duration: 0m 34s - New: 0, Existing: 72, Total: 72
+[2025-10-02T21:42:10.263Z] 🚀 STARTED processing user 141 (AUTO CORNER AG) - 219/2011 - URL: https://www.autoscout24.ch/de/s/seller-2286383
+[2025-10-02T21:42:45.460Z] ✅ COMPLETED user 141 (AUTO CORNER AG) - 219/2011 - Duration: 0m 35s - New: 1, Existing: 68, Total: 69
+[2025-10-02T21:42:48.713Z] 🚀 STARTED processing user 344 (Auto Zentrum West AG) - 220/2011 - URL: https://www.autoscout24.ch/de/s/seller-64739
+[2025-10-02T21:43:19.791Z] ✅ COMPLETED user 344 (Auto Zentrum West AG) - 220/2011 - Duration: 0m 31s - New: 0, Existing: 64, Total: 64
+[2025-10-02T21:43:23.089Z] 🚀 STARTED processing user 1298 (Garage Carrozzeria Maffeis SA) - 221/2011 - URL: https://www.autoscout24.ch/it/s/seller-65171
+[2025-10-02T21:43:50.963Z] ✅ COMPLETED user 1298 (Garage Carrozzeria Maffeis SA) - 221/2011 - Duration: 0m 27s - New: 0, Existing: 57, Total: 57
+[2025-10-02T21:43:54.198Z] 🚀 STARTED processing user 1731 (Garage des Chaufours SRL) - 222/2011 - URL: https://www.autoscout24.be/fr/professional/garage-des-chaufours-srl
+[2025-10-02T21:45:37.159Z] ✅ COMPLETED user 1731 (Garage des Chaufours SRL) - 222/2011 - Duration: 1m 42s - New: 3, Existing: 75, Total: 78
+[2025-10-02T21:45:40.419Z] 🚀 STARTED processing user 19 (A Zaidan Automobile GmbH) - 223/2011 - URL: https://www.autoscout24.ch/de/s/seller-1929539
+[2025-10-02T21:46:08.944Z] ✅ COMPLETED user 19 (A Zaidan Automobile GmbH) - 223/2011 - Duration: 0m 28s - New: 0, Existing: 57, Total: 57
+[2025-10-02T21:46:12.196Z] 🚀 STARTED processing user 77 (AMAG Frauenfeld) - 224/2011 - URL: https://www.autoscout24.ch/de/s/seller-1373358
+[2025-10-02T21:46:43.154Z] ✅ COMPLETED user 77 (AMAG Frauenfeld) - 224/2011 - Duration: 0m 30s - New: 0, Existing: 64, Total: 64
+[2025-10-02T21:46:46.424Z] 🚀 STARTED processing user 101 (AMAG Solothurn) - 225/2011 - URL: https://www.autoscout24.ch/de/s/seller-60734
+[2025-10-02T21:47:19.261Z] ✅ COMPLETED user 101 (AMAG Solothurn) - 225/2011 - Duration: 0m 32s - New: 1, Existing: 65, Total: 66
+[2025-10-02T21:47:22.566Z] 🚀 STARTED processing user 1160 (Garage - Carrosserie Georges Bovet SA) - 226/2011 - URL: https://www.autoscout24.ch/fr/s/seller-61748
+[2025-10-02T21:47:57.771Z] ✅ COMPLETED user 1160 (Garage - Carrosserie Georges Bovet SA) - 226/2011 - Duration: 0m 35s - New: 2, Existing: 62, Total: 64
+[2025-10-02T21:48:01.048Z] 🚀 STARTED processing user 1250 (Garage Bolzern Koch AG Ebikon) - 227/2011 - URL: https://www.autoscout24.ch/de/s/seller-16617
+[2025-10-02T21:48:36.400Z] ✅ COMPLETED user 1250 (Garage Bolzern Koch AG Ebikon) - 227/2011 - Duration: 0m 35s - New: 0, Existing: 73, Total: 73
+[2025-10-02T21:48:39.668Z] 🚀 STARTED processing user 1276 (Garage Burkhardt AG) - 228/2011 - URL: https://www.autoscout24.ch/de/s/seller-61782
+[2025-10-02T21:49:14.411Z] ✅ COMPLETED user 1276 (Garage Burkhardt AG) - 228/2011 - Duration: 0m 34s - New: 0, Existing: 72, Total: 72
+[2025-10-02T21:49:17.675Z] 🚀 STARTED processing user 1277 (Garage Burkhardt AG) - 229/2011 - URL: https://www.autoscout24.ch/de/s/seller-61782
+[2025-10-02T21:49:47.576Z] ✅ COMPLETED user 1277 (Garage Burkhardt AG) - 229/2011 - Duration: 0m 29s - New: 0, Existing: 62, Total: 62
+[2025-10-02T21:49:50.854Z] 🚀 STARTED processing user 1960 (Sprl Siyam-Cars) - 230/2011 - URL: https://www.autoscout24.be/fr/professional/sprl-siyam-cars
+[2025-10-02T21:51:20.018Z] ✅ COMPLETED user 1960 (Sprl Siyam-Cars) - 230/2011 - Duration: 1m 29s - New: 3, Existing: 73, Total: 76
+[2025-10-02T21:51:23.290Z] 🚀 STARTED processing user 93 (AMAG Occasions Center Kreuzlingen) - 231/2011 - URL: https://www.autoscout24.ch/de/s/seller-2383008
+[2025-10-02T21:51:55.695Z] ✅ COMPLETED user 93 (AMAG Occasions Center Kreuzlingen) - 231/2011 - Duration: 0m 32s - New: 0, Existing: 67, Total: 67
+[2025-10-02T21:51:58.960Z] 🚀 STARTED processing user 557 (Autoverkehr AG Zuchwil) - 232/2011 - URL: https://www.autoscout24.ch/de/s/seller-11893
+[2025-10-02T21:52:34.074Z] ✅ COMPLETED user 557 (Autoverkehr AG Zuchwil) - 232/2011 - Duration: 0m 35s - New: 0, Existing: 73, Total: 73
+[2025-10-02T21:52:37.355Z] 🚀 STARTED processing user 558 (Autoverkehr AG Zuchwil) - 233/2011 - URL: https://www.autoscout24.ch/de/s/seller-11893
+[2025-10-02T21:53:08.374Z] ✅ COMPLETED user 558 (Autoverkehr AG Zuchwil) - 233/2011 - Duration: 0m 31s - New: 0, Existing: 64, Total: 64
+[2025-10-02T21:53:11.649Z] 🚀 STARTED processing user 1251 (Garage Bolzern Koch AG Ebikon) - 234/2011 - URL: https://www.autoscout24.ch/de/s/seller-16617
+[2025-10-02T21:53:45.929Z] ✅ COMPLETED user 1251 (Garage Bolzern Koch AG Ebikon) - 234/2011 - Duration: 0m 34s - New: 1, Existing: 69, Total: 70
+[2025-10-02T21:53:49.196Z] 🚀 STARTED processing user 1329 (Garage Egger) - 235/2011 - URL: https://www.autoscout24.ch/de/s/seller-890
+[2025-10-02T21:54:26.447Z] ✅ COMPLETED user 1329 (Garage Egger) - 235/2011 - Duration: 0m 37s - New: 4, Existing: 69, Total: 73
+[2025-10-02T21:54:29.722Z] 🚀 STARTED processing user 1330 (Garage Egger) - 236/2011 - URL: https://www.autoscout24.ch/de/s/seller-890
+[2025-10-02T21:55:03.554Z] ✅ COMPLETED user 1330 (Garage Egger) - 236/2011 - Duration: 0m 33s - New: 4, Existing: 63, Total: 67
+[2025-10-02T21:55:06.830Z] 🚀 STARTED processing user 1681 (Dumane Supercar) - 237/2011 - URL: https://www.autoscout24.be/fr/professional/dumane-supercar
+[2025-10-02T21:56:36.583Z] ✅ COMPLETED user 1681 (Dumane Supercar) - 237/2011 - Duration: 1m 29s - New: 4, Existing: 64, Total: 68
+[2025-10-02T21:56:39.850Z] 🚀 STARTED processing user 1736 (Gma-cars Automotive) - 238/2011 - URL: https://www.autoscout24.be/nl/verkopers/gma-cars-automotive
+[2025-10-02T21:58:06.096Z] ✅ COMPLETED user 1736 (Gma-cars Automotive) - 238/2011 - Duration: 1m 26s - New: 0, Existing: 75, Total: 75
+[2025-10-02T21:58:09.349Z] 🚀 STARTED processing user 1854 (BMW - Juma Leuven) - 239/2011 - URL: https://www.autoscout24.be/nl/verkopers/bmw-juma-leuven
+[2025-10-02T21:58:58.761Z] ✅ COMPLETED user 1854 (BMW - Juma Leuven) - 239/2011 - Duration: 0m 49s - New: 3, Existing: 77, Total: 80
+[2025-10-02T21:59:02.017Z] 🚀 STARTED processing user 65 (AMAG Buchs) - 240/2011 - URL: https://www.autoscout24.ch/de/s/seller-61143
+[2025-10-02T21:59:34.476Z] ✅ COMPLETED user 65 (AMAG Buchs) - 240/2011 - Duration: 0m 32s - New: 0, Existing: 67, Total: 67
+[2025-10-02T21:59:37.771Z] 🚀 STARTED processing user 66 (AMAG Buchs) - 241/2011 - URL: https://www.autoscout24.ch/de/s/seller-61143
+[2025-10-02T22:00:10.632Z] ✅ COMPLETED user 66 (AMAG Buchs) - 241/2011 - Duration: 0m 32s - New: 0, Existing: 68, Total: 68
+[2025-10-02T22:00:13.903Z] 🚀 STARTED processing user 145 (AUTO GOBELI AG) - 242/2011 - URL: https://www.autoscout24.ch/de/s/seller-1353800
+[2025-10-02T22:00:42.636Z] ✅ COMPLETED user 145 (AUTO GOBELI AG) - 242/2011 - Duration: 0m 28s - New: 0, Existing: 59, Total: 59
+[2025-10-02T22:00:45.921Z] 🚀 STARTED processing user 1313 (Garage Dubach AG) - 243/2011 - URL: https://www.autoscout24.ch/de/s/seller-60270
+[2025-10-02T22:01:19.542Z] ✅ COMPLETED user 1313 (Garage Dubach AG) - 243/2011 - Duration: 0m 33s - New: 0, Existing: 70, Total: 70
+[2025-10-02T22:01:22.788Z] 🚀 STARTED processing user 1314 (Garage Dubach AG) - 244/2011 - URL: https://www.autoscout24.ch/de/s/seller-60270
+[2025-10-02T22:01:53.948Z] ✅ COMPLETED user 1314 (Garage Dubach AG) - 244/2011 - Duration: 0m 31s - New: 0, Existing: 64, Total: 64
+[2025-10-02T22:01:57.235Z] 🚀 STARTED processing user 229 (Auto Fischer Ettingen GmbH) - 245/2011 - URL: https://www.autoscout24.ch/de/s/seller-60513
+[2025-10-02T22:02:21.474Z] ✅ COMPLETED user 229 (Auto Fischer Ettingen GmbH) - 245/2011 - Duration: 0m 24s - New: 0, Existing: 49, Total: 49
+[2025-10-02T22:02:24.742Z] 🚀 STARTED processing user 230 (Auto Fischer Ettingen GmbH) - 246/2011 - URL: https://www.autoscout24.ch/de/s/seller-60513
+[2025-10-02T22:02:49.370Z] ✅ COMPLETED user 230 (Auto Fischer Ettingen GmbH) - 246/2011 - Duration: 0m 24s - New: 0, Existing: 50, Total: 50
+[2025-10-02T22:02:52.648Z] 🚀 STARTED processing user 328 (Auto Touring Hunzenschwil AG) - 247/2011 - URL: https://www.autoscout24.ch/de/s/seller-64869
+[2025-10-02T22:03:19.692Z] ✅ COMPLETED user 328 (Auto Touring Hunzenschwil AG) - 247/2011 - Duration: 0m 27s - New: 1, Existing: 53, Total: 54
+[2025-10-02T22:03:22.949Z] 🚀 STARTED processing user 1603 (AB Automotive nv) - 248/2011 - URL: https://www.autoscout24.be/nl/verkopers/ab-automotive-nv
+[2025-10-02T22:04:15.730Z] ✅ COMPLETED user 1603 (AB Automotive nv) - 248/2011 - Duration: 0m 52s - New: 6, Existing: 74, Total: 80
+[2025-10-02T22:04:19.004Z] 🚀 STARTED processing user 1969 (Tip Top Cars) - 249/2011 - URL: https://www.autoscout24.be/nl/verkopers/tip-top-cars-sint-pieters-leeuw
+[2025-10-02T22:05:40.788Z] ✅ COMPLETED user 1969 (Tip Top Cars) - 249/2011 - Duration: 1m 21s - New: 3, Existing: 71, Total: 74
+[2025-10-02T22:05:44.077Z] 🚀 STARTED processing user 518 (Automobiles SENN SA - Neuchâtel) - 250/2011 - URL: https://www.autoscout24.ch/fr/s/seller-2276713
+[2025-10-02T22:06:19.052Z] ✅ COMPLETED user 518 (Automobiles SENN SA - Neuchâtel) - 250/2011 - Duration: 0m 34s - New: 1, Existing: 67, Total: 68
+[2025-10-02T22:06:22.328Z] 🚀 STARTED processing user 521 (Automobiles Zimmermann SA) - 251/2011 - URL: https://www.autoscout24.ch/de/s/seller-2374532
+[2025-10-02T22:06:50.271Z] ✅ COMPLETED user 521 (Automobiles Zimmermann SA) - 251/2011 - Duration: 0m 27s - New: 0, Existing: 57, Total: 57
+[2025-10-02T22:06:53.532Z] 🚀 STARTED processing user 522 (Automobiles Zimmermann SA) - 252/2011 - URL: https://www.autoscout24.ch/de/s/seller-2374532
+[2025-10-02T22:07:24.168Z] ✅ COMPLETED user 522 (Automobiles Zimmermann SA) - 252/2011 - Duration: 0m 30s - New: 0, Existing: 63, Total: 63
+[2025-10-02T22:07:27.440Z] 🚀 STARTED processing user 1442 (Garage Hollenstein AG) - 253/2011 - URL: https://www.autoscout24.ch/de/s/seller-969
+[2025-10-02T22:08:01.259Z] ✅ COMPLETED user 1442 (Garage Hollenstein AG) - 253/2011 - Duration: 0m 33s - New: 0, Existing: 70, Total: 70
+[2025-10-02T22:08:04.547Z] 🚀 STARTED processing user 67 (AMAG Bülach) - 254/2011 - URL: https://www.autoscout24.ch/de/s/seller-61715
+[2025-10-02T22:08:37.465Z] ✅ COMPLETED user 67 (AMAG Bülach) - 254/2011 - Duration: 0m 32s - New: 5, Existing: 58, Total: 63
+[2025-10-02T22:08:40.725Z] 🚀 STARTED processing user 472 (Autohaus Otelfingen) - 255/2011 - URL: https://www.autoscout24.ch/de/s/seller-62788
+[2025-10-02T22:09:13.391Z] ✅ COMPLETED user 472 (Autohaus Otelfingen) - 255/2011 - Duration: 0m 32s - New: 0, Existing: 67, Total: 67
+[2025-10-02T22:09:16.654Z] 🚀 STARTED processing user 473 (Autohaus Otelfingen) - 256/2011 - URL: https://www.autoscout24.ch/de/s/seller-62788
+[2025-10-02T22:09:49.481Z] ✅ COMPLETED user 473 (Autohaus Otelfingen) - 256/2011 - Duration: 0m 32s - New: 0, Existing: 67, Total: 67
+[2025-10-02T22:09:52.760Z] 🚀 STARTED processing user 559 (Autoverkehr Bern) - 257/2011 - URL: https://www.autoscout24.ch/de/s/seller-60432
+[2025-10-02T22:10:24.932Z] ✅ COMPLETED user 559 (Autoverkehr Bern) - 257/2011 - Duration: 0m 32s - New: 2, Existing: 61, Total: 63
+[2025-10-02T22:10:28.169Z] 🚀 STARTED processing user 560 (Autoverkehr Bern) - 258/2011 - URL: https://www.autoscout24.ch/de/s/seller-60432
+[2025-10-02T22:11:04.560Z] ✅ COMPLETED user 560 (Autoverkehr Bern) - 258/2011 - Duration: 0m 36s - New: 2, Existing: 70, Total: 72
+[2025-10-02T22:11:07.836Z] 🚀 STARTED processing user 647 (Binelli Automobile AG - Maserati Zürich) - 259/2011 - URL: https://www.autoscout24.ch/de/s/seller-2462796
+[2025-10-02T22:11:47.596Z] ✅ COMPLETED user 647 (Binelli Automobile AG - Maserati Zürich) - 259/2011 - Duration: 0m 39s - New: 2, Existing: 75, Total: 77
+[2025-10-02T22:11:50.875Z] 🚀 STARTED processing user 1834 (Auto's Basile - Kuurne motors) - 260/2011 - URL: https://www.autoscout24.be/nl/verkopers/auto-s-basile-kuurne-motors
+[2025-10-02T22:12:41.062Z] ✅ COMPLETED user 1834 (Auto's Basile - Kuurne motors) - 260/2011 - Duration: 0m 50s - New: 0, Existing: 70, Total: 70
+[2025-10-02T22:12:44.337Z] 🚀 STARTED processing user 1886 (Car Company BV) - 261/2011 - URL: https://www.autoscout24.be/nl/verkopers/car-company-bv
+[2025-10-02T22:13:54.923Z] ✅ COMPLETED user 1886 (Car Company BV) - 261/2011 - Duration: 1m 10s - New: 0, Existing: 75, Total: 75
+[2025-10-02T22:13:58.200Z] 🚀 STARTED processing user 53 (AMAG Altstetten) - 262/2011 - URL: https://www.autoscout24.ch/de/s/seller-60935
+[2025-10-02T22:14:27.865Z] ✅ COMPLETED user 53 (AMAG Altstetten) - 262/2011 - Duration: 0m 29s - New: 0, Existing: 60, Total: 60
+[2025-10-02T22:14:31.157Z] 🚀 STARTED processing user 87 (AMAG Lausanne) - 263/2011 - URL: https://www.autoscout24.ch/fr/s/seller-64210
+[2025-10-02T22:15:03.809Z] ✅ COMPLETED user 87 (AMAG Lausanne) - 263/2011 - Duration: 0m 32s - New: 1, Existing: 64, Total: 65
+[2025-10-02T22:15:07.084Z] 🚀 STARTED processing user 197 (Ausee-Garage AG) - 264/2011 - URL: https://www.autoscout24.ch/it/s/seller-61747
+[2025-10-02T22:15:38.067Z] ✅ COMPLETED user 197 (Ausee-Garage AG) - 264/2011 - Duration: 0m 30s - New: 3, Existing: 57, Total: 60
+[2025-10-02T22:15:41.331Z] 🚀 STARTED processing user 1719 (GSL Chatelineau) - 265/2011 - URL: https://www.autoscout24.be/fr/professional/gsl-chatelineau
+[2025-10-02T22:17:20.016Z] ✅ COMPLETED user 1719 (GSL Chatelineau) - 265/2011 - Duration: 1m 38s - New: 3, Existing: 72, Total: 75
+[2025-10-02T22:17:23.288Z] 🚀 STARTED processing user 387 (AutoCenter Spreitenbach GmbH) - 266/2011 - URL: https://www.autoscout24.ch/de/s/seller-64305
+[2025-10-02T22:17:54.915Z] ✅ COMPLETED user 387 (AutoCenter Spreitenbach GmbH) - 266/2011 - Duration: 0m 31s - New: 1, Existing: 60, Total: 61
+[2025-10-02T22:17:58.170Z] 🚀 STARTED processing user 911 (Dimab Chablais SA - Concessionnaire BMW, MINI et ALPINA) - 267/2011 - URL: https://www.autoscout24.ch/fr/s/seller-62348
+[2025-10-02T22:18:29.743Z] ✅ COMPLETED user 911 (Dimab Chablais SA - Concessionnaire BMW, MINI et ALPINA) - 267/2011 - Duration: 0m 31s - New: 2, Existing: 59, Total: 61
+[2025-10-02T22:18:33.021Z] 🚀 STARTED processing user 912 (Dimab Chablais SA - Concessionnaire BMW, MINI et ALPINA) - 268/2011 - URL: https://www.autoscout24.ch/fr/s/seller-62348
+[2025-10-02T22:19:04.019Z] ✅ COMPLETED user 912 (Dimab Chablais SA - Concessionnaire BMW, MINI et ALPINA) - 268/2011 - Duration: 0m 30s - New: 2, Existing: 59, Total: 61
+[2025-10-02T22:19:07.302Z] 🚀 STARTED processing user 913 (Dimab Riviera SA - Concessionnaire BMW, MINI et ALPINA) - 269/2011 - URL: https://www.autoscout24.ch/fr/s/seller-62348
+[2025-10-02T22:19:35.050Z] ✅ COMPLETED user 913 (Dimab Riviera SA - Concessionnaire BMW, MINI et ALPINA) - 269/2011 - Duration: 0m 27s - New: 2, Existing: 52, Total: 54
+[2025-10-02T22:19:38.326Z] 🚀 STARTED processing user 1242 (Garage Blaser AG) - 270/2011 - URL: https://www.autoscout24.ch/de/s/seller-991915
+[2025-10-02T22:20:09.664Z] ✅ COMPLETED user 1242 (Garage Blaser AG) - 270/2011 - Duration: 0m 31s - New: 0, Existing: 64, Total: 64
+[2025-10-02T22:20:12.934Z] 🚀 STARTED processing user 1243 (Garage Blaser AG) - 271/2011 - URL: https://www.autoscout24.ch/de/s/seller-991915
