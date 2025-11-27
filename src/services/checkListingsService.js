@@ -285,7 +285,25 @@ async function processUsersSequentiallyForChecker(users) {
 
 async function checkListingsAcrossUsers() {
   logger.info('[CHECKER] 📋 Starting check listings across users...');
+  
+  // LOCALHOST MODE: Filter users by IDs when NODE_ENV=development and LOCALHOST_USERS=true
   let users = await getUsersToScrape('CHECKER');
+  
+  if (process.env.NODE_ENV === 'development' && process.env.LOCALHOST_USERS === 'true') {
+    // Define localhost user IDs - modify these IDs as needed for testing
+    const localhostUserIds = [
+      1049, 1161, 1612, 1614, 1620, 1645, 1648, 1661, 1665, 1683,
+      1696, 1708, 1732, 1779, 1781, 1787, 1792, 1805, 1826, 1827,
+      1942, 1943, 1944, 1967, 1974, 1978, 2000, 2006, 2010
+    ];
+    
+    const originalCount = users.length;
+    users = users.filter(user => localhostUserIds.includes(user.id));
+    
+    logger.info(`[CHECKER] 🏠 LOCALHOST MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+    logger.info(`[CHECKER] 📋 Localhost user IDs: [${localhostUserIds.join(', ')}]`);
+    logger.info(`[CHECKER] 👥 Filtered users: [${users.map(u => `${u.id} (${u.company_name || 'Unknown'})`).join(', ')}]`);
+  }
 
   // Sort users by created_at (latest first)
   users.sort((a, b) => {

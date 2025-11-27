@@ -34,60 +34,6 @@ function isWithinCurrentWeek(dateString) {
     return targetDate >= startOfWeek && targetDate <= endOfWeek;
 }
 
-/**
- * Filter users based on their autoscout_url_add_date
- * Skip users whose date is within the current week and not older than 7 days
- * @param {Array} users - Array of users to filter
- * @returns {Array} - Filtered array of users
- */
-function filterUsersByAddDate(users) {
-    const today = new Date();
-    const filteredUsers = [];
-    const skippedUsers = [];
-    
-    for (const user of users) {
-        if (!user.autoscout_url_add_date) {
-            // If no date is provided, include the user
-            logger.info(`[SCRAPER] ✅ User ${user.id}: No autoscout_url_add_date provided - will be processed`);
-            filteredUsers.push(user);
-            continue;
-        }
-        
-        const addDate = new Date(user.autoscout_url_add_date);
-        const daysDifference = Math.floor((today - addDate) / (1000 * 60 * 60 * 24));
-        const isWithinWeek = isWithinCurrentWeek(user.autoscout_url_add_date);
-        
-        // Skip if the date is within the current week and not older than 7 days
-        if (isWithinWeek && daysDifference < 7) {
-            const skipInfo = {
-                id: user.id,
-                autoscout_url_add_date: user.autoscout_url_add_date,
-                daysDifference: daysDifference,
-                isWithinWeek: isWithinWeek,
-                reason: `Within current week (${daysDifference} days old) - skipping until next Monday`
-            };
-            skippedUsers.push(skipInfo);
-            
-            // Log each skipped user immediately
-            logger.info(`[SCRAPER] ⏭️ SKIPPED User ${user.id}:`);
-            logger.info(`[SCRAPER]    📊 User: ${user.company_name}`);
-            logger.info(`[SCRAPER]    📅 Add Date: ${user.autoscout_url_add_date}`);
-            logger.info(`[SCRAPER]    📊 Days Old: ${daysDifference}`);
-            logger.info(`[SCRAPER]    📈 Within Current Week: ${isWithinWeek}`);
-            logger.info(`[SCRAPER]    🚫 Reason: ${skipInfo.reason}`);
-            logger.info(`[SCRAPER]    ──────────────────────────────────────────`);
-        } else {
-            logger.info(`[SCRAPER] ✅ User ${user.id}: Will be processed (${daysDifference} days old, within week: ${isWithinWeek})`);
-            filteredUsers.push(user);
-        }
-    }
-    
-    if (skippedUsers.length > 0) {
-        logger.info(`[SCRAPER] 📊 SUMMARY: Skipped ${skippedUsers.length} users due to autoscout_url_add_date within current week`);
-    }
-    
-    return filteredUsers;
-}
 
 /**
  * Process users sequentially to prevent memory overflow
@@ -199,9 +145,25 @@ async function main() {
         
 
         console.log("--------------------------------getting users--------------------------------");
-        // Fetch and process users
+        
+        // LOCALHOST MODE: Filter users by IDs when NODE_ENV=development and LOCALHOST_USERS=true
+        console.log("env", process.env.NODE_ENV, process.env.LOCALHOST_USERS);
         let users = await getUsersToScrape();
         console.log("users", users);
+        // if (process.env.NODE_ENV === 'dev' && process.env.LOCALHOST_USERS === 'true') {
+        //     // Define localhost user IDs - modify these IDs as needed for testing
+        //     const localhostUserIds = [
+        //         1614
+        //     ];
+            
+        //     const originalCount = users.length;
+        //     users = users.filter(user => localhostUserIds.includes(user.id));
+            
+        //     logger.info(`[SCRAPER] 🏠 LOCALHOST MODE ENABLED: Filtered to ${users.length} users from ${originalCount} total users`);
+        //     logger.info(`[SCRAPER] 📋 Localhost user IDs: [${localhostUserIds.join(', ')}]`);
+        //     logger.info(`[SCRAPER] 👥 Filtered users: [${users.map(u => `${u.id} (${u.company_name || 'Unknown'})`).join(', ')}]`);
+        // }
+        
  
         // sort the users by autoscout_adverts_count count desc
         users.sort((a, b) => {

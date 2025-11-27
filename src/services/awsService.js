@@ -3,7 +3,7 @@ const axios = require('axios');
 
 // Configure MinIO S3-compatible service using AWS SDK v3
 const s3Client = new S3Client({
-  endpoint: 'https://s3.b2motive.com', // MinIO S3 endpoint
+  endpoint: 'https://s3.nightdrive.ai', // MinIO S3 endpoint
   credentials: {
     accessKeyId: process.env.MINIO_ROOT_USER || process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.MINIO_ROOT_PASSWORD || process.env.AWS_SECRET_ACCESS_KEY,
@@ -93,7 +93,7 @@ async function uploadImage(imageUrl, advertId) {
     
     // Construct the URL manually since AWS SDK v3 doesn't return Location in the same way
     const bucketName = process.env.MINIO_BUCKET || process.env.AWS_S3_BUCKET;
-    const objectUrl = `https://s3.b2motive.com/${bucketName}/${filename}`;
+    const objectUrl = `https://s3.nightdrive.ai/${bucketName}/${filename}`;
     
     console.log(`Image uploaded to MinIO with quality preserved: ${objectUrl}`);
     console.log(`Original size: ${(imageResponse.data.length / 1024).toFixed(2)} KB`);

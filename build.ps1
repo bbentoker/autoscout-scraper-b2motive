@@ -1,7 +1,7 @@
-# Build script for autoscout-scraper-b2motive Docker image
+# Build script for autoscout-scraper-CarClick Docker image
 
 # Set variables
-$IMAGE_NAME = "bbentoker/autoscout-scraper-b2motive"
+$IMAGE_NAME = "bbentoker/autoscout-scraper-carclick"
 $TAG = "latest"
 
 Write-Host "Building Docker image: $IMAGE_NAME`:$TAG" -ForegroundColor Green

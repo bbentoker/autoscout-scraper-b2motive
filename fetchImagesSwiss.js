@@ -36,7 +36,7 @@ async function processSwissAdvertImage(advert) {
     console.log(`[SWISS_FETCHER] 📋 Processing Swiss advert ${advert.autoscout_id} (${advert.make} ${advert.model})`);
     
     // Check if we already have a MinIO URL (starts with our MinIO domain)
-    if (advert.image_url && advert.image_url.includes('s3.b2motive.com')) {
+    if (advert.image_url && advert.image_url.includes('s3.nightdrive.ai')) {
       console.log(`[SWISS_FETCHER] ✅ Advert ${advert.autoscout_id} already has MinIO image: ${advert.image_url}`);
       return true;
     }
@@ -104,7 +104,7 @@ async function fetchSwissImages(options = {}) {
         },
         {
           [Op.or]: [
-            { image_url: { [Op.notLike]: '%s3.b2motive.com%' } }, // Not already MinIO URL
+            { image_url: { [Op.notLike]: '%s3.nightdrive.ai%' } }, // Not already MinIO URL
             { image_url: { [Op.is]: null } }, // Or no image URL at all
             { image_url: '' } // Or empty image URL
           ]

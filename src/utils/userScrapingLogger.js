@@ -17,9 +17,14 @@ class UserScrapingLogger {
      * Ensure the logs directory exists
      */
     ensureLogDirectory() {
-        const logDir = path.dirname(this.logFile);
-        if (!fs.existsSync(logDir)) {
-            fs.mkdirSync(logDir, { recursive: true });
+        try {
+            const logDir = path.dirname(this.logFile);
+            if (!fs.existsSync(logDir)) {
+                fs.mkdirSync(logDir, { recursive: true, mode: 0o775 });
+            }
+        } catch (error) {
+            console.error('Failed to create logs directory:', error.message);
+            // Don't throw - allow application to continue without logging
         }
     }
 
@@ -27,8 +32,15 @@ class UserScrapingLogger {
      * Ensure the log file exists
      */
     ensureLogFile() {
-        if (!fs.existsSync(this.logFile)) {
-            fs.writeFileSync(this.logFile, '');
+        try {
+            if (!fs.existsSync(this.logFile)) {
+                fs.writeFileSync(this.logFile, '', { mode: 0o664 });
+            }
+        } catch (error) {
+            console.error('Failed to create log file:', error.message);
+            console.error('Logging to file will be disabled. Application will continue.');
+            // Disable file logging if we can't create the file
+            this.logFile = null;
         }
     }
 
@@ -46,6 +58,11 @@ class UserScrapingLogger {
      * @param {string} message - The message to log
      */
     writeLog(message) {
+        // If log file is disabled (due to permission errors), skip writing
+        if (!this.logFile) {
+            return;
+        }
+        
         const timestamp = new Date().toISOString();
         const logEntry = `[${timestamp}] ${message}\n`;
         
@@ -53,6 +70,10 @@ class UserScrapingLogger {
             fs.appendFileSync(this.logFile, logEntry);
         } catch (error) {
             console.error('Failed to write to user-scraping.log:', error.message);
+            // Disable file logging on persistent errors
+            if (error.code === 'EACCES' || error.code === 'EPERM') {
+                this.logFile = null;
+            }
         }
     }
 
@@ -129,12 +150,20 @@ class UserScrapingLogger {
      * Clear the log file at the start of a new session
      */
     clearLogFile() {
+        if (!this.logFile) {
+            return;
+        }
+        
         try {
             const timestamp = new Date().toISOString();
             const header = `AutoScout24 User Scraping Log - Session started at ${timestamp}\n`;
             fs.writeFileSync(this.logFile, header);
         } catch (error) {
             console.error('Failed to clear user-scraping.log:', error.message);
+            // Disable file logging on persistent errors
+            if (error.code === 'EACCES' || error.code === 'EPERM') {
+                this.logFile = null;
+            }
         }
     }
 }

@@ -4,32 +4,29 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files first
 COPY package*.json ./
 
 # Install dependencies
 RUN npm ci --only=production
 
-# Copy application code
+# Add non-root user
+RUN addgroup -g 1001 -S nodejs \
+  && adduser -S nodejs -u 1001
+
+# Copy application code (AFTER the user is created)
 COPY . .
 
-# Create a non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
+# Create logs dir with correct ownership
+RUN mkdir -p /app/logs \
+  && rm -f /app/logs/*.log \
+  && chown -R nodejs:nodejs /app
 
-# Change ownership of the app directory
-RUN chown -R nodejs:nodejs /app
+# Switch to non-root user
 USER nodejs
 
-# Expose port (if needed for health checks)
 EXPOSE 3000
 
-# Set environment variables
 ENV NODE_ENV=production
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "console.log('Health check passed')" || exit 1
-
-# Start the application with memory optimization flags
-CMD ["node", "--expose-gc", "--max-old-space-size=512", "main.js"] 
+CMD ["node", "--expose-gc", "--max-old-space-size=512", "main.js"]

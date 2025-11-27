@@ -1,55 +1,61 @@
--- PostgreSQL Schema for AutoScout Scraper B2Motive
+-- PostgreSQL Schema for AutoScout Scraper CarClick
 -- Generated from Sequelize models
 
+drop table if exists autoscout_adverts;
+drop table if exists autoscout_controls;
+drop table if exists autoscout_inventory;
+
 -- Create autoscout_adverts table
-CREATE TABLE autoscout_adverts (
+CREATE TABLE IF NOT EXISTS autoscout_adverts (
     id SERIAL PRIMARY KEY,
     autoscout_id VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     seller_id INTEGER,
     seller_name VARCHAR(255),
     first_registration DATE,
-    is_active BOOLEAN DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT true,
     last_seen TIMESTAMP,
     make VARCHAR(255) NOT NULL,
     model VARCHAR(255) NOT NULL,
     model_version VARCHAR(255),
     location VARCHAR(255),
-    price DECIMAL(10,2),
+    price FLOAT,
     price_currency VARCHAR(10),
-    body_type VARCHAR(255),
-    type VARCHAR(255),
-    drivetrain VARCHAR(255),
+    body_type VARCHAR(100),
+    type VARCHAR(100),
+    drivetrain VARCHAR(100),
     seats INTEGER,
     doors INTEGER,
-    mileage VARCHAR(255),
+    mileage VARCHAR(100),
     previous_owner INTEGER,
     full_service_history BOOLEAN,
     non_smoker_vehicle BOOLEAN,
-    power VARCHAR(255),
-    gearbox VARCHAR(255),
-    engine_size VARCHAR(255),
+    power VARCHAR(100),
+    gearbox VARCHAR(100),
+    engine_size VARCHAR(100),
     gears INTEGER,
     cylinders INTEGER,
-    empty_weight VARCHAR(255),
-    emission_class VARCHAR(255),
-    fuel_type VARCHAR(255),
-    fuel_consumption VARCHAR(255),
-    co_2_emissions VARCHAR(255),
+    empty_weight VARCHAR(100),
+    emission_class VARCHAR(100),
+    fuel_type VARCHAR(100),
+    fuel_consumption VARCHAR(100),
+    co_2_emissions VARCHAR(100),
     comfort TEXT,
     entertainment TEXT,
     safety TEXT,
     extras TEXT,
-    color VARCHAR(255),
-    paint VARCHAR(255),
-    upholstery_color VARCHAR(255),
-    upholstery VARCHAR(255),
+    color VARCHAR(100),
+    paint VARCHAR(100),
+    upholstery_color VARCHAR(100),
+    upholstery TEXT,
     description TEXT,
     link VARCHAR(500),
     sell_time INTEGER,
     image_url VARCHAR(500),
+    is_initial_run_listing BOOLEAN DEFAULT false,
     original_image_url VARCHAR(500)
 );
+
 
 -- Create autoscout_controls table
 CREATE TABLE autoscout_controls (

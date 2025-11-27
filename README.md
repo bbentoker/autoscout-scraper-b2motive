@@ -5,7 +5,7 @@ A Node.js application for scraping car listings from AutoScout24 with automated 
 ## Project Structure
 
 ```
-autoscout-scraper-b2motive/
+autoscout-scraper-CarClick/
 ├── src/                          # Source code
 │   ├── services/                 # Business logic services
 │   │   ├── scraper.js           # Main scraping logic
