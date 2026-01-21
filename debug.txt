@@ -1,0 +1,5 @@
+AutoScout24 Scraper Debug Log - Session started at 2025-11-27T16:02:28.242Z
+================================================================================
+[2025-11-27T16:02:30.026Z] 🔥 SCRAPER SESSION STARTED - Processing 9 users
+[2025-11-27T16:02:30.026Z] ================================================================================
+[2025-11-27T16:02:30.029Z] 🚀 STARTED processing user 6 (Autowelt von Rotz AG) - 1/9 - URL: https://www.autoscout24.ch/de/s/seller-1153

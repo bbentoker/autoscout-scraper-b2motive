@@ -1,0 +1,34 @@
+{
+  "name": "autoscout-scraper-CarClick",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "node --expose-gc main.js",
+    "dev": "node --expose-gc main.js",
+    "start:memory-optimized": "node --expose-gc --max-old-space-size=512 main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test-scheduler": "node --expose-gc test-scheduler.js",
+    "test-scraper-only": "TEST_CHECKER_ON=false node --expose-gc test-scheduler.js",
+    "test-checker-only": "TEST_SCRAPER_ON=false node --expose-gc test-scheduler.js"
+  },
+  "keywords": [
+    "scraper",
+    "autoscout24",
+    "cars",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "A Node.js application for scraping car listings from AutoScout24",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.658.1",
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.1",
+    "client-s3": "github:aws-sdk/client-s3",
+    "dotenv": "^17.2.0",
+    "node-cron": "^4.2.1",
+    "openai": "^4.28.0",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7"
+  }
+}
